@@ -14,7 +14,20 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@family-budget/family-budget.data": [
+        "libs/family-budget.data/src/index.ts"
+      ],
+      "@family-budget/family-budget.mapper": [
+        "libs/family-budget.mapper/src/index.ts"
+      ],
+      "@family-budget/family-budget.model": [
+        "libs/family-budget.model/src/index.ts"
+      ],
+      "@family-budget/family-budget.service": [
+        "libs/family-budget.service/src/index.ts"
+      ]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
