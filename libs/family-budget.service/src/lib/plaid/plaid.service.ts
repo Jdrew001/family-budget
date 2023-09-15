@@ -43,7 +43,7 @@ export class PlaidService {
                 client_user_id: this.clientUserId
             },
             client_name: 'Family Budget',
-            products: [Products.Transactions],
+            products: [Products.Transactions, Products.Auth],
             country_codes: [CountryCode.Us],
             language: 'en'
         };
