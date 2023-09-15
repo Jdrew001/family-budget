@@ -27,6 +27,9 @@
         "{workspaceRoot}/.eslintignore",
         "{workspaceRoot}/eslint.config.js"
       ]
+    },
+    "e2e": {
+      "inputs": ["default", "^production"]
     }
   },
   "namedInputs": {
@@ -48,7 +51,8 @@
       "style": "scss",
       "linter": "eslint",
       "unitTestRunner": "jest",
-      "e2eTestRunner": "none"
+      "e2eTestRunner": "none",
+      "strict": false
     },
     "@nx/angular:library": {
       "linter": "eslint",

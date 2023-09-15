@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EMPTY, catchError, lastValueFrom, map } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
-import { Configuration, CountryCode, LinkTokenCreateRequest, PlaidApi, PlaidEnvironments, Products } from 'plaid';
+import { Configuration, CountryCode, Products } from 'plaid';
 
 
 @Injectable()
@@ -11,53 +11,50 @@ export class PlaidService {
 
     get clientId() { return this.configService.get<string>('PLAID_CLIENT_ID'); }
     get secret() { return this.configService.get<string>('PLAID_SECRET'); }
-    plaidClient: PlaidApi;
+    get clientUserId() { return this.configService.get<string>('CLIENT_USER_ID'); }
+    get baseUrl() { return this.configService.get<string>('PLAID_API'); }
 
     constructor(
         private configService: ConfigService,
-        private httpService: HttpService) {
-            const configuration = new Configuration({
-                basePath: this.configService.get('PLAID_API'),
-                baseOptions: {
-                  headers: {
-                    'PLAID-CLIENT-ID': this.clientId as string,
-                    'PLAID-SECRET': this.clientId as string,
-                  },
-                },
-              });
-              
-            this.plaidClient = new PlaidApi(configuration);
-        }
+        private httpService: HttpService) {}
 
     async getLinkToken(): Promise<GenericResponse<any>> {
-        const request = this.generateLinkTokenRequest();
-        let response = await this.plaidClient.linkTokenCreate(request)
-        return {error: null, message: 'Success', data: response };
-
-        // try {
-            
-        // } catch (err) {
-        //     Logger.error('getLinkToken ERROR OUTSIDE BLOCK:', err);
-        //     return {error: err, message: 'Error getting link token', data: null}
-        // }
+        try {
+            let url = `${this.baseUrl}/link/token/create`; // CONSTANT
+            const request = this.generateLinkTokenRequest();
+            let result = await lastValueFrom(
+                this.httpService.post(url, request, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).pipe(catchError(err => this.handleError(err))));
+            return {error: null, message: 'Success', data: result['data'] };
+        } catch (err) {
+            Logger.error('getLinkToken ERROR OUTSIDE BLOCK:', err);
+            return {error: err, message: 'Error getting link token', data: null}
+        }
     }
 
     private generateLinkTokenRequest() {
-        const request: LinkTokenCreateRequest = {
+        const request: any = {
+            client_id: this.clientId,
+            secret: this.secret,
             user: {
-                client_user_id: this.clientId as string,
-                phone_number: '+16824140386',
+                client_user_id: this.clientUserId
             },
-            client_name: 'Famil Budget',
-            products: [Products.Auth, Products.Transactions],
+            client_name: 'Family Budget',
+            products: [Products.Transactions],
             country_codes: [CountryCode.Us],
-            language: 'en',
-            webhook: 'https://sample-web-hook.com', // set later
-            required_if_supported_products: [Products.Transactions],
-            redirect_uri: 'https://sample-redirect-uri.com', // set later
+            language: 'en'
         };
 
 
         return request;
+    }
+
+    private handleError(err: any) {
+        Logger.error('ERROR: ', err, new Date());
+        //Sentry.captureException(`Email templates have failed: ${err}`);
+        return EMPTY;
     }
 }
