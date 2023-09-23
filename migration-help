@@ -1,0 +1,3 @@
+to create a migration with custom name
+
+npx nx run family-budget-api:typeorm:create-migration -- ./migrations/test-migration

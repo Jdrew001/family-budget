@@ -39,3 +39,9 @@ testem.log
 Thumbs.db
 
 .angular
+
+apps/family-budget-api/package-lock.json
+
+apps/family-budget-api/.env
+
+package-lock.json

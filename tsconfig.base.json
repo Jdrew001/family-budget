@@ -8,11 +8,11 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "module": "esnext",
+    "module": "commonJS",
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "target": "es2022",
     "baseUrl": ".",
     "useDefineForClassFields": false,
@@ -22,6 +22,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "strictPropertyInitialization": false,
     "paths": {
       "@family-budget/family-budget.data": [
         "libs/family-budget.data/src/index.ts"
@@ -34,6 +35,9 @@
       ],
       "@family-budget/family-budget.service": [
         "libs/family-budget.service/src/index.ts"
+      ],
+      "@family-budget/libs/family-budget.common": [
+        "libs/family-budget.common/src/index.ts"
       ]
     }
   },
