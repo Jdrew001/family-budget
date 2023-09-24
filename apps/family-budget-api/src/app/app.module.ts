@@ -7,18 +7,19 @@ import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { FamilyBudgetDataModule } from '@family-budget/family-budget.data';
 import { FamilyBudgetServiceModule } from '@family-budget/family-budget.service';
-
+import { SummaryController } from './controllers/summary/summary.controller';
 
 @Module({
-  imports: [PlaidModule,
+  imports: [
+    PlaidModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
     HttpModule,
     FamilyBudgetDataModule,
-    FamilyBudgetServiceModule
+    FamilyBudgetServiceModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, SummaryController],
   providers: [AppService],
 })
 export class AppModule {}

@@ -1,7 +1,8 @@
-import { Account, AccountBalance, Family, User } from '@family-budget/family-budget.model';
+import { Account, AccountBalance, Budget, Family, NewAccountBudget, User } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { BalanceService } from '../balance/balance.service';
+import { DateUtils } from '../util/date-util';
 
 @Injectable()
 export class AccountService {
@@ -9,13 +10,26 @@ export class AccountService {
     constructor(
         @Inject('AccountRepository') private readonly accountRepository: Repository<Account>,
         @Inject('UserRepository') private readonly userRepository: Repository<User>,
+        @Inject('BudgetRepository') private readonly budgetRepository: Repository<Budget>,
         private readonly balanceService: BalanceService
     ) { }
 
     //#region CRUD Account Methods
-    async createAccountForUser(userId: string, account: Account) {
+    async createAccountForUser(userId: string, account: Account, newBudget?: NewAccountBudget) {
         const user = await this.userRepository.findOne({ where: { id: userId } }) as User;
         account.family = user.family as Family;
+
+        if (newBudget) {
+            const budget: Budget = {
+                startDate: newBudget.startDate,
+                endDate: DateUtils.calculateEndDate(newBudget.startDate, newBudget.frequency),
+                budgetCategories: [],
+                account: account
+            };
+
+            account.budgets = [budget];
+        }
+
         return await this.accountRepository.save(account);
     }
 

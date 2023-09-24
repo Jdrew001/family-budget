@@ -7,7 +7,7 @@ import { BudgetCategory } from './budget-category.model';
 export class Budget {
 
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    id?: string;
 
     @Column()
     startDate: Date;
@@ -16,7 +16,7 @@ export class Budget {
     endDate: Date;
 
     @Column()
-    activeInd: boolean;
+    activeInd?: boolean = true;
 
     @ManyToOne(() => Account, (account) => account.budgets)
     account?: Account;

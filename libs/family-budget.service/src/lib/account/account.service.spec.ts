@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AccountService } from './account.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Account, User } from '@family-budget/family-budget.model';
+import { Account, Budget, User } from '@family-budget/family-budget.model';
 import { FindOptionsWhere } from 'typeorm';
 
 describe('AccountService', () => {
@@ -52,6 +52,12 @@ describe('AccountService', () => {
           useClass: jest.fn(() => ({
             findOne(where: FindOptionsWhere<Account>) { return {}; }
           }))
+        },
+        {
+          provide: getRepositoryToken(Budget),
+          useClass: jest.fn(() => ({
+            findOne(where: FindOptionsWhere<Budget>) { return {}; }
+          }))
         }
       ],
     }).compile();
@@ -75,12 +81,14 @@ describe('AccountService', () => {
       {
         id: '1',
         amount: 40.00,
-        dateTime: new Date('2023-02-28')
+        dateTime: new Date('2023-02-28'),
+        activeInd: true
       },
       {
         id: '2',
         amount: 100.00,
-        dateTime: new Date()
+        dateTime: new Date(),
+        activeInd: true
       }
     ]
 
@@ -97,12 +105,14 @@ describe('AccountService', () => {
       {
         id: '1',
         amount: 100.00,
-        dateTime: new Date()
+        dateTime: new Date(),
+        activeInd: true
       },
       {
         id: '2',
         amount: 40.00,
-        dateTime: new Date('2023-02-28')
+        dateTime: new Date('2023-02-28'),
+        activeInd: true
       }
     ]
 

@@ -14,4 +14,5 @@ export * from './lib/entities/subscription.model';
 export * from './lib/entities/category.model';
 export * from './lib/entities/budget-category.model';
 export * from './lib/dto/account-balances.model';
+export * from './lib/dto/new-account-budget.model';
 

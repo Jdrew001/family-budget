@@ -13,6 +13,9 @@ export class Balance {
     @Column()
     dateTime: Date;
 
+    @Column()
+    activeInd: boolean = true;
+
     @ManyToOne(() => Account, (account) => account.balances)
     account?: Account;
 }

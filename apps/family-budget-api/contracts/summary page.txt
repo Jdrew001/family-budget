@@ -1,0 +1,75 @@
+summary page:
+
+get current budget
+
+request - GET
+Header - jwt token - lets skip for now..
+we will hard code user id and family id in the controller
+
+response 
+{
+    "message": "",
+    "error": true/false,
+    "data": {
+        "displayDate: "Feb 23 - Feb 24",
+        "leftSpendingAmount": "$200.00",
+        "leftSpendingDays": 2,
+        "income": {
+            "amount": "$1,230.21",
+            "icon": "test"
+        },
+        "expense": {
+            "amount": "$230.12",
+            "icon": "test"
+        }
+    }
+}
+
+-------------------
+
+Account Balances
+
+request - GET
+Header - jwt token - lets skip for now..
+
+response 
+{
+    "message": "",
+    "error": true/false,
+    "data": {
+        "accounts": [
+            {
+                "name": "",
+                "icon": "",
+                "amount": ""
+            }
+        ]
+    }
+}
+
+
+-------------------
+
+Get Transactions
+
+request - GET url/{accountId}
+Header - jwt token - lets skip for now..
+
+response
+
+{
+    "message": "",
+    "error": true/false,
+    "data": {
+        "transactions": [
+            {
+                "date": "02/23/1994",
+                "amount": "$200.00",
+                "description": "test",
+                "category": "test",
+                "categoryIcon": "test",
+                "transactionType": 0 or 1 // income or expense
+            }
+        ]
+    }
+}

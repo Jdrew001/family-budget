@@ -26,4 +26,26 @@ export class BalanceService {
         balance.dateTime = new Date();
         return await this.balanceRepository.save(balance);
     }
+ 
+    async updateAddBalanceById(balanceId: string, amount: number) {
+        const balance = await this.getBalanceById(balanceId) as Balance;
+        balance.amount += amount;
+        return await this.balanceRepository.save(balance);
+    }
+
+    async updateAddLatestBalance(account: Account, amount: number) {
+        const balance = await this.getLatestBalance(account) as Balance;
+        balance.amount += amount;
+        return await this.balanceRepository.save(balance);
+    }
+
+    async getLatestBalance(account: Account) {
+        return await this.balanceRepository.findOne({ where: { account: account }, order: { dateTime: 'DESC' } });
+    }
+
+    async markBalanceAsInactive(balanceId: string) {
+        const balance = await this.getBalanceById(balanceId) as Balance;
+        balance.activeInd = false;
+        return await this.balanceRepository.save(balance);
+    }
 }

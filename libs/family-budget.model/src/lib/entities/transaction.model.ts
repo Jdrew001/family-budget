@@ -32,5 +32,5 @@ export class Transaction {
 
     //TODO: this needs to be relational to user
     @Column()
-    createdBy: string;
+    createdBy?: string;
 }
