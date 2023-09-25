@@ -11,7 +11,7 @@ import { Family } from './family.model';
 export class Account {
 
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    id?: string;
 
     @Column()
     name: string;
@@ -22,11 +22,13 @@ export class Account {
     @ManyToOne(() => AccountType)
     accountType: AccountType;
 
-    @OneToMany(() => Budget, (budget) => budget.account)
+    @OneToMany(() => Budget, (budget) => budget.account, {
+        cascade: true
+    })
     budgets: Array<Budget>;
 
     @ManyToOne(() => Family, (family) => family.accounts)
-    family: Family;
+    family?: Family;
 
     @OneToMany(() => Balance, (balance) => balance.account, {
         cascade: true

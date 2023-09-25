@@ -8,4 +8,7 @@ export class AccountType {
 
     @Column()
     name: string;
+
+    @Column({ default: 0 })
+    sortOrder: number;
 }

@@ -8,6 +8,7 @@ import { HttpModule } from '@nestjs/axios';
 import { FamilyBudgetDataModule } from '@family-budget/family-budget.data';
 import { FamilyBudgetServiceModule } from '@family-budget/family-budget.service';
 import { SummaryController } from './controllers/summary/summary.controller';
+import { AccountController } from './controllers/account/account.controller';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { SummaryController } from './controllers/summary/summary.controller';
     FamilyBudgetDataModule,
     FamilyBudgetServiceModule,
   ],
-  controllers: [AppController, SummaryController],
+  controllers: [AppController, SummaryController, AccountController],
   providers: [AppService],
 })
 export class AppModule {}

@@ -1,4 +1,5 @@
 export interface CurrentBudgetSummary {
+    id: string;
     displayDate: string;
     leftSpendingAmount: string;
     leftSpendingDays: number;

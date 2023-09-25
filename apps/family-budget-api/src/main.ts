@@ -15,7 +15,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
 
   app.enableCors({
-    origin: ["http://localhost:4200", "https://discoverfaitharlington.org"],
+    origin: ["http://localhost:8100", "https://discoverfaitharlington.org"],
     credentials: true
   });
 

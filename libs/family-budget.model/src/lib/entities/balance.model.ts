@@ -5,10 +5,10 @@ import { Account } from './account.model';
 export class Balance {
 
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    id?: string;
 
     @Column()
-    amount: number;
+    amount?: number;
 
     @Column()
     dateTime: Date;

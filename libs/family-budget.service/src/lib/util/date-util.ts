@@ -31,4 +31,11 @@ export class DateUtils {
         }
         return endDate;
     }
+
+    public static getShortDateString(startDateParam: string, endDateParam: string) {
+        const startDate = new Date(startDateParam);
+        const endDate = new Date(endDateParam);
+        const displayDate = `${startDate.toLocaleString('default', { month: 'short' })} ${startDate.getDate()} - ${endDate.toLocaleString('default', { month: 'short' })} ${endDate.getDate()}`;
+        return displayDate;
+    }
 }

@@ -1,4 +1,5 @@
 export interface SummaryTransactions {
+    id: string;
     date: string;
     amount: string;
     description: string;

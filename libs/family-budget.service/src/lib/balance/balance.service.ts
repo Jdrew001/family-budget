@@ -29,12 +29,14 @@ export class BalanceService {
  
     async updateAddBalanceById(balanceId: string, amount: number) {
         const balance = await this.getBalanceById(balanceId) as Balance;
+        if (balance.amount === undefined) balance.amount = 0;
         balance.amount += amount;
         return await this.balanceRepository.save(balance);
     }
 
     async updateAddLatestBalance(account: Account, amount: number) {
         const balance = await this.getLatestBalance(account) as Balance;
+        if (balance.amount === undefined) balance.amount = 0;
         balance.amount += amount;
         return await this.balanceRepository.save(balance);
     }
