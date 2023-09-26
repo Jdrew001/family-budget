@@ -26,6 +26,7 @@ import { BalanceService } from './balance/balance.service';
 import { AuthenticationService } from './authentication/authentication.service';
 import { AccessTokenStrategy } from './authentication/strategies/access-token.strategy';
 import { RefreshTokenStrategy } from './authentication/strategies/refresh-token.strategy';
+import { FamilyService } from './family/family.service';
 
 @Module({
   controllers: [],
@@ -39,7 +40,8 @@ import { RefreshTokenStrategy } from './authentication/strategies/refresh-token.
     BalanceService,
     AuthenticationService,
     AccessTokenStrategy,
-    RefreshTokenStrategy
+    RefreshTokenStrategy,
+    FamilyService,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -59,17 +61,19 @@ import { RefreshTokenStrategy } from './authentication/strategies/refresh-token.
       Subscription,
       Transaction,
     ]),
-    JwtModule.register({})
+    JwtModule.register({}),
   ],
   exports: [
     PlaidService,
+    UserService,
     SeedService,
     BudgetService,
     AccountService,
     TransactionService,
     AuthenticationService,
     AccessTokenStrategy,
-    RefreshTokenStrategy
+    RefreshTokenStrategy,
+    FamilyService
   ],
 })
 export class FamilyBudgetServiceModule {}

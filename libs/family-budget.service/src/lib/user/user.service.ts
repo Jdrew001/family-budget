@@ -1,12 +1,14 @@
 import { CreateUserDto, UpdateUserDto, User } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { FamilyService } from '../family/family.service';
 
 @Injectable()
 export class UserService {
 
     constructor(
-        @Inject('UserRepository') private readonly userRepository: Repository<User>
+        @Inject('UserRepository') private readonly userRepository: Repository<User>,
+        private readonly familyService: FamilyService
     ) {}
 
     async create(createUserDto: CreateUserDto) {
@@ -18,6 +20,7 @@ export class UserService {
         user.confirmed = false;
         user.password = createUserDto.password;
         user.locked = false;
+        user.family = await this.familyService.createFamily();
         return this.userRepository.save(user)
     }
 

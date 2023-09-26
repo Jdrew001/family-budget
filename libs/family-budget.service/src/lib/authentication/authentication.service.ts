@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -41,6 +41,17 @@ export class AuthenticationService {
         const tokens = await this.getTokens(user.id || '', user.email);
         await this.updateRefreshToken(user.id || '', tokens.refreshToken);
         return tokens;
+    }
+
+    async refreshTokens(userId: string, refreshToken: string) {
+      const user = await this.userService.findById(userId);
+      if (!user || !user.refreshToken) throw new ForbiddenException('Access Denied');
+
+      const refreshTokenMatches = await argon2.verify(user.refreshToken, refreshToken);
+      if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+      const tokens = await this.getTokens(user.id || '', user.email);
+      await this.updateRefreshToken(user.id || '', tokens.refreshToken);
+      return tokens;
     }
 
     async logout(userId: string) {

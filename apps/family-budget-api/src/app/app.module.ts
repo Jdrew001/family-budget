@@ -10,6 +10,9 @@ import { FamilyBudgetServiceModule } from '@family-budget/family-budget.service'
 import { SummaryController } from './controllers/summary/summary.controller';
 import { AccountController } from './controllers/account/account.controller';
 import { AuthenticationController } from './controllers/authentication/authentication.controller';
+import { UserController } from './controllers/user/user.controller';
+import { AccessTokenGuard } from './guards/access-token.guard';
+import { RefreshTokenGuard } from './guards/refresh-token.guard';
 
 @Module({
   imports: [
@@ -26,7 +29,12 @@ import { AuthenticationController } from './controllers/authentication/authentic
     SummaryController,
     AccountController,
     AuthenticationController,
+    UserController,
   ],
-  providers: [AppService],
+  providers: [
+    AppService,
+    AccessTokenGuard,
+    RefreshTokenGuard
+  ],
 })
 export class AppModule {}
