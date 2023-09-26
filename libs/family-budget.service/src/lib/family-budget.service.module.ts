@@ -6,6 +6,7 @@ import { SeedService } from './seed/seed.service';
 import { BudgetService } from './budget/budget.service';
 import { AccountService } from './account/account.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
 import {
   Account,
   AccountType,
@@ -22,6 +23,9 @@ import {
 import { TransactionService } from './transaction/transaction.service';
 import { UserService } from './user/user.service';
 import { BalanceService } from './balance/balance.service';
+import { AuthenticationService } from './authentication/authentication.service';
+import { AccessTokenStrategy } from './authentication/strategies/access-token.strategy';
+import { RefreshTokenStrategy } from './authentication/strategies/refresh-token.strategy';
 
 @Module({
   controllers: [],
@@ -33,6 +37,9 @@ import { BalanceService } from './balance/balance.service';
     TransactionService,
     UserService,
     BalanceService,
+    AuthenticationService,
+    AccessTokenStrategy,
+    RefreshTokenStrategy
   ],
   imports: [
     ConfigModule.forRoot({
@@ -52,13 +59,17 @@ import { BalanceService } from './balance/balance.service';
       Subscription,
       Transaction,
     ]),
+    JwtModule.register({})
   ],
   exports: [
     PlaidService,
     SeedService,
     BudgetService,
     AccountService,
-    TransactionService
+    TransactionService,
+    AuthenticationService,
+    AccessTokenStrategy,
+    RefreshTokenStrategy
   ],
 })
 export class FamilyBudgetServiceModule {}

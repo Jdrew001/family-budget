@@ -18,3 +18,7 @@ export * from './lib/dto/new-account-budget.model';
 export * from './lib/dto/summary/current-budget.model';
 export * from './lib/dto/summary/summary-account-balance';
 export * from './lib/dto/summary/summary-transactions.model';
+export * from './lib/dto/user/create-user.model';
+export * from './lib/dto/user/login-user.model';
+export * from './lib/dto/user/update-user.model';
+export * from './lib/dto/security/access-token.model';

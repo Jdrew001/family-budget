@@ -5,10 +5,10 @@ export class SeedConstant {
         firstname: "John",
         lastname: "Doe",
         password: "password",
-        salt: "salt",
         email: "test@gmail.com",
         confirmed: true,
         lastLogin: new Date(),
-        locked: false
+        locked: false,
+        refreshToken: ''
     }
 }

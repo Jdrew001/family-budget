@@ -19,9 +19,6 @@ export class User {
     password: string;
 
     @Column()
-    salt: string;
-
-    @Column()
     email: string;
 
     @Column()
@@ -35,6 +32,9 @@ export class User {
 
     @Column()
     confirmed: boolean;
+
+    @Column({nullable: true})
+    refreshToken: string;
 
     @ManyToOne(() => Subscription, (subscription) => subscription.users)
     subscription?: Subscription;

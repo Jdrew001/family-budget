@@ -9,6 +9,7 @@ import { FamilyBudgetDataModule } from '@family-budget/family-budget.data';
 import { FamilyBudgetServiceModule } from '@family-budget/family-budget.service';
 import { SummaryController } from './controllers/summary/summary.controller';
 import { AccountController } from './controllers/account/account.controller';
+import { AuthenticationController } from './controllers/authentication/authentication.controller';
 
 @Module({
   imports: [
@@ -20,7 +21,12 @@ import { AccountController } from './controllers/account/account.controller';
     FamilyBudgetDataModule,
     FamilyBudgetServiceModule,
   ],
-  controllers: [AppController, SummaryController, AccountController],
+  controllers: [
+    AppController,
+    SummaryController,
+    AccountController,
+    AuthenticationController,
+  ],
   providers: [AppService],
 })
 export class AppModule {}
