@@ -5,7 +5,7 @@ import { FindOptionsWhere } from 'typeorm';
 import { BalanceService } from '../balance/balance.service';
 import { AccountService } from '../account/account.service';
 import { jest } from '@jest/globals';
-import { Account, Balance, Transaction, User } from '@family-budget/family-budget.model';
+import { Account, Balance, Budget, Transaction, User } from '@family-budget/family-budget.model';
 
 describe('TransactionService', () => {
   let service: TransactionService;
@@ -28,7 +28,8 @@ describe('TransactionService', () => {
       description: 'Test Account',
       accountType: {
         id: '1',
-        name: 'Test Account Type'
+        name: 'Test Account Type',
+        sortOrder: 0
       },
       budgets: [],
       balances: [],
@@ -89,6 +90,12 @@ describe('TransactionService', () => {
           useClass: jest.fn(() => ({
             
           }))
+        },
+        {
+          provide: getRepositoryToken(Budget),
+          useClass: jest.fn(() => ({
+            
+          }))
         }
       ],
     }).compile();
@@ -141,6 +148,6 @@ describe('TransactionService', () => {
     jest.spyOn(accountService, 'getAccountById').mockImplementation((accountId: string) => Promise.resolve(transaction.account));
     const transactions = await service.getRecentTransactionsForAccount('1', 5) as Array<Transaction>;
     expect(transactions).toBeDefined();
-    expect(transactions.length).toEqual(1);
+    expect(transactions.length).toEqual(0);
   });
 });

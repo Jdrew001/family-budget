@@ -6,50 +6,8 @@ import { FindOptionsWhere } from 'typeorm';
 
 describe('BalanceService', () => {
   let service: BalanceService;
-  let balances: Array<Balance> = [
-    {
-      id: '1',
-      amount: 45,
-      dateTime: new Date(new Date().setDate(new Date().getDate() - 5)),
-      activeInd: false
-    },
-    {
-      id: '2',
-      amount: 100,
-      dateTime: new Date(),
-      activeInd: true
-    }
-  ];
-  let account: Account = {
-    id: '1',
-    name: 'Test Account',
-    description: 'Test Account',
-    accountType: {
-      id: '1',
-      name: 'Test Account Type'
-    },
-    budgets: [],
-    balances: balances,
-    transactions: [],
-    budgetPeriod: {
-      id: '1',
-      frequency: 1
-    },
-    family: {
-      id: '1',
-      users: [
-        {
-          id: '1',
-          firstname: 'Test',
-          lastname: 'User',
-          email: '',
-          password: '',
-          salt: '',
-          confirmed: true
-        }
-      ]
-    },
-  }
+  let balances: Array<Balance> = [];
+  let account: Account;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -66,6 +24,52 @@ describe('BalanceService', () => {
     }).compile();
 
     service = module.get<BalanceService>(BalanceService);
+
+    balances = [
+      {
+        id: '1',
+        amount: 45,
+        dateTime: new Date(new Date().setDate(new Date().getDate() - 5)),
+        activeInd: false
+      },
+      {
+        id: '2',
+        amount: 100,
+        dateTime: new Date(),
+        activeInd: true
+      }
+    ];
+    account = {
+      id: '1',
+      name: 'Test Account',
+      description: 'Test Account',
+      accountType: {
+        id: '1',
+        name: 'Test Account Type',
+        sortOrder: 0
+      },
+      budgets: [],
+      balances: balances,
+      transactions: [],
+      budgetPeriod: {
+        id: '1',
+        frequency: 1
+      },
+      family: {
+        id: '1',
+        users: [
+          {
+            id: '1',
+            firstname: 'Test',
+            lastname: 'User',
+            email: '',
+            password: '',
+            salt: '',
+            confirmed: true
+          }
+        ]
+      },
+    }
   });
 
   it('should be defined', () => {

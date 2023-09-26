@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AccountService } from './account.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Account, Budget, User } from '@family-budget/family-budget.model';
+import { Account, Balance, Budget, User } from '@family-budget/family-budget.model';
 import { FindOptionsWhere } from 'typeorm';
+import { BalanceService } from '../balance/balance.service';
 
 describe('AccountService', () => {
   let service: AccountService;
@@ -12,7 +13,8 @@ describe('AccountService', () => {
     description: 'Test Account',
     accountType: {
         id: '1',
-        name: 'Test Account Type'
+        name: 'Test Account Type',
+        sortOrder: 0
     },
     budgets: [],
     balances: [],
@@ -41,6 +43,7 @@ describe('AccountService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AccountService,
+        BalanceService,
         {
           provide: getRepositoryToken(Account),
           useClass: jest.fn(() => ({
@@ -57,6 +60,12 @@ describe('AccountService', () => {
           provide: getRepositoryToken(Budget),
           useClass: jest.fn(() => ({
             findOne(where: FindOptionsWhere<Budget>) { return {}; }
+          }))
+        },
+        {
+          provide: getRepositoryToken(Balance),
+          useClass: jest.fn(() => ({
+            findOne(where: FindOptionsWhere<Balance>) { return {}; }
           }))
         }
       ],

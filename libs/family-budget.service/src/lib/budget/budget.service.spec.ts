@@ -37,7 +37,8 @@ describe('BudgetService', () => {
       description: 'Test Account',
       accountType: {
           id: '1',
-          name: 'Test Account Type'
+          name: 'Test Account Type',
+          sortOrder: 0
       },
       budgets: budgets as Array<Budget>,
       balances: [],
@@ -131,7 +132,7 @@ describe('BudgetService', () => {
           }
       }
     ];
-    let result = await service.getWhatsLeftToSpend('1') as number;
+    let result = await service.getWhatsLeftToSpend(account) as number;
     expect(result).toEqual(50);
   });
 
@@ -164,7 +165,7 @@ describe('BudgetService', () => {
         budget: budgets[2]
       }
     ];
-    let result = await service.getTotalIncomeExpenseForBudget('1');
+    let result = await service.getTotalIncomeExpenseForBudget(account);
     expect(result).toEqual({totalIncome: 100, totalExpense: 50});
   });
 });
