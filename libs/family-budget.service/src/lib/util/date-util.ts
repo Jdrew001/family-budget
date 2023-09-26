@@ -38,4 +38,10 @@ export class DateUtils {
         const displayDate = `${startDate.toLocaleString('default', { month: 'short' })} ${startDate.getDate()} - ${endDate.toLocaleString('default', { month: 'short' })} ${endDate.getDate()}`;
         return displayDate;
     }
+
+    public static getShortDate(dateParam: string) {
+        const startDate = new Date(dateParam);
+        const displayDate = `${startDate.toLocaleString('default', { month: 'short' })} ${startDate.getDate(), startDate.getFullYear()}`;
+        return displayDate;
+    }
 }

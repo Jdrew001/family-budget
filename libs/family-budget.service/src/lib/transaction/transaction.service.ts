@@ -19,7 +19,7 @@ export class TransactionService {
 
     async getTransactionsForAccount(accountId: string) {
         const account = await this.accountService.getAccountById(accountId) as Account;
-        return this.transactionRepository.find({ where: { account: account } });
+        return this.transactionRepository.find({ where: { account: account }, order: { createdAt: 'DESC' } });
     }
 
     async createTransaction(transaction: Transaction, accountId: string) {
@@ -50,6 +50,6 @@ export class TransactionService {
     // get the five most recent transactions for an account order by date descending
     async getRecentTransactionsForAccount(accountId: string, count: number) {
         const account = await this.accountService.getAccountById(accountId) as Account;
-        return await this.transactionRepository.find({ where: { account: account }, order: { createdAt: 'DESC' }, take: count });
+        return account.transactions;
     }
 }

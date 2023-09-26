@@ -53,6 +53,12 @@ import { BalanceService } from './balance/balance.service';
       Transaction,
     ]),
   ],
-  exports: [PlaidService, SeedService, BudgetService, AccountService],
+  exports: [
+    PlaidService,
+    SeedService,
+    BudgetService,
+    AccountService,
+    TransactionService
+  ],
 })
 export class FamilyBudgetServiceModule {}

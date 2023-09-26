@@ -1,5 +1,5 @@
 import { CurrentBudgetSummary, SummaryAccountBalance, SummaryTransactions } from '@family-budget/family-budget.model';
-import { BudgetService, DateUtils } from '@family-budget/family-budget.service';
+import { BudgetService, DateUtils, TransactionService } from '@family-budget/family-budget.service';
 import { Controller, Get, Param } from '@nestjs/common';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 
@@ -10,7 +10,8 @@ export class SummaryController {
 
     constructor(
         private readonly budgetService: BudgetService,
-        private readonly accountService: AccountService
+        private readonly accountService: AccountService,
+        private readonly transactionService: TransactionService
     ) { }
 
     @Get('currentBudget/:accountId')
@@ -60,71 +61,18 @@ export class SummaryController {
     }
 
     @Get('transactions/:accountId')
-    getAccountTransactions(@Param('accountId') accountId: string): SummaryTransactions[] {
-        return [
-            {
-                id: '1',
-                date: 'Sep 23',
-                amount: '100.00',
-                description: 'Walmart',
-                category: 'Groceries',
-                categoryIcon: 'fa fa-shopping-cart',
-                transactionType: 1
-            },
-            {
-                id: '2',
-                date: 'Sep 23',
-                amount: '100.00',
-                description: 'Walmart',
-                category: 'Groceries',
-                categoryIcon: 'fa fa-shopping-cart',
-                transactionType: 1
-            },
-            {
-                id: '3',
-                date: 'Sep 23',
-                amount: '100.00',
-                description: 'Walmart',
-                category: 'Groceries',
-                categoryIcon: 'fa fa-shopping-cart',
-                transactionType: 1
-            },
-            {
-                id: '4',
-                date: 'Sep 23',
-                amount: '100.00',
-                description: 'Walmart',
-                category: 'Groceries',
-                categoryIcon: 'fa fa-shopping-cart',
-                transactionType: 1
-            },
-            {
-                id: '5',
-                date: 'Sep 23',
-                amount: '100.00',
-                description: 'Walmart',
-                category: 'Groceries',
-                categoryIcon: 'fa fa-shopping-cart',
-                transactionType: 1
-            },
-            {
-                id: '6',
-                date: 'Sep 23',
-                amount: '100.00',
-                description: 'Walmart',
-                category: 'Groceries',
-                categoryIcon: 'fa fa-shopping-cart',
-                transactionType: 1
-            },
-            {
-                id: '7',
-                date: 'Sep 23',
-                amount: '100.00',
-                description: 'Walmart',
-                category: 'Groceries',
-                categoryIcon: 'fa fa-shopping-cart',
-                transactionType: 1
-            }
-        ]
+    async getAccountTransactions(@Param('accountId') accountId: string): Promise<SummaryTransactions[]> {
+        const transactions = await this.transactionService.getRecentTransactionsForAccount(accountId, 7);
+        return transactions.map(transaction => {
+            return {
+                id: transaction.id,
+                date: DateUtils.getShortDate(transaction.createdAt.toDateString()),
+                amount: transaction.amount.toString(),
+                description: transaction.description,
+                category: transaction.category.name,
+                categoryIcon: '',
+                transactionType: transaction.category.type == 0 ? 0 : 1
+            } as SummaryTransactions;
+        });
     }
 }
