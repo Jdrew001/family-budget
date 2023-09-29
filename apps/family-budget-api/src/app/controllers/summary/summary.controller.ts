@@ -50,12 +50,13 @@ export class SummaryController {
     @Get('accountBalances')
     async getAccountBalances(): Promise<SummaryAccountBalance[]> {
         const accountBalances = await this.accountService.getAccountBalancesForUser(this.mockUser);
-        return accountBalances.map(account => {
+        return accountBalances.map((account, index: number) => {
             return {
                 id: account.accountId,
                 name: account.accountName,
                 icon: 'fa fa-university',
-                amount: account.balance.amount.toString()
+                amount: account.balance.amount.toString(),
+                active: index === 0
             }
         });
     }

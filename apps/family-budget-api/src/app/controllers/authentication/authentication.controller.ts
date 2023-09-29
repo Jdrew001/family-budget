@@ -1,6 +1,6 @@
 import { CreateUserDto, LoginUserDto } from '@family-budget/family-budget.model';
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
-import { Request } from 'express';
+import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthenticationService } from 'libs/family-budget.service/src/lib/authentication/authentication.service';
 import { RefreshTokenGuard } from '../../guards/refresh-token.guard';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
@@ -18,8 +18,12 @@ export class AuthenticationController {
     }
 
     @Post('signin')
-    signIn(@Body() loginDto: LoginUserDto) {
-        return this.authenticationService.signIn(loginDto);
+    async signIn(@Body() loginDto: LoginUserDto, @Res() res: Response) {
+        const tokens = await this.authenticationService.signIn(loginDto);
+        return res.status(200).json({
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken
+        });
     }
 
     @UseGuards(RefreshTokenGuard)
