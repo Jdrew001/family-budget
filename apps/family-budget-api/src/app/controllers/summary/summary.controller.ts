@@ -1,12 +1,13 @@
 import { CurrentBudgetSummary, SummaryAccountBalance, SummaryTransactions } from '@family-budget/family-budget.model';
 import { BudgetService, DateUtils, TransactionService } from '@family-budget/family-budget.service';
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
+import { AccessTokenGuard } from '../../guards/access-token.guard';
 
+@UseGuards(AccessTokenGuard)
 @Controller('summary')
 export class SummaryController {
-
-    mockUser = 'aac96db3-0e26-479f-a7e0-1832aef1b6a8';
 
     constructor(
         private readonly budgetService: BudgetService,
@@ -48,8 +49,9 @@ export class SummaryController {
     }
 
     @Get('accountBalances')
-    async getAccountBalances(): Promise<SummaryAccountBalance[]> {
-        const accountBalances = await this.accountService.getAccountBalancesForUser(this.mockUser);
+    async getAccountBalances(@Req() req: Request): Promise<SummaryAccountBalance[]> {
+        const user = req.user['sub'];
+        const accountBalances = await this.accountService.getAccountBalancesForUser(user);
         return accountBalances.map((account, index: number) => {
             return {
                 id: account.accountId,

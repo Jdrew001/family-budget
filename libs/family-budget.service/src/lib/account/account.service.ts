@@ -63,7 +63,7 @@ export class AccountService {
 
     async getAccountsUserUser(userId: string) {
         // using the userId, get the family id and get all accounts for that family;
-        const user = await this.userRepository.findOne({ where: { id: userId } }) as User;
+        const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['family'] }) as User;
         const accounts = await this.accountRepository.find({ where: { family: user.family },
         relations: [
             'transactions',
