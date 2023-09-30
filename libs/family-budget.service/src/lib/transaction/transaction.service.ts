@@ -1,4 +1,4 @@
-import { Account, Transaction } from '@family-budget/family-budget.model';
+import { Account, Category, CreateTransactionDto, Transaction } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { AccountService } from '../account/account.service';
@@ -22,17 +22,28 @@ export class TransactionService {
         return this.transactionRepository.find({ where: { account: account }, order: { createdAt: 'DESC' } });
     }
 
-    async createTransaction(transaction: Transaction, accountId: string) {
+    async createTransaction(
+        transaction: CreateTransactionDto, 
+        accountId: string,
+        category: Category,
+        userId: string) {
         const account = await this.accountService.getAccountById(accountId) as Account;
-        transaction.account = account;
+        const transactionToCreate: Transaction = {
+            description: transaction.description,
+            account: account,
+            budget: account.budgets[0],
+            amount: transaction.amount,
+            createdAt: new Date(transaction.date),
+            createdBy: userId,
+            category: category
+        }
 
         // update the latest balance
-        this.balanceService.updateAddLatestBalance(account, transaction.amount);
-        return await this.transactionRepository.save(transaction);
+        return await this.transactionRepository.save(transactionToCreate);
     }
 
     async updateTransaction(transaction: Transaction) {
-        const transactionToUpdate = await this.getTransactionById(transaction.id) as Transaction;
+        const transactionToUpdate = await this.getTransactionById(transaction.id || '') as Transaction;
         transactionToUpdate.amount = transaction.amount;
         transactionToUpdate.description = transaction.description;
         transactionToUpdate.category = transaction.category;

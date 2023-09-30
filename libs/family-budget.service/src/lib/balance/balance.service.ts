@@ -1,5 +1,5 @@
 import { Account, Balance } from '@family-budget/family-budget.model';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -36,13 +36,14 @@ export class BalanceService {
 
     async updateAddLatestBalance(account: Account, amount: number) {
         const balance = await this.getLatestBalance(account) as Balance;
-        if (balance.amount === undefined) balance.amount = 0;
+        if (!balance) throw new BadRequestException('No balance found for account');
+        if (balance.amount === undefined) throw new BadRequestException('No balance found for account');
         balance.amount += amount;
         return await this.balanceRepository.save(balance);
     }
 
     async getLatestBalance(account: Account) {
-        return await this.balanceRepository.findOne({ where: { account: account }, order: { dateTime: 'DESC' } });
+        return await this.balanceRepository.findOne({ where: { account: {id: account.id} }, relations: ['account'], order: { dateTime: 'DESC' } });
     }
 
     async markBalanceAsInactive(balanceId: string) {

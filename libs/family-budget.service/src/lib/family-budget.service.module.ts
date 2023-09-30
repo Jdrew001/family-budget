@@ -27,6 +27,7 @@ import { AuthenticationService } from './authentication/authentication.service';
 import { AccessTokenStrategy } from './authentication/strategies/access-token.strategy';
 import { RefreshTokenStrategy } from './authentication/strategies/refresh-token.strategy';
 import { FamilyService } from './family/family.service';
+import { CategoryService } from './category/category.service';
 
 @Module({
   controllers: [],
@@ -42,6 +43,7 @@ import { FamilyService } from './family/family.service';
     AccessTokenStrategy,
     RefreshTokenStrategy,
     FamilyService,
+    CategoryService,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -73,7 +75,9 @@ import { FamilyService } from './family/family.service';
     AuthenticationService,
     AccessTokenStrategy,
     RefreshTokenStrategy,
-    FamilyService
+    FamilyService,
+    CategoryService,
+    BalanceService
   ],
 })
 export class FamilyBudgetServiceModule {}

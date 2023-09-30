@@ -1,4 +1,5 @@
 import { Entity, Column, CreateDateColumn, UpdateDateColumn, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinTable } from 'typeorm';
+import { Family } from './family.model';
 
 @Entity()
 export class Category {
@@ -11,6 +12,9 @@ export class Category {
 
     @Column()
     type: CategoryType;
+
+    @ManyToOne(() => Family, (family) => family.categories)
+    family?: Family;
 }
 
 export enum CategoryType {

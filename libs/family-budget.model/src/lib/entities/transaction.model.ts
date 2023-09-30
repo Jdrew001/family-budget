@@ -7,7 +7,7 @@ import { Budget } from './budget.model';
 export class Transaction {
 
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    id?: string;
 
     @Column()
     description: string;

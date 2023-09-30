@@ -23,3 +23,4 @@ export * from './lib/dto/user/login-user.model';
 export * from './lib/dto/user/update-user.model';
 export * from './lib/dto/security/access-token.model';
 export * from './lib/dto/user/user-info.model';
+export * from './lib/dto/transaction/create-transaction.model';

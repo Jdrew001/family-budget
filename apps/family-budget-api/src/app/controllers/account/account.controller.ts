@@ -1,6 +1,9 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
+import { AccessTokenGuard } from '../../guards/access-token.guard';
+import { Request } from 'express';
 
+@UseGuards(AccessTokenGuard)
 @Controller('account')
 export class AccountController {
 
@@ -10,9 +13,15 @@ export class AccountController {
         private readonly accountService: AccountService
     ) {}
 
-    @Get()
-    async getAccounts() {
-        // TODO: User id from token, mocked for now
-        return await this.accountService.getAccountsUserUser(this.mockUser);
+    @Get('getUserAccounts')
+    async getAccounts(@Req() req: Request) {
+        const user = req.user['sub'];
+        const accounts = await this.accountService.getAccountsUserUser(user);
+        return accounts.map((account, index: number) => {
+            return {
+                id: account.id,
+                name: account.name,
+            }
+        })
     }
 }

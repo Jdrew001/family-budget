@@ -13,6 +13,8 @@ import { AuthenticationController } from './controllers/authentication/authentic
 import { UserController } from './controllers/user/user.controller';
 import { AccessTokenGuard } from './guards/access-token.guard';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
+import { TransactionController } from './controllers/transaction/transaction.controller';
+import { CategoryController } from './controllers/category/category.controller';
 
 @Module({
   imports: [
@@ -30,11 +32,9 @@ import { RefreshTokenGuard } from './guards/refresh-token.guard';
     AccountController,
     AuthenticationController,
     UserController,
+    TransactionController,
+    CategoryController,
   ],
-  providers: [
-    AppService,
-    AccessTokenGuard,
-    RefreshTokenGuard
-  ],
+  providers: [AppService, AccessTokenGuard, RefreshTokenGuard],
 })
 export class AppModule {}
