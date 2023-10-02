@@ -5,6 +5,7 @@ export interface CurrentBudgetSummary {
     leftSpendingDays: number;
     income: TypeAmount;
     expense: TypeAmount
+    showBudgetError: boolean;
 }
 
 export interface TypeAmount {

@@ -37,6 +37,7 @@ export class SummaryController {
             displayDate: displayDate,
             leftSpendingAmount: whatsLeftToSpend.toString(),
             leftSpendingDays: daysLeft,
+            showBudgetError: budget.budgetCategories.length == 0,
             income: {
                 amount: totalIncomeExpense.totalIncome.toString(),
                 icon: 'fa fa-plus'
