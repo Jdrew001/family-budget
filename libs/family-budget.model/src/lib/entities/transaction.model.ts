@@ -21,7 +21,7 @@ export class Transaction {
     @ManyToOne(() => Budget)
     budget?: Budget
 
-    @Column()
+    @Column("float")
     amount: number;
 
     @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })

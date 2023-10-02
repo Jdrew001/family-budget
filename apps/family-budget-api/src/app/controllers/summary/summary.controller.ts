@@ -1,4 +1,4 @@
-import { CurrentBudgetSummary, SummaryAccountBalance, SummaryTransactions } from '@family-budget/family-budget.model';
+import { CategoryType, CurrentBudgetSummary, SummaryAccountBalance, SummaryTransactions } from '@family-budget/family-budget.model';
 import { BudgetService, DateUtils, TransactionService } from '@family-budget/family-budget.service';
 import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
@@ -67,13 +67,16 @@ export class SummaryController {
     async getAccountTransactions(@Param('accountId') accountId: string): Promise<SummaryTransactions[]> {
         const transactions = await this.transactionService.getRecentTransactionsForAccount(accountId, 7);
         return transactions.map(transaction => {
+            const multiplyBy = transaction.category.type == CategoryType.Expense ? -1 : 1;
+            const amount = (transaction.amount * multiplyBy).toString();
             return {
                 id: transaction.id,
                 date: DateUtils.getShortDate(transaction.createdAt.toDateString()),
-                amount: transaction.amount.toString(),
+                amount: amount,
                 description: transaction.description,
                 category: transaction.category.name,
                 categoryIcon: '',
+                showRed: transaction.category.type == CategoryType.Expense,
                 transactionType: transaction.category.type == 0 ? 0 : 1
             } as SummaryTransactions;
         });

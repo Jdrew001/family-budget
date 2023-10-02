@@ -1,36 +1,48 @@
-import { Account, AccountBalance, Balance, Budget, Family, NewAccountBudget, User } from '@family-budget/family-budget.model';
+import { Account, AccountBalance, AccountType, Balance, Budget, BudgetPeriod, CreateAccountDto, Family, NewAccountBudget, User } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { BalanceService } from '../balance/balance.service';
 import { DateUtils } from '../util/date-util';
+import { UserService } from '../user/user.service';
+import { BudgetService } from '../budget/budget.service';
 
 @Injectable()
 export class AccountService {
 
     constructor(
         @Inject('AccountRepository') private readonly accountRepository: Repository<Account>,
-        @Inject('UserRepository') private readonly userRepository: Repository<User>,
-        @Inject('BudgetRepository') private readonly budgetRepository: Repository<Budget>,
+        @Inject('AccountTypeRepository') private readonly accountTypeRepository: Repository<AccountType>,
+        private readonly userService: UserService,
+        private readonly budgetService: BudgetService,
         private readonly balanceService: BalanceService
     ) { }
 
-    //#region CRUD Account Methods
-    async createAccountForUser(userId: string, account: Account, newBudget?: NewAccountBudget) {
-        const user = await this.userRepository.findOne({ where: { id: userId } }) as User;
+    async createAccountForUser(userId: string, nAccount: CreateAccountDto, newBudget?: NewAccountBudget) {
+        const user = await this.userService.findById(userId) as User;
+        const accountType = await this.getAccountTypeById(nAccount.accountType);
+        const account = new Account();
+        account.name = nAccount.name;
+        account.description = nAccount.description;
+        account.accountType = accountType as AccountType;
         account.family = user.family as Family;
+        account.budgetPeriod = await this.budgetService.getBudgetPeriodByFrequency(nAccount.frequency) as BudgetPeriod;
 
-        if (newBudget) {
-            const budget: Budget = {
-                startDate: newBudget.startDate,
-                endDate: DateUtils.calculateEndDate(newBudget.startDate, newBudget.frequency),
-                budgetCategories: [],
-                account: account
-            };
+        const balance = new Balance();
+        balance.amount = 0;
+        balance.dateTime = new Date();
 
+        account.balance = balance;
+
+        if (nAccount.createBudget) {
+            const budget = new Budget();
+            budget.startDate = new Date(nAccount.startDate);
+            budget.endDate = DateUtils.calculateEndDate(new Date(nAccount.startDate), nAccount.frequency);
+            budget.budgetCategories = [];
             account.budgets = [budget];
         }
-
-        return await this.accountRepository.save(account);
+        
+        let savedAccount = await this.accountRepository.save(account);
+        return savedAccount;
     }
 
     async updateAccount(account: Account) {
@@ -43,6 +55,7 @@ export class AccountService {
                 'transactions',
                 'transactions.category',
                 'transactions.budget',
+                'budgetPeriod',
                 'budgets', 
                 'budgets.budgetCategories',
                 'budgets.budgetCategories.category'] });
@@ -52,24 +65,23 @@ export class AccountService {
         return await this.accountRepository.delete({ id: accountId });
     }
 
-    async updateAccountBalance(accountId: string, amount: number) {
-        const account = await this.getAccountById(accountId);
-        account?.balances.push(await this.balanceService.createBalance(account, amount));
+    // async updateAccountBalance(accountId: string, amount: number) {
+    //     const account = await this.getAccountById(accountId);
+    //     // account.balance = await this.balanceService.createBalance(account, amount);
+    //     account.balance = await this.balanceService.updateBalance(account.balance, amount);
 
-        return account;
-    }
-
-    //#endregion
+    //     return account;
+    // }
 
     async getAccountsUserUser(userId: string) {
         // using the userId, get the family id and get all accounts for that family;
-        const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['family'] }) as User;
+        const user = await this.userService.findById(userId) as User;
         const accounts = await this.accountRepository.find({ where: { family: user.family },
         relations: [
             'transactions',
             'transactions.category',
-            'balances',
-            'accountType'
+            'accountType',
+            'balance'
         ] });
 
         return accounts;
@@ -80,9 +92,7 @@ export class AccountService {
 
         //get the latest by date balance for each account
         const balances: Array<AccountBalance> = accounts.map(account => {
-            const latestBalance = account.balances.reduce((prev, current) => {
-                return (prev.dateTime > current.dateTime) ? prev : current
-            });
+        const latestBalance = account.balance as Balance;
 
             return {
                 accountId: account.id as string,
@@ -105,5 +115,13 @@ export class AccountService {
         });
 
         return balances;
+    }
+
+    async getAccountTypes() {
+        return await this.accountTypeRepository.find({ order: { sortOrder: 'ASC' } });
+    }
+
+    async getAccountTypeById(id: string) {
+        return await this.accountTypeRepository.findOne({ where: {id: id} });
     }
 }

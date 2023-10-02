@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToMany, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinTable } from 'typeorm';
+import { Entity, Column, ManyToMany, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinTable, OneToOne } from 'typeorm';
 import { Account } from './account.model';
 
 @Entity()
@@ -7,7 +7,7 @@ export class Balance {
     @PrimaryGeneratedColumn("uuid")
     id?: string;
 
-    @Column()
+    @Column("float")
     amount?: number;
 
     @Column()
@@ -16,6 +16,6 @@ export class Balance {
     @Column()
     activeInd: boolean = true;
 
-    @ManyToOne(() => Account, (account) => account.balances)
+    @OneToOne(() => Account, (account) => account.balance)
     account?: Account;
 }

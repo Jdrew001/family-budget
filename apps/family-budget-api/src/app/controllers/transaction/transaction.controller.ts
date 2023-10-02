@@ -41,6 +41,8 @@ export class TransactionController {
         const category = await this.categoryService.findCategoryById(data.category);
         const userId = req.user['sub'];
         let result = null;
+        // take a field that has $32.00 and convert it to 32.00 and it should be a string
+        data.amount = data.amount.replace(/[$,]/g, "");
 
         if (action == TransactionAction.Add) {
             result = await this.transactionService.createTransaction(
@@ -53,8 +55,8 @@ export class TransactionController {
         }
 
         if (result) {
-            const amount = category.type == CategoryType.Income ? data.amount : -data.amount;
-            await this.balanceService.updateAddLatestBalance(result.account, amount);
+            const amount = category.type == CategoryType.Income ? +(data.amount) : +(data.amount) * -1;
+            await this.balanceService.updateAddLatestBalance(result.account, +amount);
             return res.status(200).json({ success: true, data: result });
         }
 

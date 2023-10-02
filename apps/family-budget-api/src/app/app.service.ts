@@ -15,7 +15,7 @@ export class AppService implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
 
     // Seed mock data
-    if (!this.isDevelopment) return;
-    await this.seedService.seed();
+    // if (!this.isDevelopment) return;
+    // await this.seedService.seed();
   }
 }

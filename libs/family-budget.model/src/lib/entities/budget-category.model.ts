@@ -8,7 +8,7 @@ export class BudgetCategory {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @Column()
+    @Column("float")
     amount: number;
 
     @ManyToOne(() => Budget, (budget) => budget.budgetCategories)

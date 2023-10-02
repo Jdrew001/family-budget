@@ -1,4 +1,4 @@
-import { Category, Family } from '@family-budget/family-budget.model';
+import { Category, CreateCategoryDto, Family } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
@@ -19,5 +19,20 @@ export class CategoryService {
 
     async findCategoryById(categoryId: string): Promise<Category> {
         return await this.categoryRepository.findOne({ where: { id: categoryId } }) as Category;
+    }
+
+    async createCategories(userId: string, categories: Array<CreateCategoryDto>) {
+        const user = await this.userService.findById(userId);
+        
+        await categories.forEach(async category => {
+            const newCategory = this.categoryRepository.create({
+                name: category.name,
+                type: category.type,
+                family: user.family
+            });
+            await this.categoryRepository.save(newCategory);
+        });
+
+        return await this.fetchCategoriesForUser(userId);
     }
 }

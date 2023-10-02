@@ -54,7 +54,7 @@ export class SeedService {
                 description: 'some description',
                 accountType: accountType,
                 budgets: [],
-                balances: [await this.createDefaultBalance()],
+                balance: await this.createDefaultBalance(),
                 transactions: [],
                 budgetPeriod: budgetPeriod,
                 family: family

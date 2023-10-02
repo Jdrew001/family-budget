@@ -41,7 +41,7 @@ export class DateUtils {
 
     public static getShortDate(dateParam: string) {
         const startDate = new Date(dateParam);
-        const displayDate = `${startDate.toLocaleString('default', { month: 'short' })} ${startDate.getDate(), startDate.getFullYear()}`;
+        const displayDate = `${startDate.toLocaleString('default', { month: 'short' })} ${startDate.getDate()}, ${startDate.getFullYear()}`;
         return displayDate;
     }
 }
