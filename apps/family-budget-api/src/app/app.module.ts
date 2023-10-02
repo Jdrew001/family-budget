@@ -15,6 +15,7 @@ import { AccessTokenGuard } from './guards/access-token.guard';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 import { TransactionController } from './controllers/transaction/transaction.controller';
 import { CategoryController } from './controllers/category/category.controller';
+import { BudgetController } from './controllers/budget/budget.controller';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { CategoryController } from './controllers/category/category.controller';
     UserController,
     TransactionController,
     CategoryController,
+    BudgetController,
   ],
   providers: [AppService, AccessTokenGuard, RefreshTokenGuard],
 })

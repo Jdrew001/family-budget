@@ -12,6 +12,10 @@ export class BudgetService {
         @Inject('BudgetPeriodRepository') private readonly budgetPeriodRepository: Repository<BudgetPeriod>,
     ) { }
 
+    async getBudgetById(id: string) {
+        return await this.budgetRepository.findOne({ where: { id: id }, relations: ['budgetCategories', 'budgetCategories.category', 'account'] });
+    }
+
     async getCurrentBudget(account: Account) {
         const currentDate = new Date();
         const budgets = account?.budgets?.filter(budget => budget.startDate <= currentDate && budget.endDate >= currentDate) as Array<Budget>;

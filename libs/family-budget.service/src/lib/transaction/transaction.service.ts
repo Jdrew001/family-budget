@@ -1,6 +1,6 @@
-import { Account, Category, CreateTransactionDto, Transaction } from '@family-budget/family-budget.model';
+import { Account, Budget, Category, CreateTransactionDto, Transaction } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { AccountService } from '../account/account.service';
 import { BalanceService } from '../balance/balance.service';
 
@@ -31,7 +31,7 @@ export class TransactionService {
         const transactionToCreate: Transaction = {
             description: transaction.description,
             account: account,
-            budget: account.budgets[0],
+            budget: account?.budgets[0],
             amount: +transaction.amount,
             createdAt: new Date(transaction.date),
             createdBy: userId,
@@ -68,5 +68,19 @@ export class TransactionService {
             const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
             return dateB.getTime() - dateA.getTime();
         });
+    }
+
+    async getTransactionsForBudget(budget: Budget) {
+        // find all transactions in between budget start date and end date inclusive
+        const transactions = await this.transactionRepository.find(
+            { 
+                where: 
+                { 
+                    createdAt: Between(budget.startDate, budget.endDate),
+                    account: budget.account
+                },
+                relations: ['category']
+            });
+        return transactions;
     }
 }
