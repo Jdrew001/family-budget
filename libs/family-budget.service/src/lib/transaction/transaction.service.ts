@@ -72,15 +72,7 @@ export class TransactionService {
 
     async getTransactionsForBudget(budget: Budget) {
         // find all transactions in between budget start date and end date inclusive
-        const transactions = await this.transactionRepository.find(
-            { 
-                where: 
-                { 
-                    createdAt: Between(budget.startDate, budget.endDate),
-                    account: budget.account
-                },
-                relations: ['category']
-            });
+        const transactions = await this.transactionRepository.find({ where:{budget: budget},relations: ['budget', 'category']});
         return transactions;
     }
 }

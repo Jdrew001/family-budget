@@ -8,7 +8,7 @@ export interface LeftSpendingManage {
     totalBudget: string;
 }
 
-export interface BudgetCategory {
+export interface BudgetCategoryManage {
     id: string;
     icon: string;
     percentageSpent: number;

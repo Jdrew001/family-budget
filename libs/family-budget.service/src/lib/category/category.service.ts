@@ -1,14 +1,14 @@
-import { Category, CreateCategoryDto, Family } from '@family-budget/family-budget.model';
+import { Budget, BudgetCategory, Category, CreateCategoryBudgetDto, CreateCategoryDto, Family } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
-import { FamilyService } from '../family/family.service';
 
 @Injectable()
 export class CategoryService {
     
     constructor(
     @Inject('CategoryRepository') private readonly categoryRepository: Repository<Category>,
+    @Inject('BudgetCategoryRepository') private readonly budgetCategoryRepository: Repository<BudgetCategory>,
     private readonly userService: UserService
     ) {}
 
@@ -35,4 +35,17 @@ export class CategoryService {
 
         return await this.fetchCategoriesForUser(userId);
     }
+
+    async createCategoryForBudget(budget: Budget, category: CreateCategoryBudgetDto) {
+        await this.budgetCategoryRepository.save({
+            amount: (category.amount as number),
+            budget: budget,
+            category: await this.findCategoryById(category.id)
+        });
+        return await this.budgetCategoryRepository.find({ where: { budget: budget } }) as BudgetCategory[];
+    }
+
+    async getCategoriesForBudget(budget: Budget): Promise<BudgetCategory[]> {
+        return await this.budgetCategoryRepository.find({ where: { budget: budget }, relations: ['category'] }) as BudgetCategory[];
+    };
 }

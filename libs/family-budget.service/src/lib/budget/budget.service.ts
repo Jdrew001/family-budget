@@ -1,8 +1,7 @@
-import { Account, Budget, BudgetPeriod, CreateAccountDto, Frequency } from '@family-budget/family-budget.model';
+import { Account, Budget, BudgetPeriod, Category, CreateAccountDto, Frequency } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import moment from 'moment';
-import { DateUtils } from '../util/date-util';
 
 @Injectable()
 export class BudgetService {
@@ -13,7 +12,7 @@ export class BudgetService {
     ) { }
 
     async getBudgetById(id: string) {
-        return await this.budgetRepository.findOne({ where: { id: id }, relations: ['budgetCategories', 'budgetCategories.category', 'account'] });
+        return await this.budgetRepository.findOne({ where: { id: id }, relations: ['budgetCategories', 'budgetCategories.category', 'account', 'account.transactions', 'account.transactions.budget', 'account.transactions.category'] });
     }
 
     async getCurrentBudget(account: Account) {
@@ -97,6 +96,15 @@ export class BudgetService {
 
     async getBudgetPeriodByFrequency(frequency: Frequency) {
         return await this.budgetPeriodRepository.findOne({ where: { frequency: frequency } });
+    }
+
+    async getSpentAmountForCategory(category: Category, budgetId: string) {
+        const budget = await this.getBudgetById(budgetId);
+        const transactions = budget?.account?.transactions?.filter(transaction => transaction.category.id === category.id) || [];
+        const spent = transactions.reduce((total, transaction) => {
+            return total + transaction.amount;
+        }, 0)
+        return spent
     }
 
     private handleFrequency(budgetPeriod: Frequency, newBudget: Budget, prevBudget: Budget) {
