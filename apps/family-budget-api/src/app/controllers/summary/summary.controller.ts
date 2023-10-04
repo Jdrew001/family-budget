@@ -27,9 +27,8 @@ export class SummaryController {
         const totalIncomeExpense = await this.budgetService.getTotalIncomeExpenseForBudget(account, budget);
         
         const displayDate = DateUtils.getShortDateString(budget.startDate.toDateString(), budget.endDate.toDateString());
-        const startDate = new Date(budget.startDate)
         const endDate = new Date(budget.endDate);
-        const timeDiff = endDate.getTime() - startDate.getTime();
+        const timeDiff = endDate.getTime() - new Date().getTime();
         const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
         
         return {

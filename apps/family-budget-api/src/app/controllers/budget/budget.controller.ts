@@ -1,6 +1,6 @@
 import { LeftSpendingManage } from '@family-budget/family-budget.model';
 import { BudgetService, CategoryService, DateUtils, TransactionService } from '@family-budget/family-budget.service';
-import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
 
@@ -10,7 +10,6 @@ export class BudgetController {
 
     constructor(
         private readonly budgetService: BudgetService,
-        private readonly transactionService: TransactionService,
         private readonly categoryservice: CategoryService
     ) { }
 
@@ -19,9 +18,8 @@ export class BudgetController {
         const budgetId = request.params.budgetId;
         const budget = await this.budgetService.getBudgetById(budgetId);
         const totalExpenses = (await this.budgetService.getTotalIncomeExpenseForBudget(budget.account, budget)).totalExpense;
-        const startDate = new Date(budget.startDate)
         const endDate = new Date(budget.endDate);
-        const timeDiff = endDate.getTime() - startDate.getTime();
+        const timeDiff = endDate.getTime() - new Date().getTime();
         const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
         const leftSpendingAmount = await this.budgetService.getWhatsLeftToSpend(budget.account, budget)
         const expenseBudgetAmount = budget.budgetCategories.filter(o => o.category.type == 1).reduce((total, category) => {
