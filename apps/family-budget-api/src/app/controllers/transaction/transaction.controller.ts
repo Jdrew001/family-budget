@@ -41,7 +41,6 @@ export class TransactionController {
         const category = await this.categoryService.findCategoryById(data.category);
         const userId = req.user['sub'];
         let result = null;
-        // take a field that has $32.00 and convert it to 32.00 and it should be a string
         data.amount = data.amount.replace(/[$,]/g, "");
 
         if (action == TransactionAction.Add) {
