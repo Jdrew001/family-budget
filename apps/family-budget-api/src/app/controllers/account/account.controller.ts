@@ -2,7 +2,7 @@ import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
 import { Request } from 'express';
-import { CreateAccountDto } from '@family-budget/family-budget.model';
+import { CreateAccountDto, SummaryAccountBalance } from '@family-budget/family-budget.model';
 
 @UseGuards(AccessTokenGuard)
 @Controller('account')
@@ -11,6 +11,21 @@ export class AccountController {
     constructor(
         private readonly accountService: AccountService
     ) {}
+
+    @Get('accountBalances')
+    async getAccountBalances(@Req() req: Request): Promise<SummaryAccountBalance[]> {
+        const user = req.user['sub'];
+        const accountBalances = await this.accountService.getAccountBalancesForUser(user);
+        return accountBalances.map((account, index: number) => {
+            return {
+                id: account.accountId,
+                name: account.accountName,
+                icon: 'fa fa-university',
+                amount: account.balance.amount.toString(),
+                active: index === 0
+            }
+        });
+    }
 
     @Get('getUserAccounts')
     async getAccounts(@Req() req: Request) {

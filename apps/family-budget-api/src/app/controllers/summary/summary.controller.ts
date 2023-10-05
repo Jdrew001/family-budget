@@ -48,21 +48,6 @@ export class SummaryController {
         }
     }
 
-    @Get('accountBalances')
-    async getAccountBalances(@Req() req: Request): Promise<SummaryAccountBalance[]> {
-        const user = req.user['sub'];
-        const accountBalances = await this.accountService.getAccountBalancesForUser(user);
-        return accountBalances.map((account, index: number) => {
-            return {
-                id: account.accountId,
-                name: account.accountName,
-                icon: 'fa fa-university',
-                amount: account.balance.amount.toString(),
-                active: index === 0
-            }
-        });
-    }
-
     @Get('transactions/:accountId')
     async getAccountTransactions(@Param('accountId') accountId: string): Promise<SummaryTransactions[]> {
         const transactions = await this.transactionService.getRecentTransactionsForAccount(accountId, 7);

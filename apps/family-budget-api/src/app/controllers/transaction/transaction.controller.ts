@@ -69,6 +69,9 @@ export class TransactionController {
         const dto = req.body as TransactionGroupRequest;
         dto.userId = userId;
         const transactions = await this.transactionService.getGroupedTransactions(dto);
-        return transactions;
+        if (transactions.length == 0) {
+            return {page: dto.page - 1, pageSize: dto.size, transactions: []};
+        }
+        return {page: dto.page, pageSize: dto.size, transactions: transactions};
     }
 }
