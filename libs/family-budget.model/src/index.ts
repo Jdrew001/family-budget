@@ -28,3 +28,4 @@ export * from './lib/dto/account/create-account.model';
 export * from './lib/dto/category/create-category.model';
 export * from './lib/dto/budget/left-spending.model';
 export * from './lib/dto/category/create-category-budget.model';
+export * from './lib/dto/transaction/group-transaction.model';

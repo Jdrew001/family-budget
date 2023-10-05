@@ -3,7 +3,7 @@ import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
-import { CreateTransactionDto, TransactionAction, Transaction, CategoryType } from '@family-budget/family-budget.model';
+import { CreateTransactionDto, TransactionAction, Transaction, CategoryType, TransactionGroupRequest } from '@family-budget/family-budget.model';
 import { BalanceService } from 'libs/family-budget.service/src/lib/balance/balance.service';
 
 @UseGuards(AccessTokenGuard)
@@ -61,5 +61,14 @@ export class TransactionController {
         }
 
         return res.status(200).json({ success: false, data: null });
+    }
+
+    @Post('getGroupedTransactions')
+    async getGroupedTransactions(@Req() req: Request) {
+        const userId = req.user['sub'];
+        const dto = req.body as TransactionGroupRequest;
+        dto.userId = userId;
+        const transactions = await this.transactionService.getGroupedTransactions(dto);
+        return transactions;
     }
 }
