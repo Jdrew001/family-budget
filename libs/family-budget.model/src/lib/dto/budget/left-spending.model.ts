@@ -1,4 +1,6 @@
 export interface LeftSpendingManage {
+    accountId?: string;
+    accountName?: string;
     id: string;
     displayDate: string;
     leftSpendingAmount: string;

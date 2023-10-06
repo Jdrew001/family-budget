@@ -1,4 +1,4 @@
-import { Account, Budget, BudgetPeriod, Category, CreateAccountDto, Frequency } from '@family-budget/family-budget.model';
+import { Account, Budget, BudgetPeriod, Category, CreateAccountDto, Family, Frequency } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import moment from 'moment';
@@ -10,6 +10,27 @@ export class BudgetService {
         @Inject('BudgetRepository') private readonly budgetRepository: Repository<Budget>,
         @Inject('BudgetPeriodRepository') private readonly budgetPeriodRepository: Repository<BudgetPeriod>,
     ) { }
+
+    async fetchBudgetsFromAccounts(accounts: Array<Account>) {
+        let budgets: Array<{account: Account, budget: Budget}> = [];
+        await Promise.all(accounts.map(async account => {
+          const latestBudget = await this.budgetRepository.findOne({
+            where: { account: account },
+            order: { endDate: 'DESC' },
+            relations: [
+                'budgetCategories', 
+                'budgetCategories.category', 
+                'account', 'account.transactions', 
+                'account.transactions.budget', 
+                'account.transactions.category']
+          });
+          if (latestBudget) {
+            const nAccount = latestBudget.account as Account;
+            budgets.push({account: nAccount, budget: latestBudget});
+          }
+        }));
+        return budgets;
+      }
 
     async getBudgetById(id: string) {
         return await this.budgetRepository.findOne({ where: { id: id }, relations: ['budgetCategories', 'budgetCategories.category', 'account', 'account.transactions', 'account.transactions.budget', 'account.transactions.category'] });
