@@ -63,10 +63,18 @@ export class TransactionService {
 
     // get the five most recent transactions for an account order by date descending
     async getRecentTransactionsForAccount(accountId: string, count: number) {
-        const account = await this.accountService.getAccountById(accountId) as Account;
+        const transactions = await this.transactionRepository.find(
+            { 
+                where: { account: { id: accountId} }, 
+                order: { createdAt: 'DESC' }, 
+                take: count, 
+                relations: [
+                    'budget', 
+                    'category',
+                    'budget.budgetCategories'
+                ] 
+            });
         // sort by date descending with account.transactions
-        const transactions = account?.transactions as Transaction[];
-        
         return transactions.sort((a, b) => {
             const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
             const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
@@ -114,7 +122,7 @@ export class TransactionService {
             description: transaction.description,
             date: DateUtils.getShortDate(date),
             showRed: transaction.category.type === 1,
-            amount: transaction.amount,
+            amount: transaction.category.type === 1 ? transaction.amount * -1: transaction.amount,
             budget: transaction.budget as Budget,
             category: transaction.category
           });

@@ -49,7 +49,7 @@ export class AccountService {
         return await this.accountRepository.save(account);
     }
 
-    async getAccountById(accountId: string) {
+    async getAccountById(accountId: string, count?: number) {
         return await this.accountRepository.findOne({ where: { id: accountId }, 
             relations: [
                 'transactions',

@@ -50,7 +50,7 @@ export class SummaryController {
 
     @Get('transactions/:accountId')
     async getAccountTransactions(@Param('accountId') accountId: string): Promise<SummaryTransactions[]> {
-        const transactions = await this.transactionService.getRecentTransactionsForAccount(accountId, 7);
+        const transactions = await this.transactionService.getRecentTransactionsForAccount(accountId, 5);
 
         return await Promise.all(
             transactions.map(async transaction => {

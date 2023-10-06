@@ -13,6 +13,9 @@ export class Category {
     @Column()
     type: CategoryType;
 
+    @Column({nullable: true})
+    icon?: string;
+
     @ManyToOne(() => Family, (family) => family.categories)
     family?: Family;
 }

@@ -19,6 +19,9 @@ export class Account {
     @Column()
     description: string;
 
+    @Column({nullable: true})
+    icon?: string;
+
     @ManyToOne(() => AccountType)
     accountType: AccountType;
 
