@@ -34,7 +34,7 @@ export class TransactionService {
         const transactionToCreate: Transaction = {
             description: transaction.description,
             account: account,
-            budget: account?.budgets[0],
+            budget: (account.budgets as Budget[])[0],
             amount: +transaction.amount,
             createdAt: new Date(transaction.date),
             createdBy: userId,
@@ -65,12 +65,13 @@ export class TransactionService {
     async getRecentTransactionsForAccount(accountId: string, count: number) {
         const account = await this.accountService.getAccountById(accountId) as Account;
         // sort by date descending with account.transactions
+        const transactions = account?.transactions as Transaction[];
         
-        return account.transactions.sort((a, b) => {
+        return transactions.sort((a, b) => {
             const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
             const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
             return dateB.getTime() - dateA.getTime();
-        });
+        })
     }
 
     async getTransactionsForBudget(budget: Budget) {

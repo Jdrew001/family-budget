@@ -51,19 +51,31 @@ export class SummaryController {
     @Get('transactions/:accountId')
     async getAccountTransactions(@Param('accountId') accountId: string): Promise<SummaryTransactions[]> {
         const transactions = await this.transactionService.getRecentTransactionsForAccount(accountId, 7);
-        return transactions.map(transaction => {
-            const multiplyBy = transaction.category.type == CategoryType.Expense ? -1 : 1;
-            const amount = (transaction.amount * multiplyBy).toString();
-            return {
-                id: transaction.id,
-                date: DateUtils.getShortDate(transaction.createdAt.toDateString()),
-                amount: amount,
-                description: transaction.description,
-                category: transaction.category.name,
-                categoryIcon: '',
-                showRed: transaction.category.type == CategoryType.Expense,
-                transactionType: transaction.category.type == 0 ? 0 : 1
-            } as SummaryTransactions;
-        });
+
+        return await Promise.all(
+            transactions.map(async transaction => {
+                const multiplyBy = transaction.category.type == CategoryType.Expense ? -1 : 1;
+                const amount = (transaction.amount * multiplyBy).toString();
+                const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(transaction.budget.id, transaction.category.id);
+                const categorySpentAmount = await this.budgetService.getSpentAmountForCategory(transaction.category, transaction.budget.id);
+                const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
+                return {
+                    id: transaction.id,
+                    date: DateUtils.getShortDate(transaction.createdAt.toDateString()),
+                    amount: amount,
+                    description: transaction.description,
+                    category: transaction.category.name,
+                    categoryIcon: '',
+                    showRed: transaction.category.type == CategoryType.Expense,
+                    transactionType: transaction.category.type == 0 ? 0 : 1,
+                    circleGuage: {
+                        minValue: 0,
+                        maxValue: 100,
+                        currentValue: currentValue > 100 ? 100 : currentValue,
+                        showRed: currentValue > 100
+                    }
+                } as SummaryTransactions;
+            })
+        );
     }
 }
