@@ -84,6 +84,8 @@ export class TransactionService {
         const accountId = dto.accountId
         const query = this.transactionRepository.createQueryBuilder('transaction')
             .leftJoinAndSelect('transaction.category', 'category')
+            .leftJoinAndSelect('transaction.budget', 'budget')
+            .leftJoinAndSelect('budget.budgetCategories', 'BudgetCategory')
             .where('transaction.account.id = :accountId', { accountId: accountId })
             .orderBy('transaction.createdAt', 'DESC')
             .skip((dto.page - 1) * dto.size)
@@ -113,7 +115,8 @@ export class TransactionService {
             date: DateUtils.getShortDate(date),
             showRed: transaction.category.type === 1,
             amount: transaction.amount,
-
+            budget: transaction.budget as Budget,
+            category: transaction.category
           });
 
         });

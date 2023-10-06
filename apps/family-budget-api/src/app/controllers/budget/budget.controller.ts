@@ -81,6 +81,9 @@ export class BudgetController {
         const budgetId = req.params.budgetId;
         const budget = await this.budgetService.getBudgetById(budgetId);
         const result = await Promise.all(budget.budgetCategories.map(async budgetCategory => {
+            const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(budget.id, budgetCategory.category.id);
+            const categorySpentAmount = await this.budgetService.getSpentAmountForCategory(budgetCategory.category, budget.id);
+            const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
             const spent = await this.budgetService.getSpentAmountForCategory(budgetCategory.category, budget.id)
             return {
                 id: budgetCategory.id,
@@ -89,7 +92,13 @@ export class BudgetController {
                 type: budgetCategory.category.type,
                 spentAmount: spent,
                 remainingAmount: budgetCategory.amount - spent,
-                showRed: budgetCategory.amount - spent < 0
+                showRed: budgetCategory.amount - spent < 0,
+                circleGuage: {
+                    minValue: 0,
+                    maxValue: 100,
+                    currentValue: currentValue > 100 ? 100 : currentValue,
+                    showRed: currentValue > 100
+                }
             }
         }));
         return result;

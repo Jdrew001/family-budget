@@ -1,4 +1,4 @@
-import { CategoryService, TransactionService } from '@family-budget/family-budget.service';
+import { BudgetService, CategoryService, TransactionService } from '@family-budget/family-budget.service';
 import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
@@ -14,7 +14,8 @@ export class TransactionController {
         private readonly categoryService: CategoryService,
         private readonly accountService: AccountService,
         private readonly transactionService: TransactionService,
-        private readonly balanceService: BalanceService
+        private readonly balanceService: BalanceService,
+        private readonly budgetService: BudgetService
     ) {}
 
     @Get('getTransactionRefData')
@@ -71,6 +72,32 @@ export class TransactionController {
         if (transactions.length == 0) {
             return {page: dto.page - 1, pageSize: dto.size, transactions: []};
         }
-        return {page: dto.page, pageSize: dto.size, transactions: transactions};
+
+        const transactionsWithCircleGuage = await Promise.all(
+            transactions.map(async group => {
+                const transactionsWithCircleGuage = await Promise.all(
+                    group.transactions.map(async transaction => {
+                        const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(transaction.budget.id, transaction.category.id);
+                        const categorySpentAmount = await this.budgetService.getSpentAmountForCategory(transaction.category, transaction.budget.id);
+                        const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
+                        return {
+                            ...transaction,
+                            circleGuage: {
+                                minValue: 0,
+                                maxValue: 100,
+                                currentValue: currentValue > 100 ? 100 : currentValue,
+                                showRed: currentValue > 100
+                            }
+                        }
+                    })
+                );
+                return {
+                    ...group,
+                    transactions: transactionsWithCircleGuage
+                };
+            })
+        );
+
+        return {page: dto.page, pageSize: dto.size, transactions: transactionsWithCircleGuage};
     }
 }

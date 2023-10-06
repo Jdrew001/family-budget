@@ -1,3 +1,5 @@
+import { Budget } from "../../entities/budget.model";
+import { Category } from "../../entities/category.model";
 import { Transaction } from "../../entities/transaction.model";
 
 export class GroupTransaction {
@@ -16,6 +18,8 @@ export interface TransactionDto {
     date: string;
     showRed: boolean;
     amount: number;
+    budget: Budget,
+    category: Category
 }
 
 export interface TransactionGroupRequest {
