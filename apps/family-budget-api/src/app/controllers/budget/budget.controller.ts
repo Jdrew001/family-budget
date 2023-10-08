@@ -38,7 +38,7 @@ export class BudgetController {
                 accountName: data.account.name,
                 id: data.budget.id,
                 displayDate: DateUtils.getShortDateString(data.budget.startDate.toDateString(), data.budget.endDate.toDateString()),
-                leftSpendingAmount: leftSpendingAmount.toString(),
+                leftSpendingAmount: leftSpendingAmount.whatsLeft.toString(),
                 leftSpendingDays: daysLeft,
                 percentageSpent: percentageSpent,
                 totalSpent: totalExpenses.toString(),
@@ -66,11 +66,13 @@ export class BudgetController {
         const response: LeftSpendingManage = {
             id: budgetId,
             displayDate: DateUtils.getShortDateString(budget.startDate.toDateString(), budget.endDate.toDateString()),
-            leftSpendingAmount: leftSpendingAmount.toString(),
+            leftSpendingAmount: leftSpendingAmount.whatsLeft.toString(),
             leftSpendingDays: daysLeft,
             percentageSpent: percentageSpent,
             totalSpent: totalExpenses.toString(),
-            totalBudget: expenseBudgetAmount.toString()
+            totalBudget: expenseBudgetAmount.toString(),
+            totalSpentIcon: 'money-5',
+            totalBudgetIcon: 'budget'
         }
 
         return response;
@@ -97,7 +99,8 @@ export class BudgetController {
                     minValue: 0,
                     maxValue: 100,
                     currentValue: currentValue > 100 ? 100 : currentValue,
-                    showRed: currentValue > 100
+                    showRed: currentValue > 100,
+                    icon: budgetCategory?.category?.icon
                 }
             }
         }));

@@ -86,7 +86,8 @@ export class TransactionController {
                                 minValue: 0,
                                 maxValue: 100,
                                 currentValue: currentValue > 100 ? 100 : currentValue,
-                                showRed: currentValue > 100
+                                showRed: currentValue > 100,
+                                icon: transaction?.category?.icon
                             }
                         }
                     })

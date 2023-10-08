@@ -30,20 +30,29 @@ export class SummaryController {
         const endDate = new Date(budget.endDate);
         const timeDiff = endDate.getTime() - new Date().getTime();
         const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+        const currentValue = whatsLeftToSpend.totalSpent / whatsLeftToSpend.totalBudget * 100;
         
         return {
             id: budget.id,
             displayDate: displayDate,
-            leftSpendingAmount: whatsLeftToSpend.toString(),
+            leftSpendingAmount: whatsLeftToSpend.whatsLeft.toString(),
             leftSpendingDays: daysLeft,
             showBudgetError: budget.budgetCategories.length == 0,
+            circleGuage: {
+                minValue: 0,
+                maxValue: 100,
+                currentValue: currentValue > 100 ? 100 : currentValue,
+                showRed: currentValue > 100,
+                icon: 'money-6'
+            },
             income: {
                 amount: totalIncomeExpense.totalIncome.toString(),
-                icon: 'fa fa-plus'
+                icon: 'profit'
             },
             expense: {
                 amount: totalIncomeExpense.totalExpense.toString(),
-                icon: 'fa fa-minus'
+                icon: 'expense'
             }
         }
     }
@@ -72,7 +81,8 @@ export class SummaryController {
                         minValue: 0,
                         maxValue: 100,
                         currentValue: currentValue > 100 ? 100 : currentValue,
-                        showRed: currentValue > 100
+                        showRed: currentValue > 100,
+                        icon: transaction.category.icon
                     }
                 } as SummaryTransactions;
             })

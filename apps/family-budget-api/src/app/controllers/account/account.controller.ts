@@ -20,7 +20,7 @@ export class AccountController {
             return {
                 id: account.accountId,
                 name: account.accountName,
-                icon: 'fa fa-university',
+                icon: account.icon,
                 amount: account.balance.amount.toString(),
                 active: index === 0
             }

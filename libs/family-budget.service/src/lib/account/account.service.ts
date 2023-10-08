@@ -98,6 +98,7 @@ export class AccountService {
                 accountId: account.id as string,
                 accountName: account.name,
                 accountOrder: account.accountType.sortOrder,
+                icon: account.icon,
                 balance: {
                     id: latestBalance.id,
                     amount: latestBalance.amount || 0,

@@ -65,7 +65,7 @@ export class BudgetService {
             totalSpent += transaction.amount;
         });
         
-        return totalBudget - totalSpent;
+        return {whatsLeft: totalBudget - totalSpent, totalBudget, totalSpent};
     }
 
     async getTotalIncomeExpenseForBudget(account: Account, budget?: Budget) {

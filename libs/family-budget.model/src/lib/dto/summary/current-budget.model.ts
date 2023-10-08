@@ -4,8 +4,9 @@ export interface CurrentBudgetSummary {
     leftSpendingAmount: string;
     leftSpendingDays: number;
     income: TypeAmount;
-    expense: TypeAmount
+    expense: TypeAmount;
     showBudgetError: boolean;
+    circleGuage: any;
 }
 
 export interface TypeAmount {
