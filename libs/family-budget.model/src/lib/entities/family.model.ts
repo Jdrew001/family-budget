@@ -10,7 +10,7 @@ export class Family {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @OneToMany(() => User, (user) => user.subscription)
+    @OneToMany(() => User, (user) => user.family)
     users: Array<User>;
 
     @OneToMany(() => Account, (account) => account.family, {

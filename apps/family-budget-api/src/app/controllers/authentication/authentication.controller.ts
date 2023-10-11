@@ -38,6 +38,6 @@ export class AuthenticationController {
     @Get('logout')
     logout(@Req() req: Request) {
         const userId = req.user['sub'];
-        this.authenticationService.logout(userId);
+        return this.authenticationService.logout(userId);
     }
 }

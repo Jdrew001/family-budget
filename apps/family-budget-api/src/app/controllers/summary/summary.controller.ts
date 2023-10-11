@@ -29,7 +29,7 @@ export class SummaryController {
         const displayDate = DateUtils.getShortDateString(budget.startDate.toDateString(), budget.endDate.toDateString());
         const endDate = new Date(budget.endDate);
         const timeDiff = endDate.getTime() - new Date().getTime();
-        const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
 
         const currentValue = whatsLeftToSpend.totalSpent / whatsLeftToSpend.totalBudget * 100;
         

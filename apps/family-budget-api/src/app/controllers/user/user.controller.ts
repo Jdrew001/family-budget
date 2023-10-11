@@ -19,7 +19,19 @@ export class UserController {
         return {
             id: user.id,
             firstname: user.firstname,
-            lastname: user.lastname
+            lastname: user.lastname,
+            email: user.email,
+            family: {
+                id: user.family.id,
+                users: user.family.users.map(user => {
+                    return {
+                        id: user.id,
+                        firstname: user.firstname,
+                        lastname: user.lastname,
+                        email: user.email,
+                    }
+                })
+            }
         }
     }
 }
