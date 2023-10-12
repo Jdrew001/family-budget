@@ -2,6 +2,7 @@ import { Account, Budget, BudgetPeriod, Category, CreateAccountDto, Family, Freq
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import moment from 'moment';
+import { DateUtils } from '../util/date-util';
 
 @Injectable()
 export class BudgetService {
@@ -37,8 +38,15 @@ export class BudgetService {
     }
 
     async getCurrentBudget(account: Account) {
-        const currentDate = new Date();
-        const budgets = account?.budgets?.filter(budget => budget.startDate <= currentDate && budget.endDate >= currentDate) as Array<Budget>;
+        const currentDate = DateUtils.getYYYYMMDD((new Date()).toDateString());
+        const mCurrentDate = moment(currentDate);
+        const budgets = account?.budgets?.filter(budget => {
+            const startDate = DateUtils.getYYYYMMDD(budget.startDate.toDateString());
+            const endDate = DateUtils.getYYYYMMDD(budget.endDate.toDateString());
+            const mStartDate = moment(startDate);
+            const mEndDate = moment(endDate);
+            return mCurrentDate.isSameOrAfter(mStartDate) && mCurrentDate.isSameOrBefore(mEndDate);
+        }) as Budget[];
         if (budgets.length == 0) {
             return await this.createNewBudget(account);
         }

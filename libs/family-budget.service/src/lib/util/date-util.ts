@@ -6,6 +6,8 @@ export class DateUtils {
     // if payperiod is monthly, then the end date is 30 days - 1 from the start date
 
 
+
+
     // code the first comment
     public static calculateEndDate(startDate: Date, payPeriod: Frequency) {
         let endDate = new Date(startDate);
@@ -42,6 +44,16 @@ export class DateUtils {
     public static getShortDate(dateParam: string) {
         const startDate = new Date(dateParam);
         const displayDate = `${startDate.toLocaleString('default', { month: 'short' })} ${startDate.getDate()}, ${startDate.getFullYear()}`;
+        return displayDate;
+    }
+
+    public static getYYYYMMDD(date: string) {
+        // format YYYY-MM-DD - include leading zeros
+        const startDate = new Date(date);
+        const month = startDate.getMonth() + 1;
+        const day = startDate.getDate();
+        const year = startDate.getFullYear();
+        const displayDate = `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day}`;
         return displayDate;
     }
 }

@@ -15,7 +15,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
 
   app.enableCors({
-    origin: ["http://localhost:8100", "http://192.168.12.152:8100", "https://discoverfaitharlington.org"],
+    origin: ["http://localhost:8100", "http://192.168.12.152:8100", "http://10.189.46.102:8100", "https://discoverfaitharlington.org"],
     credentials: true
   });
 
