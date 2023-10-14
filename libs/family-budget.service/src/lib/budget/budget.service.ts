@@ -110,7 +110,7 @@ export class BudgetService {
         const budgetPeriod = account.budgetPeriod;
         const newBudget = this.handleFrequency(budgetPeriod.frequency, new Budget(), (budget as Budget));
         newBudget.account = account;
-        newBudget.budgetCategories = budget?.budgetCategories || [];
+        newBudget.budgetCategories = [];
 
         return await this.budgetRepository.save(newBudget);
     }
