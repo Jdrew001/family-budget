@@ -14,7 +14,7 @@ export class AuthenticationController {
 
     @Get('health')
     healthCheck() {
-        return 'App is running';
+        return 'App is running!!!!';
     }
 
     @Post('signup')
