@@ -12,6 +12,11 @@ export class AuthenticationController {
         private authenticationService: AuthenticationService
     ) {}
 
+    @Get('health')
+    healthCheck() {
+        return 'App is running';
+    }
+
     @Post('signup')
     signUp(@Body() createUserDto: CreateUserDto) {
         return this.authenticationService.signUp(createUserDto);

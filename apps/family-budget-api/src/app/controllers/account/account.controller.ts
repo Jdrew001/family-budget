@@ -35,6 +35,9 @@ export class AccountController {
             return {
                 id: account.id,
                 name: account.name,
+                icon: account.icon,
+                type: `${account.accountType.name} Account`,
+                typeId: account.accountType.id
             }
         })
     }

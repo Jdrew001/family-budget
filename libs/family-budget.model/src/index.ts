@@ -29,3 +29,5 @@ export * from './lib/dto/category/create-category.model';
 export * from './lib/dto/budget/left-spending.model';
 export * from './lib/dto/category/create-category-budget.model';
 export * from './lib/dto/transaction/group-transaction.model';
+export * from './lib/dto/reference/master-ref.model';
+export * from './lib/dto/reference/account-type-ref.model';

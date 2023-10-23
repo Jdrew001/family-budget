@@ -135,7 +135,10 @@ export class BudgetService {
 
     async getSpentAmountForCategory(category: Category, budgetId: string) {
         const budget = await this.getBudgetById(budgetId);
-        const transactions = budget?.account?.transactions?.filter(transaction => transaction.category.id === category.id) || [];
+        const transactions = budget?.account?.transactions?.filter(transaction => 
+            {
+                return transaction.category.id === category.id && transaction.budget?.id === budgetId;
+            }) || [];
         const spent = transactions.reduce((total, transaction) => {
             return total + transaction.amount;
         }, 0)

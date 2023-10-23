@@ -34,7 +34,7 @@ export class TransactionService {
         const transactionToCreate: Transaction = {
             description: transaction.description,
             account: account,
-            budget: (account.budgets as Budget[])[0],
+            budget: this.getLatestActiveBudget(account),
             amount: +transaction.amount,
             createdAt: new Date(transaction.date),
             createdBy: userId,
@@ -86,6 +86,10 @@ export class TransactionService {
         // find all transactions in between budget start date and end date inclusive
         const transactions = await this.transactionRepository.find({ where:{budget: budget},relations: ['budget', 'category']});
         return transactions;
+    }
+
+    private getLatestActiveBudget(account: Account) {
+        return account.budgets?.filter(o => o.activeInd)[0];
     }
 
     private async getTransactionsByAccountIdPaging(dto: TransactionGroupRequest) {
