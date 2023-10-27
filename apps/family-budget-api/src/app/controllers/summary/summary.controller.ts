@@ -1,9 +1,9 @@
 import { CategoryType, CurrentBudgetSummary, SummaryAccountBalance, SummaryTransactions } from '@family-budget/family-budget.model';
 import { BudgetService, DateUtils, TransactionService } from '@family-budget/family-budget.service';
 import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
-import { Request } from 'express';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
+import moment from 'moment';
 
 @UseGuards(AccessTokenGuard)
 @Controller('summary')
@@ -27,9 +27,9 @@ export class SummaryController {
         const totalIncomeExpense = await this.budgetService.getTotalIncomeExpenseForBudget(account, budget);
         
         const displayDate = DateUtils.getShortDateString(budget.startDate.toDateString(), budget.endDate.toDateString());
-        const endDate = new Date(budget.endDate);
-        const timeDiff = endDate.getTime() - new Date().getTime();
-        const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+        const endDate = moment.utc(budget.endDate);
+        const timeDiff = endDate.diff(moment(), 'milliseconds');
+        const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
         const currentValue = whatsLeftToSpend.totalSpent / whatsLeftToSpend.totalBudget * 100;
         

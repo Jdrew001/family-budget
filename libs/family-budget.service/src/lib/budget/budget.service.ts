@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import moment from 'moment';
 import { DateUtils } from '../util/date-util';
+import * as _ from 'lodash';
 
 @Injectable()
 export class BudgetService {
@@ -45,7 +46,7 @@ export class BudgetService {
             const endDate = DateUtils.getYYYYMMDD(budget.endDate.toDateString());
             const mStartDate = moment(startDate);
             const mEndDate = moment(endDate);
-            return mCurrentDate.isSameOrAfter(mStartDate) && mCurrentDate.isSameOrBefore(mEndDate);
+            return mCurrentDate.isSameOrAfter(mStartDate) && mCurrentDate.isBefore(mEndDate);
         }) as Budget[];
         if (budgets.length == 0) {
             return await this.createNewBudget(account);
@@ -104,7 +105,9 @@ export class BudgetService {
         //sort budget by end date -- get the last one
         const budget = account.budgets?.sort((a, b) => {
             return b.endDate.getTime() - a.endDate.getTime();
-        })[0];
+        })[0] as Budget;
+
+        this.markInactiveBudget(budget);
 
         //get the pay period for the account
         const budgetPeriod = account.budgetPeriod;
@@ -113,6 +116,13 @@ export class BudgetService {
         newBudget.budgetCategories = [];
 
         return await this.budgetRepository.save(newBudget);
+    }
+
+    async markInactiveBudget(budget: Budget) {
+        if (budget) {
+            budget.activeInd = false;
+            await this.budgetRepository.save(budget);
+        }
     }
 
     async getBudgetPeriods() {
@@ -148,24 +158,24 @@ export class BudgetService {
     private handleFrequency(budgetPeriod: Frequency, newBudget: Budget, prevBudget: Budget) {
         
         // using moment, using the frequency, add the appropriate amount of time to the prevBudget endDate and start date
-        const endDate = moment(prevBudget.endDate);
+        const endDate = moment.utc(prevBudget.endDate);
 
         switch (budgetPeriod) {
             case Frequency.Weekly:
-                newBudget.startDate = endDate.add(1, 'days').toDate();
-                newBudget.endDate = endDate.add(1, 'weeks').toDate();
+                newBudget.startDate = _.clone(endDate).add(1, 'days').toDate();
+                newBudget.endDate = _.clone(endDate).add(1, 'weeks').toDate();
                 break;
             case Frequency.BiWeekly:
-                newBudget.startDate = endDate.add(1, 'days').toDate();
-                newBudget.endDate = endDate.add(2, 'weeks').toDate();
+                newBudget.startDate = _.clone(endDate).add(1, 'days').toDate();
+                newBudget.endDate = _.clone(endDate).add(2, 'weeks').toDate();
                 break;
             case Frequency.Monthly:
-                newBudget.startDate = endDate.add(1, 'days').toDate();
-                newBudget.endDate = endDate.add(1, 'month').toDate();
+                newBudget.startDate = _.clone(endDate).add(1, 'days').toDate();
+                newBudget.endDate = _.clone(endDate).add(1, 'month').toDate();
                 break;
             case Frequency.Quarterly:
-                newBudget.startDate = endDate.add(1, 'days').toDate();
-                newBudget.endDate = endDate.add(3, 'month').toDate();
+                newBudget.startDate = _.clone(endDate).add(1, 'days').toDate();
+                newBudget.endDate = _.clone(endDate).add(3, 'month').toDate();
                 break;
             default:
                 break;
