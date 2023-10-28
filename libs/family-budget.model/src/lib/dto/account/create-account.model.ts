@@ -4,7 +4,7 @@ export interface CreateAccountDto {
     name: string;
     description: string;
     accountType: string;
-    createBudget: true;
+    createBudget: boolean;
     startDate: Date;
     frequency: Frequency;
 }

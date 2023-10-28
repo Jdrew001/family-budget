@@ -8,6 +8,7 @@ export * from './lib/entities/account.model';
 export * from './lib/entities/account-type.model';
 export * from './lib/entities/balance.model';
 export * from './lib/entities/budget.model';
+export * from './lib/entities/frequency-ref.model';
 export * from './lib/entities/budget-period.model';
 export * from './lib/entities/transaction.model';
 export * from './lib/entities/subscription.model';

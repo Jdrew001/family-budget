@@ -1,4 +1,4 @@
-export interface AccountTypeRef {
-    id: string;
+export interface TypeReference {
+    id: string | number;
     label: string;
 }

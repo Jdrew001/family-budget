@@ -16,6 +16,7 @@ import {
   BudgetPeriod,
   Category,
   Family,
+  FrequencyRef,
   Subscription,
   Transaction,
   User,
@@ -29,6 +30,7 @@ import { RefreshTokenStrategy } from './authentication/strategies/refresh-token.
 import { FamilyService } from './family/family.service';
 import { CategoryService } from './category/category.service';
 import { ReferenceService } from './reference/reference.service';
+import { FrequencyReferenceService } from './frequency-reference/frequency-reference.service';
 
 @Module({
   controllers: [],
@@ -46,6 +48,7 @@ import { ReferenceService } from './reference/reference.service';
     FamilyService,
     CategoryService,
     ReferenceService,
+    FrequencyReferenceService,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -64,6 +67,7 @@ import { ReferenceService } from './reference/reference.service';
       Family,
       Subscription,
       Transaction,
+      FrequencyRef
     ]),
     JwtModule.register({}),
   ],
@@ -80,7 +84,8 @@ import { ReferenceService } from './reference/reference.service';
     FamilyService,
     CategoryService,
     BalanceService,
-    ReferenceService
+    ReferenceService,
+    FrequencyReferenceService
   ],
 })
 export class FamilyBudgetServiceModule {}
