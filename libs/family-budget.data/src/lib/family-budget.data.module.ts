@@ -1,7 +1,6 @@
-import { Account, AccountType, Balance, Budget, BudgetCategory, BudgetPeriod, Category, Family, FrequencyRef, Subscription, Transaction, User } from '@family-budget/family-budget.model';
+import { Account, AccountType, Balance, Budget, BudgetCategory, BudgetPeriod, Category, Family, FrequencyRef, Subscription, Transaction, User, UserInvite } from '@family-budget/family-budget.model';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
 
 @Module({
   imports: [
@@ -24,7 +23,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         Family,
         Subscription,
         Transaction,
-        FrequencyRef
+        FrequencyRef,
+        UserInvite
       ],
       synchronize: false
     })

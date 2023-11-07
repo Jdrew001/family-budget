@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
 import { Request } from 'express';
@@ -51,5 +51,22 @@ export class AccountController {
             accounts.push(await this.accountService.createAccountForUser(user, item));
         });
         return accounts;
+    }
+
+    @Get('getAccountById/:accountId')
+    async getAccountById(@Req() request: Request) {
+        const accountId = request.params.accountId;
+        const data = await this.accountService.getAccountById(accountId);
+
+        return {
+            id: data.id,
+            name: data.name,
+            description: data.description,
+            icon: data.icon,
+            accountType: data.accountType?.id,
+            createBudget: data.budgets?.length > 0,
+            frequency: data.budgetPeriod.frequency,
+            shouldDisable: data.budgets?.length > 0
+        }
     }
 }

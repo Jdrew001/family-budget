@@ -32,3 +32,6 @@ export * from './lib/dto/category/create-category-budget.model';
 export * from './lib/dto/transaction/group-transaction.model';
 export * from './lib/dto/reference/master-ref.model';
 export * from './lib/dto/reference/account-type-ref.model';
+export * from './lib/entities/user-invite.model';
+export * from './lib/dto/user/invite-user.model';
+export * from './lib/dto/response/generic-response.model';

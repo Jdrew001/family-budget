@@ -20,6 +20,7 @@ import {
   Subscription,
   Transaction,
   User,
+  UserInvite,
 } from '@family-budget/family-budget.model';
 import { TransactionService } from './transaction/transaction.service';
 import { UserService } from './user/user.service';
@@ -67,7 +68,8 @@ import { FrequencyReferenceService } from './frequency-reference/frequency-refer
       Family,
       Subscription,
       Transaction,
-      FrequencyRef
+      FrequencyRef,
+      UserInvite
     ]),
     JwtModule.register({}),
   ],
