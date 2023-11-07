@@ -1,7 +1,7 @@
-import { Controller, ForbiddenException, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { UserService } from 'libs/family-budget.service/src/lib/user/user.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
-import { UserInfoDto } from '@family-budget/family-budget.model';
+import { GenericResponse, GenericResponseModel, UserInfoDto, UserInviteDto } from '@family-budget/family-budget.model';
 
 @UseGuards(AccessTokenGuard)
 @Controller('user')
@@ -33,5 +33,16 @@ export class UserController {
                 })
             }
         }
+    }
+
+    @Post('inviteUser')
+    async inviteUser(@Req() req): Promise<GenericResponseModel> {
+        const userId = req.user['sub'];
+        if (!userId) throw new ForbiddenException('User not found');
+
+        const userInviteDto = req.body as UserInviteDto;
+        userInviteDto.userId = userId;
+        
+        return await this.userService.inviteUser(userInviteDto);
     }
 }

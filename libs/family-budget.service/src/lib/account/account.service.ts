@@ -25,7 +25,10 @@ export class AccountService {
         account.description = nAccount.description;
         account.accountType = accountType as AccountType;
         account.family = user.family as Family;
-        account.budgetPeriod = await this.budgetService.getBudgetPeriodByFrequency(nAccount.frequency) as BudgetPeriod;
+
+        if (nAccount?.frequency !== null) {
+            account.budgetPeriod = await this.budgetService.getBudgetPeriodByFrequency(nAccount.frequency) as BudgetPeriod;
+        }
 
         const balance = new Balance();
         balance.amount = 0;
@@ -52,6 +55,7 @@ export class AccountService {
     async getAccountById(accountId: string, count?: number) {
         return await this.accountRepository.findOne({ where: { id: accountId }, 
             relations: [
+                'accountType',
                 'transactions',
                 'transactions.category',
                 'transactions.budget',

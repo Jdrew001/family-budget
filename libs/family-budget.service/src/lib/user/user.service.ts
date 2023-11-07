@@ -1,13 +1,15 @@
-import { CreateUserDto, UpdateUserDto, User } from '@family-budget/family-budget.model';
+import { CreateUserDto, GenericResponse, GenericResponseModel, UpdateUserDto, User, UserInvite, UserInviteDto } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { FamilyService } from '../family/family.service';
+import { ErrorConstants } from '../constants/error.constants';
 
 @Injectable()
 export class UserService {
 
     constructor(
         @Inject('UserRepository') private readonly userRepository: Repository<User>,
+        @Inject('UserInviteRepository') private readonly userInviteRepo: Repository<UserInvite>,
         private readonly familyService: FamilyService
     ) {}
 
@@ -48,5 +50,38 @@ export class UserService {
     async findFamilyForUser(userId: string) {
         const user = await this.findById(userId);
         return user.family;
+    }
+
+    async inviteUser(userInviteDto: UserInviteDto): Promise<GenericResponseModel> {
+        // check if user exists
+        const invitedUser = await this.findByEmail(userInviteDto.email);
+        const user = await this.findById(userInviteDto.userId);
+
+        // if found
+        if (invitedUser) {
+            // check if user in family
+            // TODO: add new functionality
+            // if (invitedUser?.family?.id === user?.family?.id) {
+            //     return null; // error
+            // }
+            return { success: false, message: ErrorConstants.USER_CANNOT_BE_INVITED, code: 400 };
+        }
+
+        // check if user is already invited
+        const userInvite = await this.userInviteRepo.findOne({where: {email: userInviteDto.email}});
+        if (userInvite) {
+            return { success: false, message: ErrorConstants.USER_ALREADY_INVITED, code: 400 };
+        }
+
+        // create invite
+        const newUserInvite = new UserInvite();
+        newUserInvite.email = userInviteDto.email;
+        newUserInvite.family = user.family;
+        newUserInvite.updateBy = user;
+        return { 
+            success: true,
+            code: 200, 
+            data: this.userInviteRepo.save(newUserInvite)
+        };
     }
 }
