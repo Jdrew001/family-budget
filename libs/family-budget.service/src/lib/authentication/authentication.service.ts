@@ -16,15 +16,22 @@ export class AuthenticationService {
 
     async signUp(createUserDto: CreateUserDto) {
         const userExists = await this.userService.findByEmail(createUserDto.email);
+        let isUserInvited = false;
         if (userExists) {
             throw new BadRequestException('User already exists');
+        }
+
+        const invitedUser = await this.userService.findInvitationForEmail(createUserDto.email);
+        if (invitedUser) {
+          isUserInvited = true;
+          // TODO: We need to deactivate the invitation here
         }
 
         const hashedPassword = await this.hashData(createUserDto.password);
         const newUser = await this.userService.create({
             ...createUserDto,
-            password: hashedPassword
-        }) as User;
+            password: hashedPassword,
+        }, isUserInvited) as User;
 
         const tokens = await this.getTokens(newUser.id || '', newUser.email);
         await this.updateRefreshToken(newUser.id || '', tokens.refreshToken);

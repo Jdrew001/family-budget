@@ -32,6 +32,7 @@ import { FamilyService } from './family/family.service';
 import { CategoryService } from './category/category.service';
 import { ReferenceService } from './reference/reference.service';
 import { FrequencyReferenceService } from './frequency-reference/frequency-reference.service';
+import { TextingService } from './texting/texting.service';
 
 @Module({
   controllers: [],
@@ -50,6 +51,7 @@ import { FrequencyReferenceService } from './frequency-reference/frequency-refer
     CategoryService,
     ReferenceService,
     FrequencyReferenceService,
+    TextingService,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -69,7 +71,7 @@ import { FrequencyReferenceService } from './frequency-reference/frequency-refer
       Subscription,
       Transaction,
       FrequencyRef,
-      UserInvite
+      UserInvite,
     ]),
     JwtModule.register({}),
   ],
@@ -87,7 +89,7 @@ import { FrequencyReferenceService } from './frequency-reference/frequency-refer
     CategoryService,
     BalanceService,
     ReferenceService,
-    FrequencyReferenceService
+    FrequencyReferenceService,
   ],
 })
 export class FamilyBudgetServiceModule {}

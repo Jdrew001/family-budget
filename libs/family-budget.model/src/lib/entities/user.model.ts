@@ -30,6 +30,9 @@ export class User {
     @Column()
     locked?: boolean;
 
+    @Column()
+    onboarded?: boolean;
+
     @Column({nullable: true})
     dateLocked?: Date;
 
