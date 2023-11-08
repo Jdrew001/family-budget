@@ -22,6 +22,9 @@ export class User {
     email: string;
 
     @Column()
+    phoneNumber: string;
+
+    @Column()
     lastLogin?: Date;
 
     @Column()
