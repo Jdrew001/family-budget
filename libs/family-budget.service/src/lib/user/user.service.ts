@@ -89,4 +89,9 @@ export class UserService {
     async findInvitationForEmail(email: string): Promise<UserInvite> {
         return await this.userInviteRepo.findOne({where: {email: email}}) as UserInvite;
     }
+
+    async acceptInvite(id: string): Promise<any> {
+        const invite = await this.userInviteRepo.update(id, {activeInd: false});
+        return invite;
+    }
 }

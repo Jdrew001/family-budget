@@ -24,7 +24,7 @@ export class AuthenticationService {
         const invitedUser = await this.userService.findInvitationForEmail(createUserDto.email);
         if (invitedUser) {
           isUserInvited = true;
-          // TODO: We need to deactivate the invitation here
+          await this.userService.acceptInvite(invitedUser.id as string);
         }
 
         const hashedPassword = await this.hashData(createUserDto.password);
