@@ -53,6 +53,10 @@ export class UserService {
         return user.family;
     }
 
+    async findAllInvitesForFamily(familyId: string) {
+        return this.userInviteRepo.find({where: {family: {id: familyId}, activeInd: true}});
+    }
+
     async inviteUser(userInviteDto: UserInviteDto): Promise<GenericResponseModel> {
         // check if user exists
         const invitedUser = await this.findByEmail(userInviteDto.email);
@@ -60,11 +64,6 @@ export class UserService {
 
         // if found
         if (invitedUser) {
-            // check if user in family
-            // TODO: add new functionality
-            // if (invitedUser?.family?.id === user?.family?.id) {
-            //     return null; // error
-            // }
             return { success: false, message: ErrorConstants.USER_CANNOT_BE_INVITED, code: 400 };
         }
 
