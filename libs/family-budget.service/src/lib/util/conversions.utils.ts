@@ -8,4 +8,8 @@ export class ConversionUtils {
     public static convertFormatUSDToNumber(value: string): number {
         return Number(value.replace(/[^0-9.-]+/g,""));
     }
+
+    public static convertFormatNumberToUSD(value: number): string {
+        return value.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+    }
 }
