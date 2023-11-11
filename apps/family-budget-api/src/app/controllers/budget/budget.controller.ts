@@ -32,7 +32,8 @@ export class BudgetController {
             const expenseBudgetAmount = data.budget.budgetCategories.filter(o => o.category.type == 1).reduce((total, category) => {
                 return total + category.amount;
             }, 0);
-            const percentageSpent = expenseBudgetAmount > 0 ? totalExpenses / expenseBudgetAmount: 0;
+            // const percentageSpent = expenseBudgetAmount > 0 ? totalExpenses / expenseBudgetAmount: 0;
+            const percentageSpent = leftSpendingAmount.totalBudget > 0 ? leftSpendingAmount.totalSpent / leftSpendingAmount.totalBudget: 0;
             leftSpendingAmounts.push({
                 accountId: data.account.id,
                 accountName: data.account.name,
@@ -41,8 +42,8 @@ export class BudgetController {
                 leftSpendingAmount: leftSpendingAmount.whatsLeft.toString(),
                 leftSpendingDays: daysLeft,
                 percentageSpent: percentageSpent,
-                totalSpent: totalExpenses.toString(),
-                totalBudget: expenseBudgetAmount.toString()
+                totalSpent: leftSpendingAmount.totalSpent.toString(),
+                totalBudget: leftSpendingAmount.totalBudget.toString(),
             })
         }));
 

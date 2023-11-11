@@ -31,8 +31,7 @@ export class AuthenticationService {
         const newUser = await this.userService.create({
             ...createUserDto,
             password: hashedPassword,
-        }, isUserInvited) as User;
-
+        }, invitedUser) as User;
         const tokens = await this.getTokens(newUser.id || '', newUser.email);
         await this.updateRefreshToken(newUser.id || '', tokens.refreshToken);
         return tokens;

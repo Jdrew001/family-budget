@@ -13,7 +13,7 @@ export class UserService {
         private readonly familyService: FamilyService
     ) {}
 
-    async create(createUserDto: CreateUserDto, invitedUser?: boolean) {
+    async create(createUserDto: CreateUserDto, userInvite?: UserInvite) {
         const user = new User();
         user.email = createUserDto.email;
         user.firstname = createUserDto.firstname;
@@ -22,8 +22,8 @@ export class UserService {
         user.confirmed = false;
         user.password = createUserDto.password;
         user.locked = false;
-        user.family = await this.familyService.createFamily();
-        user.onboarded = invitedUser; // if the user has been invited, then we want to skip the onboarding process
+        user.family = userInvite ? userInvite?.family: await this.familyService.createFamily();
+        user.onboarded = !!userInvite; // if the user has been invited, then we want to skip the onboarding process
         return this.userRepository.save(user)
     }
 
@@ -87,7 +87,7 @@ export class UserService {
     }
 
     async findInvitationForEmail(email: string): Promise<UserInvite> {
-        return await this.userInviteRepo.findOne({where: {email: email}}) as UserInvite;
+        return await this.userInviteRepo.findOne({where: {email: email}, relations: ['family']}) as UserInvite;
     }
 
     async acceptInvite(id: string): Promise<any> {

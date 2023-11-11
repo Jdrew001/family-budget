@@ -5,6 +5,7 @@ import { BalanceService } from '../balance/balance.service';
 import { DateUtils } from '../util/date-util';
 import { UserService } from '../user/user.service';
 import { BudgetService } from '../budget/budget.service';
+import { ConversionUtils } from '../util/conversions.utils';
 
 @Injectable()
 export class AccountService {
@@ -31,7 +32,7 @@ export class AccountService {
         }
 
         const balance = new Balance();
-        balance.amount = 0;
+        balance.amount = ConversionUtils.convertFormatUSDToNumber(nAccount.beginningBalance);
         balance.dateTime = new Date();
 
         account.balance = balance;
