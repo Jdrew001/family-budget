@@ -1,4 +1,4 @@
-import { GenericResponseModel, UserInviteDto } from '@family-budget/family-budget.model';
+import { GenericResponseModel, User, UserInviteDto } from '@family-budget/family-budget.model';
 import { FamilyService, UserService } from '@family-budget/family-budget.service';
 import { BadRequestException, Controller, ForbiddenException, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
@@ -66,6 +66,12 @@ export class FamilyController {
         } else {
             return new GenericResponseModel(true, '', 200)
         }
+    }
+
+    private checkIfUserInvitedWithFamily(user: User) {
+        // TODO: We want to check if the user has been invited to a new family while they are in a family.
+        // The user can move if they want to, and if they are the owner of a the old family.. 
+        // We want to mark that family as inactive while keeper the owner data
     }
 
     // this should get called when the user wants to create a new family after they have been in a family before 

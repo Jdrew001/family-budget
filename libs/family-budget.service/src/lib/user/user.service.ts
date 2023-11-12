@@ -65,13 +65,7 @@ export class UserService {
 
     async inviteUser(userInviteDto: UserInviteDto): Promise<GenericResponseModel> {
         // check if user exists
-        const invitedUser = await this.findByEmail(userInviteDto.email);
         const user = await this.findById(userInviteDto.userId);
-
-        // if found
-        if (invitedUser) {
-            return new GenericResponseModel(false, ErrorConstants.USER_CANNOT_BE_INVITED, 400);
-        }
 
         // check if user is already invited
         const userInvite = await this.userInviteRepo.findOne({where: {email: userInviteDto.email}});
