@@ -10,3 +10,8 @@ export interface UserInfoDto {
     invitedUsers?: Array<{id?: string, email: string}>;
     displayValues?: Array<{id?: string, label: string, email: string, invitePending: boolean}>;
 }
+
+export interface UserFamily {
+    id: string;
+    displayValues?: Array<{id?: string, label: string, email: string, invitePending: boolean}>;
+}

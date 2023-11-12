@@ -24,7 +24,7 @@ export class AuthenticationService {
         const invitedUser = await this.userService.findInvitationForEmail(createUserDto.email);
         if (invitedUser) {
           isUserInvited = true;
-          await this.userService.acceptInvite(invitedUser.id as string);
+          await this.userService.markInactive(invitedUser.id as string);
         }
 
         const hashedPassword = await this.hashData(createUserDto.password);

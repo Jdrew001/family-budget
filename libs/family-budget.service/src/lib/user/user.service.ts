@@ -65,13 +65,13 @@ export class UserService {
 
         // if found
         if (invitedUser) {
-            return { success: false, message: ErrorConstants.USER_CANNOT_BE_INVITED, code: 400 };
+            return new GenericResponseModel(false, ErrorConstants.USER_CANNOT_BE_INVITED, 400);
         }
 
         // check if user is already invited
         const userInvite = await this.userInviteRepo.findOne({where: {email: userInviteDto.email}});
-        if (userInvite) {
-            return { success: false, message: ErrorConstants.USER_ALREADY_INVITED, code: 400 };
+        if (userInvite && userInvite.activeInd) {
+            return new GenericResponseModel(false, ErrorConstants.USER_ALREADY_INVITED, 400)
         }
 
         // create invite
@@ -79,19 +79,30 @@ export class UserService {
         newUserInvite.email = userInviteDto.email;
         newUserInvite.family = user.family;
         newUserInvite.updateBy = user;
-        return { 
-            success: true,
-            code: 200, 
-            data: this.userInviteRepo.save(newUserInvite)
-        };
+        return new GenericResponseModel(true, '', 200, await this.userInviteRepo.save(newUserInvite));
+    }
+
+    async removeInvite(userInviteDto: UserInviteDto): Promise<GenericResponseModel> {
+        const userInvite = await this.userInviteRepo.findOne({where: {email: userInviteDto.email}});
+        if (!userInvite) {
+            return new GenericResponseModel(false, ErrorConstants.USER_NOT_INVITED, 400);
+        }
+
+        const invite = this.deleteInvite(userInvite.id as string);
+        return new GenericResponseModel(true, '', 200, invite)
     }
 
     async findInvitationForEmail(email: string): Promise<UserInvite> {
         return await this.userInviteRepo.findOne({where: {email: email}, relations: ['family']}) as UserInvite;
     }
 
-    async acceptInvite(id: string): Promise<any> {
+    async markInactive(id: string): Promise<any> {
         const invite = await this.userInviteRepo.update(id, {activeInd: false});
+        return invite;
+    }
+
+    async deleteInvite(id: string) {
+        const invite = await this.userInviteRepo.delete(id);
         return invite;
     }
 }

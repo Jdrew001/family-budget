@@ -17,6 +17,33 @@ export class UserController {
         if (!userId) throw new ForbiddenException('User not found');
         const user = await this.userService.findById(userId);
         if (!user) throw new BadRequestException('User not found');
+        return {
+            id: user.id,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            email: user.email,
+            family: {
+                id: user.family.id,
+                users: user.family.users.map(user => {
+                    return {
+                        id: user.id,
+                        firstname: user.firstname,
+                        lastname: user.lastname,
+                        email: user.email,
+                    }
+                })
+            }
+        }
+    }
+
+    @Get('getFamilyMembers')
+    async getFamilyMembers(@Req() req) {
+        const userId = req.user['sub'];
+        if (!userId) throw new ForbiddenException('User not found');
+
+        const user = await this.userService.findById(userId);
+        if (!user) throw new BadRequestException('User not found');
+
         const invitedUsersForFamily = await this.userService.findAllInvitesForFamily(user.family.id);
         const familyMembers = user.family.users.map(user => {
             return {
@@ -35,35 +62,23 @@ export class UserController {
             }
         })
         const displayValues = [...familyMembers, ...invitedFamilyMembers];
-        return {
-            id: user.id,
-            firstname: user.firstname,
-            lastname: user.lastname,
-            email: user.email,
-            family: {
-                id: user.family.id,
-                users: user.family.users.map(user => {
-                    return {
-                        id: user.id,
-                        firstname: user.firstname,
-                        lastname: user.lastname,
-                        email: user.email,
-                    }
-                })
-            },
-            invitedUsers: invitedUsersForFamily,
-            displayValues: displayValues
-        }
+        return displayValues;
     }
 
-    @Post('inviteUser')
-    async inviteUser(@Req() req): Promise<GenericResponseModel> {
+    @Post('manageInviteUser')
+    async manageInviteUser(@Req() req): Promise<GenericResponseModel> {
         const userId = req.user['sub'];
         if (!userId) throw new ForbiddenException('User not found');
 
         const userInviteDto = req.body as UserInviteDto;
         userInviteDto.userId = userId;
-        
-        return await this.userService.inviteUser(userInviteDto);
+
+        if (!userInviteDto.action) throw new BadRequestException('Invalid action');
+
+        if (userInviteDto.action === 'INVITE') {
+            return await this.userService.inviteUser(userInviteDto);
+        } else {
+            return await this.userService.removeInvite(userInviteDto);
+        }
     }
 }

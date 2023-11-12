@@ -1,6 +1,15 @@
-export interface GenericResponseModel {
-    message?: string;
-    success: boolean;
-    code?: number;
-    data?: any;
+export class GenericResponseModel {
+    private message?: string;
+    private success: boolean;
+    private code?: number;
+    private data?: any;
+
+
+    // constructor
+    constructor(success: boolean, message?: string, code?: number, data?: any) {
+        this.success = success;
+        this.message = message;
+        this.code = code;
+        this.data = data;
+    }
 }
