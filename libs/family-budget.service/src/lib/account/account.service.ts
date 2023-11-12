@@ -71,14 +71,6 @@ export class AccountService {
         return await this.accountRepository.delete({ id: accountId });
     }
 
-    // async updateAccountBalance(accountId: string, amount: number) {
-    //     const account = await this.getAccountById(accountId);
-    //     // account.balance = await this.balanceService.createBalance(account, amount);
-    //     account.balance = await this.balanceService.updateBalance(account.balance, amount);
-
-    //     return account;
-    // }
-
     async getAccountsUserUser(userId: string) {
         // using the userId, get the family id and get all accounts for that family;
         const user = await this.userService.findById(userId) as User;
