@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinTable } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinTable, OneToOne } from 'typeorm';
 import { User } from './user.model';
 import { Account } from './account.model';
 import { Category } from './category.model';
@@ -12,6 +12,10 @@ export class Family {
 
     @OneToMany(() => User, (user) => user.family)
     users: Array<User>;
+
+    @OneToOne(() => User, (user) => user.family)
+    @Column({name: 'user_id'})
+    owner: string;
 
     @OneToMany(() => Account, (account) => account.family, {
         cascade: true

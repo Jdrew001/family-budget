@@ -39,6 +39,9 @@ export class User {
     @Column()
     confirmed: boolean;
 
+    @Column({default: true})
+    activeInd?: boolean;
+
     @Column({nullable: true})
     refreshToken: string;
 

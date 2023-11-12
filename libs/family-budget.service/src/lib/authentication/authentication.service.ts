@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { CreateUserDto, LoginUserDto, User } from '@family-budget/family-budget.model';
 import * as argon2 from 'argon2';
+import { FamilyService } from '../family/family.service';
 
 @Injectable()
 export class AuthenticationService {
@@ -11,7 +12,8 @@ export class AuthenticationService {
     constructor(
         private userService: UserService,
         private jwtService: JwtService,
-        private configService: ConfigService
+        private configService: ConfigService,
+        private familyService: FamilyService
     ) {}
 
     async signUp(createUserDto: CreateUserDto) {
@@ -32,6 +34,11 @@ export class AuthenticationService {
             ...createUserDto,
             password: hashedPassword,
         }, invitedUser) as User;
+
+        if (newUser.family) {
+          await this.familyService.addFamilyOwner(newUser.family.id, newUser.id as string);
+        }
+
         const tokens = await this.getTokens(newUser.id || '', newUser.email);
         await this.updateRefreshToken(newUser.id || '', tokens.refreshToken);
         return tokens;
@@ -41,12 +48,10 @@ export class AuthenticationService {
         const user = await this.userService.findByEmail(loginDto.email);
         if (!user) throw new BadRequestException('Invalid credentials');
         const passwordMatches = await argon2.verify(user.password, loginDto.password);
-
         if (!passwordMatches) throw new BadRequestException('Invalid credentials');
-
         const tokens = await this.getTokens(user.id || '', user.email);
         await this.updateRefreshToken(user.id || '', tokens.refreshToken);
-        return tokens;
+        return {tokens: tokens, user: user};
     }
 
     async refreshTokens(userId: string, refreshToken: string) {

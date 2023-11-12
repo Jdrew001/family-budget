@@ -16,7 +16,8 @@ import { RefreshTokenGuard } from './guards/refresh-token.guard';
 import { TransactionController } from './controllers/transaction/transaction.controller';
 import { CategoryController } from './controllers/category/category.controller';
 import { BudgetController } from './controllers/budget/budget.controller';
-import { ReferenceController } from './controllers/reference/reference.controller';
+import { ReferenceController } from './controllers/reference/reference.controller'; 
+import { FamilyController } from './controllers/family/family.controller';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ReferenceController } from './controllers/reference/reference.controlle
     CategoryController,
     BudgetController,
     ReferenceController,
+    FamilyController,
   ],
   providers: [AppService, AccessTokenGuard, RefreshTokenGuard],
 })

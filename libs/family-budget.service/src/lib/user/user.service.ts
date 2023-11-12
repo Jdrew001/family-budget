@@ -1,4 +1,4 @@
-import { CreateUserDto, GenericResponse, GenericResponseModel, UpdateUserDto, User, UserInvite, UserInviteDto } from '@family-budget/family-budget.model';
+import { CreateUserDto, Family, GenericResponse, GenericResponseModel, UpdateUserDto, User, UserInvite, UserInviteDto } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { FamilyService } from '../family/family.service';
@@ -47,6 +47,11 @@ export class UserService {
             ...updateUserDto
         };
         return await this.userRepository.update(id, userToUpdate);
+    }
+
+    async updateUserFamily(user: User, family: Family) {
+        user.family = family;
+        return await this.userRepository.save(user);
     }
 
     async findFamilyForUser(userId: string) {
@@ -104,5 +109,28 @@ export class UserService {
     async deleteInvite(id: string) {
         const invite = await this.userInviteRepo.delete(id);
         return invite;
+    }
+
+    async removeFamilyMember(data: UserInviteDto) {
+        if (!data.email) return new GenericResponseModel(false, ErrorConstants.USER_NOT_FOUND, 400);
+        if (!data.familyId) return new GenericResponseModel(false, ErrorConstants.FAMILY_NOT_FOUND, 400);
+
+        const user = await this.findByEmail(data.email) as User;
+
+        if (!user) return new GenericResponseModel(false, ErrorConstants.USER_NOT_FOUND, 400);
+        (user.family as any) = null;
+        user.activeInd = false;
+
+        let result = await this.userRepository.save(user);
+        return new GenericResponseModel(true, '', 200, result);
+    }
+
+    async checkFamilyStatus(user: User) {
+        if (!user.family) {
+            const family = await this.familyService.createFamily();
+            user.family = family;
+            user.activeInd = true;
+            await this.userRepository.save(user);
+        }
     }
 }

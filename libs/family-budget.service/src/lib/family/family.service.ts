@@ -10,7 +10,11 @@ export class FamilyService {
         @Inject('FamilyRepository') private readonly familyRepository: Repository<Family>,
     ) {}
 
-    async createFamily() {
-        return await this.familyRepository.create();
+    async createFamily(id?: string) {
+        return await this.familyRepository.create({ owner: id });
+    }
+
+    addFamilyOwner(familyId: string, userId: string) {
+        return this.familyRepository.update(familyId, { owner: userId });
     }
 }
