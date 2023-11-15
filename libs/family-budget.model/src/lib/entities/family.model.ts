@@ -10,6 +10,9 @@ export class Family {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
+    @Column()
+    activeInd: boolean;
+
     @OneToMany(() => User, (user) => user.family)
     users: Array<User>;
 

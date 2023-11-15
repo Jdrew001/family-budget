@@ -52,6 +52,43 @@ export class FamilyController {
         return displayValues;
     }
 
+    @Get('confirmFamilySwitch/:familyId')
+    async confirmFamilySwitch(@Req() req) {
+        const userId = req.user['sub'];
+        if (!userId) throw new ForbiddenException('User not found');
+        const user = await this.userService.findById(userId);
+        const userFamily = user.family;
+        if (!user) throw new BadRequestException('User not found');
+
+        //get param
+        const familyId = req.params.familyId;
+        if (!familyId) throw new BadRequestException('Invalid Family Id');
+
+        // get the family
+        const family = await this.familyService.findById(familyId);
+        if (!family) throw new BadRequestException('Family not found');
+
+        // check if user is already in the family and is owner
+        if (userFamily && userFamily.owner === userId) {
+            // mark family inactive
+            await this.familyService.markFamilyInactive(userFamily);
+
+            // update user with new family
+            const newFamily = await this.userService.updateUserFamily(user, family);
+            return new GenericResponseModel(true, 'Family Switched', 200, { familyId: newFamily.id });
+        }
+
+        // check if user is already in the family and is not owner
+        if (userFamily && userFamily.owner !== userId) {
+
+            // update user with new family
+            const newFamily = await this.userService.updateUserFamily(user, family);
+            return new GenericResponseModel(true, 'Family Switched', 200, { familyId: newFamily.id });
+        }
+
+        throw new BadRequestException('User not in family');
+    }
+
     @Get('checkFamilyStatus')
     async checkFamilyStatus(@Req() req): Promise<GenericResponseModel<FamilyStatusDto>> {
         const userId = req.user['sub'];
@@ -85,6 +122,34 @@ export class FamilyController {
         }
     
         return new GenericResponseModel(true, 'No Changes Needed', 200, { familyId: user.family.id, showPopup: false });
+    }
+
+    @Get('leaveFamily')
+    async leaveFamily(@Req() req) {
+        const userId = req.user['sub'];
+        if (!userId) throw new ForbiddenException('User not found');
+        const user = await this.userService.findById(userId);
+        if (!user) throw new BadRequestException('User not found');
+
+        // check if user is owner of family
+        if (user.family.owner === userId) {
+            throw new BadRequestException('Owner cannot leave family');
+        }
+
+        // check if the user is an owner of any families
+        const ownedFamily = await this.familyService.isUserOwnerOfAnyFamily(user.id);
+        if (!ownedFamily) {
+            // create new family for user
+            const family = await this.familyService.createFamily(userId);
+            await this.userService.updateUserFamily(user, family);
+            return new GenericResponseModel(true, 'Family Created for new User', 200, { familyId: family.id });
+        }
+
+        await this.userService.updateUserFamily(user, ownedFamily);
+
+        // mark family active
+        const nFamily = await this.familyService.markFamilyActive(ownedFamily);
+        return new GenericResponseModel(true, 'User removed from family and added to new', 200, { familyId: nFamily.id });
     }
 
     // this should get called when the user wants to create a new family after they have been in a family before 

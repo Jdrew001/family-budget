@@ -27,4 +27,23 @@ export class FamilyService {
     addFamilyOwner(familyId: string, userId: string) {
         return this.familyRepository.update(familyId, { owner: userId });
     }
+
+    async findById(id: string): Promise<Family> {
+        return await this.familyRepository.findOne({ where: { id: id }}) as Family;
+    }
+
+    async markFamilyActive(family: Family) {
+        family.activeInd = true;
+        return await this.familyRepository.save(family);
+    }
+
+    async markFamilyInactive(family: Family) {
+        family.activeInd = false;
+        return await this.familyRepository.save(family);
+    }
+
+    async isUserOwnerOfAnyFamily(userId: string) {
+        const family = await this.familyRepository.findOne({ where: { owner: userId }});
+        return family;
+    }
 }

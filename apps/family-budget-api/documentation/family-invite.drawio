@@ -1,4 +1,4 @@
-<mxfile host="Electron" modified="2023-11-14T21:42:17.462Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.0.3 Chrome/114.0.5735.289 Electron/25.8.4 Safari/537.36" etag="07Gz-pTukRiXl0ki-hqs" version="22.0.3" type="device">
+<mxfile host="Electron" modified="2023-11-15T01:22:12.305Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.0.3 Chrome/114.0.5735.289 Electron/25.8.4 Safari/537.36" etag="r8Fov-7CRJ5sO94pRwm1" version="22.0.3" type="device">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
     <mxGraphModel dx="1674" dy="954" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -172,6 +172,9 @@
         </mxCell>
         <mxCell id="dd1Xcp6RzstKpq6wdoQb-71" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="dd1Xcp6RzstKpq6wdoQb-57" target="dd1Xcp6RzstKpq6wdoQb-54">
           <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dd1Xcp6RzstKpq6wdoQb-72" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Documentation of Invitation Logic&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="320" y="80" width="320" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
