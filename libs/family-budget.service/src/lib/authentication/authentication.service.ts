@@ -23,21 +23,11 @@ export class AuthenticationService {
             throw new BadRequestException('User already exists');
         }
 
-        const invitedUser = await this.userService.findInvitationForEmail(createUserDto.email);
-        if (invitedUser) {
-          isUserInvited = true;
-          await this.userService.markInactive(invitedUser.id as string);
-        }
-
         const hashedPassword = await this.hashData(createUserDto.password);
         const newUser = await this.userService.create({
             ...createUserDto,
             password: hashedPassword,
-        }, invitedUser) as User;
-
-        if (newUser.family) {
-          await this.familyService.addFamilyOwner(newUser.family.id, newUser.id as string);
-        }
+        }) as User;
 
         const tokens = await this.getTokens(newUser.id || '', newUser.email);
         await this.updateRefreshToken(newUser.id || '', tokens.refreshToken);

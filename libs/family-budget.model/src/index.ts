@@ -35,3 +35,4 @@ export * from './lib/dto/reference/account-type-ref.model';
 export * from './lib/entities/user-invite.model';
 export * from './lib/dto/user/invite-user.model';
 export * from './lib/dto/response/generic-response.model';
+export * from './lib/dto/family/family-status.model';

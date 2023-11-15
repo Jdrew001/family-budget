@@ -1,8 +1,8 @@
-export class GenericResponseModel {
+export class GenericResponseModel<T> {
     private message?: string;
     private success: boolean;
     private code?: number;
-    private data?: any;
+    private data?: T;
 
 
     // constructor

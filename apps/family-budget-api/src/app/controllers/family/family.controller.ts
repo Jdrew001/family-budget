@@ -1,4 +1,4 @@
-import { GenericResponseModel, User, UserInviteDto } from '@family-budget/family-budget.model';
+import { FamilyStatusDto, GenericResponseModel, User, UserInviteDto } from '@family-budget/family-budget.model';
 import { FamilyService, UserService } from '@family-budget/family-budget.service';
 import { BadRequestException, Controller, ForbiddenException, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
@@ -53,31 +53,44 @@ export class FamilyController {
     }
 
     @Get('checkFamilyStatus')
-    async checkFamilyStatus(@Req() req): Promise<GenericResponseModel> {
+    async checkFamilyStatus(@Req() req): Promise<GenericResponseModel<FamilyStatusDto>> {
         const userId = req.user['sub'];
         if (!userId) throw new ForbiddenException('User not found');
 
         const user = await this.userService.findById(userId);
         if (!user) throw new BadRequestException('User not found');
 
-        // user needs to be prompted to create a new family
-        if (!user.family) {
-            return new GenericResponseModel(false, '', 200)
-        } else {
-            return new GenericResponseModel(true, '', 200)
-        }
-    }
+        const invitation = await this.userService.findInvitationForEmail(user.email);
+        const userInFamily = !!user.family;
 
-    private checkIfUserInvitedWithFamily(user: User) {
-        // TODO: We want to check if the user has been invited to a new family while they are in a family.
-        // The user can move if they want to, and if they are the owner of a the old family.. 
-        // We want to mark that family as inactive while keeper the owner data
+        if (!invitation && !userInFamily) {
+            // create new family for user
+            const family = await this.familyService.createFamily(userId);
+            await this.userService.updateUserFamily(user, family);
+            return new GenericResponseModel(true, 'Family Created for new User', 200, { familyId: family.id, showPopup: false  });
+        }
+
+        // if they have been invited and they have not been in a family, add them to the family they are invited to
+        if (invitation && !userInFamily) {
+            // add them to the family they are invited to
+            const family = await this.familyService.addFamilyMember(invitation.family.id, user);
+            await this.userService.markUserOnboarded(user);
+            return new GenericResponseModel(true, 'User added to family', 200, { familyId: family.id, showPopup: false });
+        }
+
+        // if user has been invited and they are currently in a family, ask them if they want to join the new family
+        if (invitation && userInFamily) { 
+            const user = await this.userService.findById(invitation.family.owner);
+            return new GenericResponseModel(true, `Would you like to join ${user?.firstname} ${user?.lastname}'s Family?`, 200, { familyId: invitation.family.id, showPopup: true });
+        }
+    
+        return new GenericResponseModel(true, 'No Changes Needed', 200, { familyId: user.family.id, showPopup: false });
     }
 
     // this should get called when the user wants to create a new family after they have been in a family before 
     // --> they have activated their account after being removed from previous family
     @Get('createNewFamily')
-    async createNewFamily(@Req() req): Promise<GenericResponseModel> {
+    async createNewFamily(@Req() req): Promise<GenericResponseModel<{familyId: string}>> {
         const userId = req.user['sub'];
         if (!userId) throw new ForbiddenException('User not found');
         const user = await this.userService.findById(userId);
@@ -85,12 +98,12 @@ export class FamilyController {
         let result = await this.familyService.createFamily(user.id);
 
         // update the user with the new family
-        await this.userService.updateUserFamily(user, result);
-        return new GenericResponseModel(true, '', 200, result);
+        const family = await this.userService.updateUserFamily(user, result);
+        return new GenericResponseModel(true, '', 200, { familyId: family.id });
     }
 
     @Post('manageInviteUser')
-    async manageInviteUser(@Req() req): Promise<GenericResponseModel> {
+    async manageInviteUser(@Req() req): Promise<GenericResponseModel<any>> {
         const userId = req.user['sub'];
         if (!userId) throw new ForbiddenException('User not found');
 
@@ -107,7 +120,7 @@ export class FamilyController {
     }
 
     @Post('removeFamilyMember')
-    async removeFamilyMember(@Req() req): Promise<GenericResponseModel> {
+    async removeFamilyMember(@Req() req): Promise<GenericResponseModel<any>> {
         const userId = req.user['sub'];
         if (!userId) throw new ForbiddenException('User not found');
 

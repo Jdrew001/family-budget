@@ -13,7 +13,7 @@ export class UserService {
         private readonly familyService: FamilyService
     ) {}
 
-    async create(createUserDto: CreateUserDto, userInvite?: UserInvite) {
+    async create(createUserDto: CreateUserDto) {
         const user = new User();
         user.email = createUserDto.email;
         user.firstname = createUserDto.firstname;
@@ -22,8 +22,7 @@ export class UserService {
         user.confirmed = false;
         user.password = createUserDto.password;
         user.locked = false;
-        user.family = userInvite ? userInvite?.family: await this.familyService.createFamily();
-        user.onboarded = !!userInvite; // if the user has been invited, then we want to skip the onboarding process
+        user.onboarded = false; // if the user has been invited, then we want to skip the onboarding process
         return this.userRepository.save(user)
     }
 
@@ -54,6 +53,11 @@ export class UserService {
         return await this.userRepository.save(user);
     }
 
+    async markUserOnboarded(user: User) {
+        user.onboarded = true;
+        await this.userRepository.save(user);
+    }
+
     async findFamilyForUser(userId: string) {
         const user = await this.findById(userId);
         return user.family;
@@ -63,7 +67,7 @@ export class UserService {
         return this.userInviteRepo.find({where: {family: {id: familyId}, activeInd: true}});
     }
 
-    async inviteUser(userInviteDto: UserInviteDto): Promise<GenericResponseModel> {
+    async inviteUser(userInviteDto: UserInviteDto): Promise<GenericResponseModel<any>> {
         // check if user exists
         const user = await this.findById(userInviteDto.userId);
 
@@ -81,7 +85,7 @@ export class UserService {
         return new GenericResponseModel(true, '', 200, await this.userInviteRepo.save(newUserInvite));
     }
 
-    async removeInvite(userInviteDto: UserInviteDto): Promise<GenericResponseModel> {
+    async removeInvite(userInviteDto: UserInviteDto): Promise<GenericResponseModel<any>> {
         const userInvite = await this.userInviteRepo.findOne({where: {email: userInviteDto.email}});
         if (!userInvite) {
             return new GenericResponseModel(false, ErrorConstants.USER_NOT_INVITED, 400);
@@ -92,7 +96,7 @@ export class UserService {
     }
 
     async findInvitationForEmail(email: string): Promise<UserInvite> {
-        return await this.userInviteRepo.findOne({where: {email: email}, relations: ['family']}) as UserInvite;
+        return await this.userInviteRepo.findOne({where: {email: email, activeInd: true}, relations: ['family']}) as UserInvite;
     }
 
     async markInactive(id: string): Promise<any> {
