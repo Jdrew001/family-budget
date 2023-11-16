@@ -1,7 +1,7 @@
 export interface UserInviteDto {
     email: string;
     familyId: string;
-    action: InviteAction;
+    action?: InviteAction;
     userId: string;
 }
 

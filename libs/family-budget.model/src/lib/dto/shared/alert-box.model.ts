@@ -6,6 +6,8 @@ export class AlertBoxDto {
     canDismiss?: boolean;
     type?: AlertType;
     dialogType: AlertDialogType;
+    key: string;
+    data: any;
 }
 
 export enum AlertDialogType {

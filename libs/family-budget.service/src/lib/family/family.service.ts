@@ -15,7 +15,7 @@ export class FamilyService {
     }
 
     async addFamilyMember(familyId: string, user: User) {
-        const family = await this.familyRepository.findOne({ where: { id: familyId }});
+        const family = await this.familyRepository.findOne({ where: { id: familyId }, relations: ['users']});
         if (family) {
             family.users.push(user);
             return this.familyRepository.save(family);

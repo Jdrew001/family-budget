@@ -2,6 +2,7 @@ import { AlertBoxDto, AlertDialogType, AlertType, FamilyStatusDto, GenericRespon
 import { BadRequestException, Controller, ForbiddenException, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
 import { FamilyService, UserService } from '@family-budget/family-budget.service';
+import { AlertKeyConstants } from '../../constants/alert-key.constant';
 
 @UseGuards(AccessTokenGuard)
 @Controller('family')
@@ -59,6 +60,8 @@ export class FamilyController {
         const user = await this.userService.findById(userId);
         const userFamily = user.family;
         if (!user) throw new BadRequestException('User not found');
+        
+        const invitation = await this.userService.findInvitationForEmail(user.email);
 
         //get param
         const familyId = req.params.familyId;
@@ -67,6 +70,11 @@ export class FamilyController {
         // get the family
         const family = await this.familyService.findById(familyId);
         if (!family) throw new BadRequestException('Family not found');
+
+        if (invitation) {
+            // remove the invitation
+            await this.userService.markInactive(invitation.id);
+        }
 
         // check if user is already in the family and is owner
         if (userFamily && userFamily.owner === userId) {
@@ -111,8 +119,9 @@ export class FamilyController {
         if (invitation && !userInFamily) {
             // add them to the family they are invited to
             const family = await this.familyService.addFamilyMember(invitation.family.id, user);
+            await this.userService.updateUserFamily(user, family);
             await this.userService.markUserOnboarded(user);
-            
+            await this.userService.markInactive(invitation.id);
             return new GenericResponseModel(true, 'User added to family', 200, { familyId: family.id, dialogConfig: null });
         }
 
@@ -126,6 +135,8 @@ export class FamilyController {
             alertBoxDto.dialogType = AlertDialogType.CONFIRM;
             alertBoxDto.type = AlertType.INFO;
             alertBoxDto.canDismiss = false;
+            alertBoxDto.key = AlertKeyConstants.FAMILY_SWITCH_CONFIRMATION;
+            alertBoxDto.data = { familyId: invitation.family.id };
             return new GenericResponseModel(true, ``, 200, { familyId: invitation.family.id, dialogConfig: alertBoxDto });
         }
     
