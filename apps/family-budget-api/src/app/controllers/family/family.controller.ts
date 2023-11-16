@@ -1,7 +1,7 @@
-import { FamilyStatusDto, GenericResponseModel, User, UserInviteDto } from '@family-budget/family-budget.model';
-import { FamilyService, UserService } from '@family-budget/family-budget.service';
+import { AlertBoxDto, AlertDialogType, AlertType, FamilyStatusDto, GenericResponseModel, User, UserInviteDto } from '@family-budget/family-budget.model';
 import { BadRequestException, Controller, ForbiddenException, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
+import { FamilyService, UserService } from '@family-budget/family-budget.service';
 
 @UseGuards(AccessTokenGuard)
 @Controller('family')
@@ -104,7 +104,7 @@ export class FamilyController {
             // create new family for user
             const family = await this.familyService.createFamily(userId);
             await this.userService.updateUserFamily(user, family);
-            return new GenericResponseModel(true, 'Family Created for new User', 200, { familyId: family.id, showPopup: false  });
+            return new GenericResponseModel(true, 'Family Created for new User', 200, { familyId: family.id, dialogConfig: null  });
         }
 
         // if they have been invited and they have not been in a family, add them to the family they are invited to
@@ -112,16 +112,24 @@ export class FamilyController {
             // add them to the family they are invited to
             const family = await this.familyService.addFamilyMember(invitation.family.id, user);
             await this.userService.markUserOnboarded(user);
-            return new GenericResponseModel(true, 'User added to family', 200, { familyId: family.id, showPopup: false });
+            
+            return new GenericResponseModel(true, 'User added to family', 200, { familyId: family.id, dialogConfig: null });
         }
 
         // if user has been invited and they are currently in a family, ask them if they want to join the new family
         if (invitation && userInFamily) { 
-            const user = await this.userService.findById(invitation.family.owner);
-            return new GenericResponseModel(true, `Would you like to join ${user?.firstname} ${user?.lastname}'s Family?`, 200, { familyId: invitation.family.id, showPopup: true });
+            const alertBoxDto = new AlertBoxDto();
+            alertBoxDto.title = 'Pending Invite';
+            alertBoxDto.message = `You have been invited to join another family. Would you like to join ${user?.firstname} ${user?.lastname}'s Family?`;
+            alertBoxDto.cancelText = 'No';
+            alertBoxDto.confirmText = 'Yes';
+            alertBoxDto.dialogType = AlertDialogType.CONFIRM;
+            alertBoxDto.type = AlertType.INFO;
+            alertBoxDto.canDismiss = false;
+            return new GenericResponseModel(true, ``, 200, { familyId: invitation.family.id, dialogConfig: alertBoxDto });
         }
     
-        return new GenericResponseModel(true, 'No Changes Needed', 200, { familyId: user.family.id, showPopup: false });
+        return new GenericResponseModel(true, 'No Changes Needed', 200, { familyId: user.family.id, dialogConfig: null });
     }
 
     @Get('leaveFamily')
