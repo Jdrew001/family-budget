@@ -26,8 +26,7 @@ export class BudgetController {
 
         await Promise.all(budgets.map(async data => {
             const endDate = new Date(data.budget.endDate);
-            const timeDiff = endDate.getTime() - new Date().getTime();
-            const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            const daysLeft = DateUtils.daysLeftCalculation(endDate);
             const leftSpendingAmount = await this.budgetService.getWhatsLeftToSpend(data.account, data.budget)
             const percentageSpent = leftSpendingAmount.totalBudget > 0 ? leftSpendingAmount.totalSpent / leftSpendingAmount.totalBudget: 0;
             leftSpendingAmounts.push({
@@ -52,8 +51,7 @@ export class BudgetController {
         const budget = await this.budgetService.getBudgetById(budgetId);
         const totalExpenses = (await this.budgetService.getTotalIncomeExpenseForBudget(budget.account, budget)).totalExpense;
         const endDate = new Date(budget.endDate);
-        const timeDiff = endDate.getTime() - new Date().getTime();
-        const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+        const daysLeft = DateUtils.daysLeftCalculation(endDate);
         const leftSpendingAmount = await this.budgetService.getWhatsLeftToSpend(budget.account, budget)
         const expenseBudgetAmount = budget.budgetCategories.filter(o => o.category.type == 1).reduce((total, category) => {
             return total + category.amount;
