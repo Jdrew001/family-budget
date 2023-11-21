@@ -1,6 +1,7 @@
 import { CategoryType } from "../../entities/category.model";
 
 export interface CreateCategoryDto {
-    name: string;
-    type: CategoryType;
+    categoryName: string;
+    categoryType: CategoryType;
+    categoryIcon: string;
 }

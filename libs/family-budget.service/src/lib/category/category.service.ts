@@ -26,8 +26,9 @@ export class CategoryService {
         
         await categories.forEach(async category => {
             const newCategory = this.categoryRepository.create({
-                name: category.name,
-                type: category.type,
+                name: category.categoryName,
+                type: category.categoryType,
+                icon: category.categoryIcon,
                 family: user.family
             });
             await this.categoryRepository.save(newCategory);
