@@ -5,3 +5,10 @@ export interface CreateCategoryDto {
     categoryType: CategoryType;
     categoryIcon: string;
 }
+
+export class CreateCategoryDto {
+    id: string;
+    categoryName: string;
+    categoryType: CategoryType;
+    icon: string;
+}

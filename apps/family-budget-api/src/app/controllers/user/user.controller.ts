@@ -35,4 +35,14 @@ export class UserController {
             }
         }
     }
+
+    @Get('checkRegistrationStatus')
+    async getUserOnboarded(@Req() req) {
+        const userId = req.user['sub'];
+        const user = await this.userService.findById(userId);
+        if (!user) throw new BadRequestException('User not found');
+        const invitation = await this.userService.findInvitationForEmail(user.email);
+
+        return new GenericResponseModel(true, '', 200, {userInvited: !!invitation, onboarded: user.onboarded});
+    }
 }
