@@ -1,4 +1,4 @@
-import { CreateUserDto, Family, GenericResponse, GenericResponseModel, UpdateUserDto, User, UserInvite, UserInviteDto } from '@family-budget/family-budget.model';
+import { CreateUserDto, Family, GenericResponse, GenericResponseModel, OnboardingDto, UpdateUserDto, User, UserInvite, UserInviteDto } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { FamilyService } from '../family/family.service';
@@ -130,5 +130,28 @@ export class UserService {
             user.activeInd = true;
             await this.userRepository.save(user);
         }
+    }
+
+
+    /**
+     * Onboards a user by updating their profile information and setting the onboarded flag.
+     * If the onboardDto.partial flag is true, the user is considered partially onboarded and
+     * their accounts, categories, and family invites are not saved.
+     * 
+     * @param user - The user to onboard.
+     * @param onboardDto - The onboarding data containing the user's profile information.
+     * @returns A boolean indicating whether the user was successfully saved.
+     */
+    async onboardUser(user: User, onboardDto: OnboardingDto) {
+        // if it is partial -> then user has been invited and doesn't need to save
+        // accounts, categories, or family invites etc..
+        // user is not fully onboarded, so we will leave onboarded to false
+        user.onboarded = !onboardDto.partial; // partial is true -> user is not fully onboarded
+        user.firstname = onboardDto.profile.firstname;
+        user.lastname = onboardDto.profile.lastname;
+        user.phoneNumber = onboardDto.profile.phone;
+
+        await this.userRepository.save(user);
+        return true;
     }
 }

@@ -108,12 +108,12 @@ export class FamilyController {
         const invitation = await this.userService.findInvitationForEmail(user.email);
         const userInFamily = !!user.family;
 
-        if (!invitation && !userInFamily) {
-            // create new family for user
-            const family = await this.familyService.createFamily(userId);
-            await this.userService.updateUserFamily(user, family);
-            return new GenericResponseModel(true, 'Family Created for new User', 200, { familyId: family.id, dialogConfig: null  });
-        }
+        // if (!invitation && !userInFamily) {
+        //     // create new family for user
+        //     const family = await this.familyService.createFamily(userId);
+        //     await this.userService.updateUserFamily(user, family);
+        //     return new GenericResponseModel(true, 'Family Created for new User', 200, { familyId: family.id, dialogConfig: null  });
+        // }
 
         // if they have been invited and they have not been in a family, add them to the family they are invited to
         if (invitation && !userInFamily) {

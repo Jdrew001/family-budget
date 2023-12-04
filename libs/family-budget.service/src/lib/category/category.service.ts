@@ -52,7 +52,7 @@ export class CategoryService {
             const newCategory = this.categoryRepository.create({
                 name: category.categoryName,
                 type: category.categoryType,
-                icon: category.categoryIcon,
+                icon: category.icon,
                 family: user.family
             });
             await this.categoryRepository.save(newCategory);
