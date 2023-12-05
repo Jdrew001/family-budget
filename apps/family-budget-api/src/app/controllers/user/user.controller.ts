@@ -70,7 +70,7 @@ export class UserController {
         }
 
         // if partial -> user invited, so lets just save profile information
-        if (onboardDto.partial) {
+        if (onboardDto.requiredSections.length === 1 && onboardDto.requiredSections[0] === OnboardingConstant.profile) {
             return new GenericResponseModel(true, 'User information saved', 200);
         }
 

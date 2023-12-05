@@ -143,10 +143,7 @@ export class UserService {
      * @returns A boolean indicating whether the user was successfully saved.
      */
     async onboardUser(user: User, onboardDto: OnboardingDto) {
-        // if it is partial -> then user has been invited and doesn't need to save
-        // accounts, categories, or family invites etc..
-        // user is not fully onboarded, so we will leave onboarded to false
-        user.onboarded = !onboardDto.partial; // partial is true -> user is not fully onboarded
+        user.onboarded = onboardDto.requiredSections.length == 4;
         user.firstname = onboardDto.profile.firstname;
         user.lastname = onboardDto.profile.lastname;
         user.phoneNumber = onboardDto.profile.phone;

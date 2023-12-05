@@ -5,7 +5,7 @@ export interface OnboardingDto {
     accounts: AccountDto[];
     categories: CategoryDto[];
     familyInvites: FamilyInviteDto[];
-    partial?: boolean;
+    requiredSections: 'profile' | 'account' | 'category' | 'inviteFamily' ;
 }
 
 export interface ProfileDto {
