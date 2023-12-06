@@ -120,7 +120,6 @@ export class FamilyController {
             // add them to the family they are invited to
             const family = await this.familyService.addFamilyMember(invitation.family.id, user);
             await this.userService.updateUserFamily(user, family);
-            await this.userService.markUserOnboarded(user);
             await this.userService.markInactive(invitation.id);
             return new GenericResponseModel(true, 'User added to family', 200, { familyId: family.id, dialogConfig: null });
         }
@@ -158,7 +157,7 @@ export class FamilyController {
         // check if the user is an owner of any families
         const ownedFamily = await this.familyService.isUserOwnerOfAnyFamily(user.id);
         if (!ownedFamily) {
-            // create new family for user
+            //TODO: return that the user needs to onboard
             const family = await this.familyService.createFamily(userId);
             await this.userService.updateUserFamily(user, family);
             return new GenericResponseModel(true, 'Family Created for new User', 200, { familyId: family.id });
