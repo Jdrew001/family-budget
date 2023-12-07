@@ -17,6 +17,15 @@ export class UserController {
         private readonly categoryService: CategoryService
     ) {}
 
+    @Get('getUserEmail')
+    async getUserEmail(@Req() req): Promise<GenericResponseModel<string>> {
+        const userId = req.user['sub'];
+        if (!userId) throw new ForbiddenException('User not found');
+        const user = await this.userService.findById(userId);
+        if (!user) throw new BadRequestException('User not found');
+        return new GenericResponseModel(true, '', 200, user.email);
+    }
+
     @Get('getUserInformation')
     async getUserInformation(@Req() req): Promise<UserInfoDto> {
         const userId = req.user['sub'];

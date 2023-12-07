@@ -17,9 +17,9 @@ export class ReferenceService {
         return {
             frequencies: frequencies.map(f => {
                 return {
-                    id: f.id,
+                    id: f.type,
                     label: f.name,
-                    value: f.id,
+                    value: f.type,
                     type: f.type
                 }
             }),
