@@ -12,8 +12,7 @@ export class BudgetController {
     constructor(
         private readonly budgetService: BudgetService,
         private readonly categoryservice: CategoryService,
-        private readonly userService: UserService,
-        private readonly accountService: AccountService
+        private readonly userService: UserService
     ) { }
 
     @Get('getAllBudgets')
