@@ -3,6 +3,7 @@ import { AccountService } from 'libs/family-budget.service/src/lib/account/accou
 import { AccessTokenGuard } from '../../guards/access-token.guard';
 import { Request } from 'express';
 import { CreateAccountDto, SummaryAccountBalance } from '@family-budget/family-budget.model';
+import { ConversionUtils } from 'libs/family-budget.service/src/lib/util/conversions.utils';
 
 @UseGuards(AccessTokenGuard)
 @Controller('account')
@@ -57,16 +58,27 @@ export class AccountController {
     async getAccountById(@Req() request: Request) {
         const accountId = request.params.accountId;
         const data = await this.accountService.getAccountById(accountId);
+        const currentBudget = data.budgets?.find(budget => budget.activeInd);
 
         return {
-            id: data.id,
-            name: data.name,
-            description: data.description,
-            icon: data.icon,
-            accountType: data.accountType?.id,
-            createBudget: data.budgets?.length > 0,
-            frequency: data.budgetPeriod.frequency,
+            data: {
+                id: data.id,
+                name: data.name,
+                description: data.description,
+                icon: data.icon,
+                accountType: data.accountType?.id,
+                createBudget: data.budgets?.length > 0,
+                frequency: data.budgetPeriod.frequency,
+                beginningBalance: ConversionUtils.convertFormatNumberToUSD(data.balance.amount),
+                startDate: currentBudget?.startDate
+            },
             shouldDisable: data.budgets?.length > 0
         }
+    }
+
+    @Get('markAccountInactive/:accountId')
+    async markAccountInactive(@Req() request: Request) {
+        const accountId = request.params.accountId;
+        return await this.accountService.markAccountInactive(accountId);
     }
 }

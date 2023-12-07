@@ -12,27 +12,22 @@ export class BudgetController {
     constructor(
         private readonly budgetService: BudgetService,
         private readonly categoryservice: CategoryService,
-        private readonly userService: UserService,
-        private readonly accountService: AccountService
+        private readonly userService: UserService
     ) { }
 
     @Get('getAllBudgets')
     async getAllBudgets(@Req() req: Request) {
         const userId = req.user['sub'];
         const family = await this.userService.findFamilyForUser(userId);
-        const budgets = await this.budgetService.fetchBudgetsFromAccounts(family.accounts);
+        const accounts = family.accounts.filter(account => account.activeInd);
+        const budgets = await this.budgetService.fetchBudgetsFromAccounts(accounts);
         const leftSpendingAmounts: Array<LeftSpendingManage> = [];
 
         await Promise.all(budgets.map(async data => {
-            const totalExpenses = (await this.budgetService.getTotalIncomeExpenseForBudget(data.account, data.budget)).totalExpense;
             const endDate = new Date(data.budget.endDate);
-            const timeDiff = endDate.getTime() - new Date().getTime();
-            const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            const daysLeft = DateUtils.daysLeftCalculation(endDate);
             const leftSpendingAmount = await this.budgetService.getWhatsLeftToSpend(data.account, data.budget)
-            const expenseBudgetAmount = data.budget.budgetCategories.filter(o => o.category.type == 1).reduce((total, category) => {
-                return total + category.amount;
-            }, 0);
-            const percentageSpent = expenseBudgetAmount > 0 ? totalExpenses / expenseBudgetAmount: 0;
+            const percentageSpent = leftSpendingAmount.totalBudget > 0 ? leftSpendingAmount.totalSpent / leftSpendingAmount.totalBudget: 0;
             leftSpendingAmounts.push({
                 accountId: data.account.id,
                 accountName: data.account.name,
@@ -41,8 +36,8 @@ export class BudgetController {
                 leftSpendingAmount: leftSpendingAmount.whatsLeft.toString(),
                 leftSpendingDays: daysLeft,
                 percentageSpent: percentageSpent,
-                totalSpent: totalExpenses.toString(),
-                totalBudget: expenseBudgetAmount.toString()
+                totalSpent: leftSpendingAmount.totalSpent.toString(),
+                totalBudget: leftSpendingAmount.totalBudget.toString(),
             })
         }));
 
@@ -55,8 +50,7 @@ export class BudgetController {
         const budget = await this.budgetService.getBudgetById(budgetId);
         const totalExpenses = (await this.budgetService.getTotalIncomeExpenseForBudget(budget.account, budget)).totalExpense;
         const endDate = new Date(budget.endDate);
-        const timeDiff = endDate.getTime() - new Date().getTime();
-        const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+        const daysLeft = DateUtils.daysLeftCalculation(endDate);
         const leftSpendingAmount = await this.budgetService.getWhatsLeftToSpend(budget.account, budget)
         const expenseBudgetAmount = budget.budgetCategories.filter(o => o.category.type == 1).reduce((total, category) => {
             return total + category.amount;

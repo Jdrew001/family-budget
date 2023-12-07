@@ -1,7 +1,7 @@
 import { Family, User } from "@family-budget/family-budget.model";
 
 export class SeedConstant {
-    public static USER_MOCK: User = {
+    public static USER_MOCK: any = {
         firstname: "John",
         lastname: "Doe",
         password: "password",

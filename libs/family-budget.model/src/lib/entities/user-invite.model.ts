@@ -11,6 +11,9 @@ export class UserInvite {
     @Column()
     email: string;
 
+    @Column()
+    activeInd?: boolean;
+
     @CreateDateColumn({ name: 'createdat', type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })
     createdAt?: Date;
 

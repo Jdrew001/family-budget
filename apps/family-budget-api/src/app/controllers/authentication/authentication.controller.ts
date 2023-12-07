@@ -24,10 +24,10 @@ export class AuthenticationController {
 
     @Post('signin')
     async signIn(@Body() loginDto: LoginUserDto, @Res() res: Response) {
-        const tokens = await this.authenticationService.signIn(loginDto);
+        const data = await this.authenticationService.signIn(loginDto);
         return res.status(200).json({
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken
+            accessToken: data.tokens.accessToken,
+            refreshToken: data.tokens.refreshToken
         });
     }
 

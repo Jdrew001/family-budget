@@ -22,6 +22,9 @@ export class Account {
     @Column({nullable: true})
     icon?: string;
 
+    @Column()
+    activeInd?: boolean;
+
     @ManyToOne(() => AccountType)
     accountType: AccountType;
 

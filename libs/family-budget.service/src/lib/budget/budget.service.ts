@@ -71,7 +71,10 @@ export class BudgetService {
         let totalSpent = 0;
         let transactions = userAccount?.transactions?.filter(item => item.category.type === 1 && item.budget?.id === budget?.id);
         transactions?.forEach(transaction => {
-            totalSpent += transaction.amount;
+            // Only consider the transaction if it's in a budgeted category
+            if (categories.find(budgetCategory => budgetCategory.category.id === transaction.category.id)) {
+                totalSpent += transaction.amount;
+            }
         });
         
         return {whatsLeft: totalBudget - totalSpent, totalBudget, totalSpent};

@@ -5,7 +5,7 @@ import { Family } from './family.model';
 export class Category {
     
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    id?: string;
 
     @Column()
     name: string;
@@ -13,7 +13,7 @@ export class Category {
     @Column()
     type: CategoryType;
 
-    @Column({nullable: true})
+    @Column()
     icon?: string;
 
     @ManyToOne(() => Family, (family) => family.categories)

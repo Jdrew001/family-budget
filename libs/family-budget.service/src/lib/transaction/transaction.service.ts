@@ -107,6 +107,9 @@ export class TransactionService {
     }
 
     async getGroupedTransactions(dto: TransactionGroupRequest) {
+        if (dto.page == 0) {
+            dto.page = 1;
+        }
         const transactions = await this.getTransactionsByAccountIdPaging(dto);
         const groups: Array<GroupTransaction> = [];
         transactions?.forEach((transaction) => {

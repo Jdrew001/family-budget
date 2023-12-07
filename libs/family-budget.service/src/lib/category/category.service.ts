@@ -1,4 +1,4 @@
-import { Budget, BudgetCategory, Category, CreateCategoryBudgetDto, CreateCategoryDto, Family } from '@family-budget/family-budget.model';
+import { Budget, BudgetCategory, Category, CreateCategoryBudgetDto, CreateCategoryDto, Family, GenericResponseModel } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
@@ -21,13 +21,38 @@ export class CategoryService {
         return await this.categoryRepository.findOne({ where: { id: categoryId } }) as Category;
     }
 
+    async createCategory(userId: string, category: CreateCategoryDto) {
+        const user = await this.userService.findById(userId);
+        const categories = await this.fetchCategoriesForUser(userId);
+
+        const duplicateCategory = categories.find(c => c.name.toLowerCase() === category.categoryName.toLowerCase());
+        if (duplicateCategory) {
+            return new GenericResponseModel(false, 'Category already exists');
+        }
+
+        const duplicateIcon = categories.find(c => c.icon === category.icon);
+        if (duplicateIcon) {
+            return new GenericResponseModel(false, `Icon already exists for ${duplicateIcon.name} category`);
+        }
+
+        await this.categoryRepository.save({
+            name: category.categoryName,
+            type: category.categoryType,
+            icon: category.icon,
+            family: user.family
+        });
+        const nCategories = await this.fetchCategoriesForUser(userId);
+        return new GenericResponseModel(true, 'Category created successfully', 200, nCategories);
+    }
+
     async createCategories(userId: string, categories: Array<CreateCategoryDto>) {
         const user = await this.userService.findById(userId);
         
         await categories.forEach(async category => {
             const newCategory = this.categoryRepository.create({
-                name: category.name,
-                type: category.type,
+                name: category.categoryName,
+                type: category.categoryType,
+                icon: category.icon,
                 family: user.family
             });
             await this.categoryRepository.save(newCategory);

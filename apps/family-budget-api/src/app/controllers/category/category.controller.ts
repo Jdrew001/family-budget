@@ -42,4 +42,11 @@ export class CategoryController {
         const budget = await this.budgetService.getBudgetById(data.budgetId);
         return await this.categoryService.createCategoryForBudget(budget, formattedData.category);
     }
+
+    @Post('createCategory')
+    async createCategory(@Req() req: Request) {
+        const userId = req.user['sub'];
+        const category = req.body as CreateCategoryDto;
+        return await this.categoryService.createCategory(userId, category);
+    }
 }

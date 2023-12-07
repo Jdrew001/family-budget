@@ -1,10 +1,11 @@
 import { Account, AccountBalance, AccountType, Balance, Budget, BudgetPeriod, CreateAccountDto, Family, NewAccountBudget, User } from '@family-budget/family-budget.model';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { BalanceService } from '../balance/balance.service';
 import { DateUtils } from '../util/date-util';
 import { UserService } from '../user/user.service';
 import { BudgetService } from '../budget/budget.service';
+import { ConversionUtils } from '../util/conversions.utils';
 
 @Injectable()
 export class AccountService {
@@ -31,7 +32,7 @@ export class AccountService {
         }
 
         const balance = new Balance();
-        balance.amount = 0;
+        balance.amount = ConversionUtils.convertFormatUSDToNumber(nAccount.beginningBalance);
         balance.dateTime = new Date();
 
         account.balance = balance;
@@ -55,6 +56,7 @@ export class AccountService {
     async getAccountById(accountId: string, count?: number) {
         return await this.accountRepository.findOne({ where: { id: accountId }, 
             relations: [
+                'balance',
                 'accountType',
                 'transactions',
                 'transactions.category',
@@ -69,18 +71,10 @@ export class AccountService {
         return await this.accountRepository.delete({ id: accountId });
     }
 
-    // async updateAccountBalance(accountId: string, amount: number) {
-    //     const account = await this.getAccountById(accountId);
-    //     // account.balance = await this.balanceService.createBalance(account, amount);
-    //     account.balance = await this.balanceService.updateBalance(account.balance, amount);
-
-    //     return account;
-    // }
-
     async getAccountsUserUser(userId: string) {
         // using the userId, get the family id and get all accounts for that family;
         const user = await this.userService.findById(userId) as User;
-        const accounts = await this.accountRepository.find({ where: { family: user.family },
+        const accounts = await this.accountRepository.find({ where: { family: user.family, activeInd: true },
         relations: [
             'transactions',
             'transactions.category',
@@ -128,5 +122,14 @@ export class AccountService {
 
     async getAccountTypeById(id: string) {
         return await this.accountTypeRepository.findOne({ where: {id: id} });
+    }
+
+    async markAccountInactive(accountId: string) {
+        const account = await this.getAccountById(accountId) as Account;
+        if (!account) {
+            throw new BadRequestException('Account not found');
+        }
+        account.activeInd = false;
+        return await this.accountRepository.save(account);
     }
 }

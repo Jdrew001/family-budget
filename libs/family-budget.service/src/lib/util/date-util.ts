@@ -5,7 +5,15 @@ export class DateUtils {
     // if payperiod is biweekly, then the end date is 14 days - 1 from the start date
     // if payperiod is monthly, then the end date is 30 days - 1 from the start date
 
+    public static daysLeftCalculation(endDate: Date) {
+        const presentTime = new Date().getTime();
+        const endTime = endDate.getTime();
 
+        const timeDiff = endTime - presentTime;
+        const unformatedDaysLeft = timeDiff / (1000 * 3600 * 24);
+        const daysLeft = Math.ceil(unformatedDaysLeft * 2) / 2;
+        return daysLeft;
+    }
 
 
     // code the first comment

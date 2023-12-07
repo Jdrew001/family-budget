@@ -25,6 +25,8 @@ export class TransactionController {
             return {
                 id: account.id,
                 name: account.name,
+                icon: account.icon,
+                type: account.accountType,
             }
         });
         const categories = await this.categoryService.fetchCategoriesForUser(userId);
