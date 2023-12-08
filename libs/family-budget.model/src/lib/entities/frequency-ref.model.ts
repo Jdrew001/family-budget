@@ -10,6 +10,6 @@ export class FrequencyRef {
     @Column()
     name: string;
 
-    @Column({type: 'int'})
+    @Column({type: 'int', nullable: true})
     type: Frequency;
 }
