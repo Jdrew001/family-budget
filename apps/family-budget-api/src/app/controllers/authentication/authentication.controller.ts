@@ -29,6 +29,7 @@ export class AuthenticationController {
 
     @Post('signin')
     async signIn(@Body() loginDto: LoginUserDto, @Res() res: Response) {
+        Logger.log(`Sign in attempt for ${loginDto}`)
         const data = await this.authenticationService.signIn(loginDto);
         return res.status(200).json({
             accessToken: data.tokens.accessToken,
