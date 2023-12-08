@@ -10,7 +10,7 @@ export class Family {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @Column()
+    @Column({default: true})
     activeInd: boolean;
 
     @OneToMany(() => User, (user) => user.family)
