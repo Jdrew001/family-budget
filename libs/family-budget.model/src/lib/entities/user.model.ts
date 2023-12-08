@@ -9,10 +9,10 @@ export class User {
     @PrimaryGeneratedColumn("uuid")
     id?: string;
 
-    @Column({nullable: true})
+    @Column({nullable: true, default: ''})
     firstname: string;
 
-    @Column({nullable: true})
+    @Column({nullable: true, default: ''})
     lastname: string;
 
     @Column()
