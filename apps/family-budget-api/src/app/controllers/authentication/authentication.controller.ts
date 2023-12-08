@@ -1,5 +1,5 @@
 import { CreateUserDto, LoginUserDto } from '@family-budget/family-budget.model';
-import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthenticationService } from 'libs/family-budget.service/src/lib/authentication/authentication.service';
 import { RefreshTokenGuard } from '../../guards/refresh-token.guard';
@@ -19,7 +19,12 @@ export class AuthenticationController {
 
     @Post('signup')
     signUp(@Body() createUserDto: CreateUserDto) {
-        return this.authenticationService.signUp(createUserDto);
+        try {
+            return this.authenticationService.signUp(createUserDto);
+        } catch (error) {
+            Logger.error(error);
+            return error;
+        }
     }
 
     @Post('signin')
