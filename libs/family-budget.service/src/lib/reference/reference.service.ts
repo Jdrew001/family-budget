@@ -22,6 +22,10 @@ export class ReferenceService {
                     value: f.type,
                     type: f.type
                 }
+            }).sort((a, b) => {
+                if (a.type < b.type) return -1;
+                if (a.type > b.type) return 1;
+                return 0;
             }),
             accountTypes: accountTypes.map(at => {
                 return {
