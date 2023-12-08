@@ -26,7 +26,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         FrequencyRef,
         UserInvite
       ],
-      synchronize: true
+      synchronize: false
     })
   ],
   controllers: [],
