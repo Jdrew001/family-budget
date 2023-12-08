@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, Int32, PrimaryColumn } from "typeorm";
 import { Frequency } from "@family-budget/family-budget.model";
 
 @Entity('frequency_ref')
@@ -10,6 +10,6 @@ export class FrequencyRef {
     @Column()
     name: string;
 
-    @Column()
+    @Column({type: 'int'})
     type: Frequency;
 }
