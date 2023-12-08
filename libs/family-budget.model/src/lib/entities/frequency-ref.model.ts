@@ -1,15 +1,15 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, Int32, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Frequency } from "@family-budget/family-budget.model";
 
 @Entity('frequency_ref')
 export class FrequencyRef {
 
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn({type: "int"})
     id: number;
 
     @Column()
     name: string;
 
-    @Column()
+    @Column({type: 'int', nullable: true})
     type: Frequency;
 }
