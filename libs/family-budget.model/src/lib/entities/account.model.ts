@@ -22,7 +22,7 @@ export class Account {
     @Column({nullable: true})
     icon?: string;
 
-    @Column()
+    @Column({default: true})
     activeInd?: boolean;
 
     @ManyToOne(() => AccountType)
