@@ -9,10 +9,10 @@ export class User {
     @PrimaryGeneratedColumn("uuid")
     id?: string;
 
-    @Column({nullable: true, default: ''})
+    @Column({nullable: true})
     firstname: string;
 
-    @Column({nullable: true, default: ''})
+    @Column({nullable: true})
     lastname: string;
 
     @Column()
@@ -21,22 +21,22 @@ export class User {
     @Column()
     email: string;
 
-    @Column()
+    @Column({nullable: true})
     phoneNumber: string;
 
-    @Column()
+    @Column({nullable: true})
     lastLogin?: Date;
 
-    @Column()
+    @Column({default: false})
     locked?: boolean;
 
-    @Column()
+    @Column({default: false})
     onboarded?: boolean;
 
     @Column({nullable: true})
     dateLocked?: Date;
 
-    @Column()
+    @Column({default: false})
     confirmed: boolean;
 
     @Column({default: true})
