@@ -96,6 +96,7 @@ export class UserService {
     }
 
     async findInvitationForEmail(email: string): Promise<UserInvite> {
+        const invites = await this.userInviteRepo.find({where: {email: email}});
         return await this.userInviteRepo.findOne({where: {email: email, activeInd: true}, relations: ['family']}) as UserInvite;
     }
 
