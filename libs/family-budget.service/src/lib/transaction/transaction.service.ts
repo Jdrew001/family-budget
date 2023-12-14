@@ -29,10 +29,9 @@ export class TransactionService {
 
     async createTransaction(
         transaction: CreateTransactionDto, 
-        accountId: string,
+        account: Account,
         category: Category,
         userId: string) {
-        const account = await this.accountService.getAccountById(accountId) as Account;
         const transactionToCreate: Transaction = {
             description: transaction.description,
             account: account,
@@ -47,16 +46,20 @@ export class TransactionService {
         return await this.transactionRepository.save(transactionToCreate);
     }
 
-    async updateTransaction(transaction: Transaction) {
-        const transactionToUpdate = await this.getTransactionById(transaction.id || '') as Transaction;
-        transactionToUpdate.amount = transaction.amount;
-        transactionToUpdate.description = transaction.description;
-        transactionToUpdate.category = transaction.category;
-        transactionToUpdate.updatedAt = new Date();
+    async updateTransaction(
+        originalTransaction: Transaction,
+        transaction: CreateTransactionDto, 
+        account: Account,
+        category: Category,
+        userId: string) {
+        originalTransaction.amount = parseFloat(transaction.amount);
+        originalTransaction.description = transaction.description;
+        originalTransaction.account = account;
+        originalTransaction.category = category;
+        originalTransaction.updatedAt = new Date();
 
         // update the balance
-        this.balanceService.updateAddLatestBalance(transaction.account, transaction.amount - transactionToUpdate.amount);
-        return await this.transactionRepository.save(transactionToUpdate);
+        return await this.transactionRepository.save(originalTransaction);
     }
 
     async deleteTransaction(transactionId: string) {

@@ -48,7 +48,7 @@ export class BudgetService {
             const mEndDate = moment(endDate);
             return mCurrentDate.isSameOrAfter(mStartDate) && mCurrentDate.isBefore(mEndDate);
         }) as Budget[];
-        if (budgets.length == 0) {
+        if (account.budgetPeriod && budgets.length == 0) {
             return await this.createNewBudget(account);
         }
         return budgets[0] || null;
@@ -117,7 +117,6 @@ export class BudgetService {
         const newBudget = this.handleFrequency(budgetPeriod.frequency, new Budget(), (budget as Budget));
         newBudget.account = account;
         newBudget.budgetCategories = [];
-
         return await this.budgetRepository.save(newBudget);
     }
 

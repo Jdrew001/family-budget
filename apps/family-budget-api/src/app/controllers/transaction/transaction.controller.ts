@@ -5,6 +5,7 @@ import { AccountService } from 'libs/family-budget.service/src/lib/account/accou
 import { AccessTokenGuard } from '../../guards/access-token.guard';
 import { CreateTransactionDto, TransactionAction, Transaction, CategoryType, TransactionGroupRequest, ManageTransactionDto } from '@family-budget/family-budget.model';
 import { BalanceService } from 'libs/family-budget.service/src/lib/balance/balance.service';
+import * as _ from 'lodash';
 
 @UseGuards(AccessTokenGuard)
 @Controller('transaction')
@@ -55,25 +56,50 @@ export class TransactionController {
 
     @Post('saveTransaction')
     async confirmTransaction(@Req() req: Request, @Res() res: Response) {
-        const data = req.body?.data as CreateTransactionDto;
-        const action = req.body?.action as TransactionAction
-        const category = await this.categoryService.findCategoryById(data.category);
+        const dto = req.body?.data as CreateTransactionDto;
+        const action = req.body?.action as TransactionAction;
+        const newAccount = await this.accountService.getAccountById(dto.account);
+        const newCategory = await this.categoryService.findCategoryById(dto.category);
         const userId = req.user['sub'];
+        const transaction = (await this.transactionService.getTransactionById(dto.id));
+        const clonedTransaction = _.clone(transaction);
         let result = null;
-        data.amount = data.amount.replace(/[$,]/g, "");
+        dto.amount = dto.amount.replace(/[$,]/g, "");
 
         if (action == TransactionAction.Add) {
             result = await this.transactionService.createTransaction(
-                req.body.data, 
-                data.account,
-                category,
+                dto, 
+                newAccount,
+                newCategory,
                 userId) as Transaction;
         } else {
-            // TODO: Add update logic
+            result = await this.transactionService.updateTransaction(
+                transaction,
+                dto, 
+                newAccount,
+                newCategory,
+                userId) as Transaction;
         }
 
         if (result) {
-            const amount = category.type == CategoryType.Income ? +(data.amount) : +(data.amount) * -1;
+            const newTranAmount = parseFloat(dto.amount);
+            let amount = newCategory.type == CategoryType.Income ? newTranAmount : newTranAmount * -1;
+
+            // we are updating the transaction and we are updating its account
+            if (action == TransactionAction.Edit && clonedTransaction.account.id != newAccount.id) {
+                const amountRemoval = newCategory.type == CategoryType.Income ? clonedTransaction.amount * -1 : clonedTransaction.amount;
+                await this.balanceService.updateAddLatestBalance(clonedTransaction.account, +amountRemoval);
+                await this.balanceService.updateAddLatestBalance(newAccount, +amount);
+
+                return res.status(200).json({ success: true, data: result });
+            }
+
+            if (action == TransactionAction.Edit) {
+                amount = newCategory.type == CategoryType.Income ? (clonedTransaction.amount - newTranAmount) * -1: (clonedTransaction.amount - newTranAmount);
+            } else {
+                amount = newCategory.type == CategoryType.Income ? newTranAmount : newTranAmount * -1;
+            }
+
             await this.balanceService.updateAddLatestBalance(result.account, +amount);
             return res.status(200).json({ success: true, data: result });
         }

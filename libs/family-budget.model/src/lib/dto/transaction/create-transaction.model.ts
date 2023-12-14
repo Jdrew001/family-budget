@@ -1,4 +1,5 @@
 export interface CreateTransactionDto {
+    id: string;
     account: string;
     description: string;
     category: string;
