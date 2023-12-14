@@ -17,6 +17,8 @@ export class AuthenticationService {
     ) {}
 
     async signUp(createUserDto: CreateUserDto) {
+      createUserDto.email = createUserDto.email.toLowerCase().trim();
+      createUserDto.password = createUserDto.password.trim();
         const userExists = await this.userService.findByEmail(createUserDto.email);
         let isUserInvited = false;
         if (userExists) {

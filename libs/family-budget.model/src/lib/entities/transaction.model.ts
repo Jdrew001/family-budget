@@ -19,7 +19,7 @@ export class Transaction {
     account: Account;
 
     @ManyToOne(() => Budget)
-    budget?: Budget
+    budget?: Budget;
 
     @Column("float")
     amount: number;

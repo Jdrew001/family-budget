@@ -48,7 +48,7 @@ export class BudgetService {
             const mEndDate = moment(endDate);
             return mCurrentDate.isSameOrAfter(mStartDate) && mCurrentDate.isBefore(mEndDate);
         }) as Budget[];
-        if (budgets.length == 0) {
+        if (account.budgetPeriod && budgets.length == 0) {
             return await this.createNewBudget(account);
         }
         return budgets[0] || null;
@@ -117,7 +117,6 @@ export class BudgetService {
         const newBudget = this.handleFrequency(budgetPeriod.frequency, new Budget(), (budget as Budget));
         newBudget.account = account;
         newBudget.budgetCategories = [];
-
         return await this.budgetRepository.save(newBudget);
     }
 
@@ -141,12 +140,14 @@ export class BudgetService {
     }
 
     async getCategoryBudgetAmount(budgetId: string, categoryId: string) {
+        if (!budgetId || !categoryId) return 0;
         const budget = await this.getBudgetById(budgetId);
         const categoryBudget = budget?.budgetCategories?.find(category => category.category.id === categoryId);
         return categoryBudget?.amount || 0;
     }
 
     async getSpentAmountForCategory(category: Category, budgetId: string) {
+        if (!category || !budgetId) return 0;
         const budget = await this.getBudgetById(budgetId);
         const transactions = budget?.account?.transactions?.filter(transaction => 
             {
