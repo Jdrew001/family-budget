@@ -6,6 +6,7 @@ import { BalanceService } from '../balance/balance.service';
 import moment from 'moment';
 import { group } from 'console';
 import { DateUtils } from '../util/date-util';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class TransactionService {
@@ -13,11 +14,12 @@ export class TransactionService {
     constructor(
         @Inject('TransactionRepository') private readonly transactionRepository: Repository<Transaction>,
         private readonly balanceService: BalanceService,
-        private readonly accountService: AccountService
+        private readonly accountService: AccountService,
+        private readonly userService: UserService
     ) {}
 
     async getTransactionById(transactionId: string) {
-        return await this.transactionRepository.findOne({ where: { id: transactionId } });
+        return await this.transactionRepository.findOne({ where: { id: transactionId }, relations: ['account', 'category'] });
     } 
 
     async getTransactionsForAccount(accountId: string) {
@@ -112,29 +114,34 @@ export class TransactionService {
         }
         const transactions = await this.getTransactionsByAccountIdPaging(dto);
         const groups: Array<GroupTransaction> = [];
-        transactions?.forEach((transaction) => {
-          const groupName = this.getGroupName(transaction.createdAt as Date);
-          let group = groups.find((group) => group.groupName === groupName);
-      
-          // group doesn't exist, add it
-          if (!group) {
-            groups.push(new GroupTransaction(groupName, []));
-          }
-      
-          group = groups.find((group) => group.groupName === groupName);
-          const date = (transaction.createdAt as Date).toDateString();
-          const transactionId = transaction.id as string;
-          group?.transactions.push({
-            id: transactionId,
-            description: transaction.description,
-            date: DateUtils.getShortDate(date),
-            showRed: transaction.category.type === 1,
-            amount: transaction.category.type === 1 ? transaction.amount * -1: transaction.amount,
-            budget: transaction.budget as Budget,
-            category: transaction.category
-          });
 
-        });
+        for (const transaction of transactions) {
+            const groupName = this.getGroupName(transaction.createdAt as Date);
+            //const user = await this.userService.findById(transaction.createdBy as string);
+            let group = groups.find((group) => group.groupName === groupName);
+        
+            // group doesn't exist, add it
+            if (!group) {
+              groups.push(new GroupTransaction(groupName, []));
+            }
+        
+            group = groups.find((group) => group.groupName === groupName);
+            const date = (transaction.createdAt as Date).toDateString();
+            const transactionId = transaction.id as string;
+            group?.transactions.push({
+              id: transactionId,
+              description: transaction.description,
+              date: DateUtils.getShortDate(date),
+              showRed: transaction.category.type === 1,
+              amount: transaction.category.type === 1 ? transaction.amount * -1: transaction.amount,
+              budget: transaction.budget as Budget,
+              category: transaction.category,
+              categoryName: transaction.category.name,
+              transactionType: transaction.category.type == 0 ? 0 : 1,
+              addedBy: ``,
+              icon: transaction.category.icon as string
+            });
+        }
 
         let sortedGroups = this.sortByGroupName(groups);
         let finalSortedGroups = this.sortByDate(sortedGroups);

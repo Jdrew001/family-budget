@@ -5,9 +5,10 @@ export interface SummaryTransactions {
     date: string;
     amount: string;
     description: string;
-    category: string;
+    categoryName: string;
     categoryIcon: string;
     transactionType: number;
     showRed: boolean;
+    addedBy: string;
     circleGuage: CircleGuageModel;
 }

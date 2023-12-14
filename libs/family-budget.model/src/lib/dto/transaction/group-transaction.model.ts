@@ -19,7 +19,11 @@ export interface TransactionDto {
     showRed: boolean;
     amount: number;
     budget: Budget,
-    category: Category
+    category: Category;
+    categoryName: string;
+    transactionType: number;
+    addedBy: string;
+    icon: string;
 }
 
 export interface TransactionGroupRequest {

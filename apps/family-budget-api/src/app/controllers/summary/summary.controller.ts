@@ -1,5 +1,5 @@
 import { CategoryType, CurrentBudgetSummary, SummaryAccountBalance, SummaryTransactions } from '@family-budget/family-budget.model';
-import { BudgetService, DateUtils, TransactionService } from '@family-budget/family-budget.service';
+import { BudgetService, DateUtils, TransactionService, UserService } from '@family-budget/family-budget.service';
 import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
@@ -12,7 +12,8 @@ export class SummaryController {
     constructor(
         private readonly budgetService: BudgetService,
         private readonly accountService: AccountService,
-        private readonly transactionService: TransactionService
+        private readonly transactionService: TransactionService,
+        private readonly userService: UserService
     ) { }
 
     @Get('currentBudget/:accountId')
@@ -67,15 +68,17 @@ export class SummaryController {
                 const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(transaction.budget.id, transaction.category.id);
                 const categorySpentAmount = await this.budgetService.getSpentAmountForCategory(transaction.category, transaction.budget.id);
                 const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
+                const user = await this.userService.findById(transaction.createdBy);
                 return {
                     id: transaction.id,
                     date: DateUtils.getShortDate(transaction.createdAt.toDateString()),
                     amount: amount,
                     description: transaction.description,
-                    category: transaction.category.name,
-                    categoryIcon: '',
+                    categoryName: transaction.category.name,
+                    categoryIcon: transaction.category.icon,
                     showRed: transaction.category.type == CategoryType.Expense,
                     transactionType: transaction.category.type == 0 ? 0 : 1,
+                    addedBy: `${user.firstname} ${user.lastname}`,
                     circleGuage: {
                         minValue: 0,
                         maxValue: 100,

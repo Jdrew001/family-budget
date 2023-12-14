@@ -1,9 +1,9 @@
-import { BudgetService, CategoryService, TransactionService } from '@family-budget/family-budget.service';
-import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { BudgetService, CategoryService, DateUtils, TransactionService } from '@family-budget/family-budget.service';
+import { Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
-import { CreateTransactionDto, TransactionAction, Transaction, CategoryType, TransactionGroupRequest } from '@family-budget/family-budget.model';
+import { CreateTransactionDto, TransactionAction, Transaction, CategoryType, TransactionGroupRequest, ManageTransactionDto } from '@family-budget/family-budget.model';
 import { BalanceService } from 'libs/family-budget.service/src/lib/balance/balance.service';
 
 @UseGuards(AccessTokenGuard)
@@ -17,6 +17,22 @@ export class TransactionController {
         private readonly balanceService: BalanceService,
         private readonly budgetService: BudgetService
     ) {}
+
+    @Get('getTransaction/:id')
+    async getTransaction(@Param('id') id: string): Promise<ManageTransactionDto> {
+        const transaction = await this.transactionService.getTransactionById(id);
+
+        const dto = {
+            id: transaction.id,
+            account: transaction.account.id,
+            description: transaction.description,
+            category: transaction.category.id,
+            amount: transaction.amount.toString(),
+            date: DateUtils.getShortDate(transaction.createdAt.toDateString())
+        }
+
+        return dto;
+    }
 
     @Get('getTransactionRefData')
     async getTransactionRefData(@Req() req: Request) {
