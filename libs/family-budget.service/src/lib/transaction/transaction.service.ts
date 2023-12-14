@@ -56,6 +56,9 @@ export class TransactionService {
         originalTransaction.description = transaction.description;
         originalTransaction.account = account;
         originalTransaction.category = category;
+        const budget = this.getBudgetByDate(account, new Date(transaction.date));
+        originalTransaction.budget = (budget ? budget: null) as any;
+        originalTransaction.createdAt = new Date(transaction.date);
         originalTransaction.updatedAt = new Date();
 
         // update the balance
@@ -95,6 +98,10 @@ export class TransactionService {
 
     private getLatestActiveBudget(account: Account) {
         return account.budgets?.filter(o => o.activeInd)[0];
+    }
+
+    private getBudgetByDate(account: Account, date: Date) {
+        return account.budgets?.filter(o => o.startDate <= date && o.endDate >= date)[0];
     }
 
     private async getTransactionsByAccountIdPaging(dto: TransactionGroupRequest) {

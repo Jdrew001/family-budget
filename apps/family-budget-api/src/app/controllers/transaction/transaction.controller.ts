@@ -84,13 +84,22 @@ export class TransactionController {
         if (result) {
             const newTranAmount = parseFloat(dto.amount);
             let amount = newCategory.type == CategoryType.Income ? newTranAmount : newTranAmount * -1;
+            const isActionEdit = action == TransactionAction.Edit;
+            const isCategoryUpdated = clonedTransaction.category.id != newCategory.id;
+            const isCategoryTypesDifferent = clonedTransaction.category.type != newCategory.type;
 
             // we are updating the transaction and we are updating its account
-            if (action == TransactionAction.Edit && clonedTransaction.account.id != newAccount.id) {
-                const amountRemoval = newCategory.type == CategoryType.Income ? clonedTransaction.amount * -1 : clonedTransaction.amount;
+            if (isActionEdit && clonedTransaction.account.id != newAccount.id) {
+                const amountRemoval = clonedTransaction.category.type == CategoryType.Income ? clonedTransaction.amount * -1 : clonedTransaction.amount;
                 await this.balanceService.updateAddLatestBalance(clonedTransaction.account, +amountRemoval);
                 await this.balanceService.updateAddLatestBalance(newAccount, +amount);
 
+                return res.status(200).json({ success: true, data: result });
+            }
+
+            // user has updated the category of the transaction
+            if (isActionEdit && isCategoryUpdated && isCategoryTypesDifferent) {
+                await this.balanceService.updateAddLatestBalance(clonedTransaction.account, +amount);
                 return res.status(200).json({ success: true, data: result });
             }
 
@@ -121,8 +130,8 @@ export class TransactionController {
             transactions.map(async group => {
                 const transactionsWithCircleGuage = await Promise.all(
                     group.transactions.map(async transaction => {
-                        const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(transaction.budget.id, transaction.category.id);
-                        const categorySpentAmount = await this.budgetService.getSpentAmountForCategory(transaction.category, transaction.budget.id);
+                        const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(transaction?.budget?.id, transaction?.category?.id);
+                        const categorySpentAmount = await this.budgetService.getSpentAmountForCategory(transaction?.category, transaction?.budget?.id);
                         const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
                         return {
                             ...transaction,

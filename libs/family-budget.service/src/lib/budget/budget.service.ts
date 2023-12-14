@@ -140,12 +140,14 @@ export class BudgetService {
     }
 
     async getCategoryBudgetAmount(budgetId: string, categoryId: string) {
+        if (!budgetId || !categoryId) return 0;
         const budget = await this.getBudgetById(budgetId);
         const categoryBudget = budget?.budgetCategories?.find(category => category.category.id === categoryId);
         return categoryBudget?.amount || 0;
     }
 
     async getSpentAmountForCategory(category: Category, budgetId: string) {
+        if (!category || !budgetId) return 0;
         const budget = await this.getBudgetById(budgetId);
         const transactions = budget?.account?.transactions?.filter(transaction => 
             {

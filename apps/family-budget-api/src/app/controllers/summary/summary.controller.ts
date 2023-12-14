@@ -65,8 +65,8 @@ export class SummaryController {
             transactions.map(async transaction => {
                 const multiplyBy = transaction.category.type == CategoryType.Expense ? -1 : 1;
                 const amount = (transaction.amount * multiplyBy).toString();
-                const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(transaction.budget.id, transaction.category.id);
-                const categorySpentAmount = await this.budgetService.getSpentAmountForCategory(transaction.category, transaction.budget.id);
+                const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(transaction?.budget?.id, transaction?.category?.id);
+                const categorySpentAmount = await this.budgetService.getSpentAmountForCategory(transaction.category, transaction?.budget?.id);
                 const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
                 const user = await this.userService.findById(transaction.createdBy);
                 return {
