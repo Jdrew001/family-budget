@@ -121,18 +121,24 @@ export class TransactionController {
         const userId = req.user['sub'];
         const dto = req.body as TransactionGroupRequest;
         dto.userId = userId;
+
         const transactions = await this.transactionService.getGroupedTransactions(dto);
-        if (transactions.length == 0) {
-            return {page: dto.page - 1, pageSize: dto.size, transactions: []};
+
+        if (transactions.length === 0) {
+            return { page: dto.page - 1, pageSize: dto.size, transactions: [] };
         }
 
         const transactionsWithCircleGuage = await Promise.all(
-            transactions.map(async group => {
+            transactions.map(async (group) => {
                 const transactionsWithCircleGuage = await Promise.all(
-                    group.transactions.map(async transaction => {
-                        const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(transaction?.budget?.id, transaction?.category?.id);
-                        const categorySpentAmount = await this.budgetService.getSpentAmountForCategory(transaction?.category, transaction?.budget?.id);
+                    group.transactions.map(async (transaction) => {
+                        const [categoryBudgetAmount, categorySpentAmount] = await Promise.all([
+                            this.budgetService.getCategoryBudgetAmount(transaction?.budget?.id, transaction?.category?.id),
+                            this.budgetService.getSpentAmountForCategory(transaction?.category, transaction?.budget?.id),
+                        ]);
+
                         const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
+
                         return {
                             ...transaction,
                             circleGuage: {
@@ -140,18 +146,18 @@ export class TransactionController {
                                 maxValue: 100,
                                 currentValue: currentValue > 100 ? 100 : currentValue,
                                 showRed: currentValue > 100,
-                                icon: transaction?.category?.icon
-                            }
-                        }
+                                icon: transaction?.category?.icon,
+                            },
+                        };
                     })
                 );
+
                 return {
                     ...group,
-                    transactions: transactionsWithCircleGuage
+                    transactions: transactionsWithCircleGuage,
                 };
             })
         );
-
-        return {page: dto.page, pageSize: dto.size, transactions: transactionsWithCircleGuage};
+        return { page: dto.page, pageSize: dto.size, transactions: transactionsWithCircleGuage };
     }
 }
