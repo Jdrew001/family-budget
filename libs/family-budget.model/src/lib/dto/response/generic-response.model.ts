@@ -1,7 +1,7 @@
 export class GenericResponseModel<T> {
     private message?: string;
     private success: boolean;
-    private code?: number;
+    private code?: number = 200;
     private data?: T;
 
 
