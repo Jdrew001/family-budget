@@ -3,7 +3,7 @@ import { Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/commo
 import { Request, Response } from 'express';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
-import { CreateTransactionDto, TransactionAction, Transaction, CategoryType, TransactionGroupRequest, ManageTransactionDto } from '@family-budget/family-budget.model';
+import { CreateTransactionDto, TransactionAction, Transaction, CategoryType, TransactionGroupRequest, ManageTransactionDto, GenericResponseModel } from '@family-budget/family-budget.model';
 import { BalanceService } from 'libs/family-budget.service/src/lib/balance/balance.service';
 import * as _ from 'lodash';
 
@@ -54,6 +54,20 @@ export class TransactionController {
         }
     }
 
+    @Get('deleteTransaction/:id')
+    async deleteTransaction(@Param('id') id: string) {
+        const transaction = await this.transactionService.getTransactionById(id);
+        const amount = transaction.category.type == CategoryType.Income ? transaction.amount * -1 : transaction.amount;
+        await this.balanceService.updateAddLatestBalance(transaction.account, +amount);
+        const result = await this.transactionService.deleteTransaction(id);
+
+        if (result.affected > 0) {
+            return new GenericResponseModel(true, 'Transaction deleted successfully');
+        } else {
+            return new GenericResponseModel(false, 'Transaction could not be deleted', 500);
+        }
+    }
+
     @Post('saveTransaction')
     async confirmTransaction(@Req() req: Request, @Res() res: Response) {
         const dto = req.body?.data as CreateTransactionDto;
@@ -85,11 +99,11 @@ export class TransactionController {
             const newTranAmount = parseFloat(dto.amount);
             let amount = newCategory.type == CategoryType.Income ? newTranAmount : newTranAmount * -1;
             const isActionEdit = action == TransactionAction.Edit;
-            const isCategoryUpdated = clonedTransaction.category.id != newCategory.id;
-            const isCategoryTypesDifferent = clonedTransaction.category.type != newCategory.type;
+            const isCategoryUpdated = clonedTransaction?.category?.id != newCategory?.id;
+            const isCategoryTypesDifferent = clonedTransaction?.category?.type != newCategory?.type;
 
             // we are updating the transaction and we are updating its account
-            if (isActionEdit && clonedTransaction.account.id != newAccount.id) {
+            if (isActionEdit && clonedTransaction?.account?.id != newAccount.id) {
                 const amountRemoval = clonedTransaction.category.type == CategoryType.Income ? clonedTransaction.amount * -1 : clonedTransaction.amount;
                 await this.balanceService.updateAddLatestBalance(clonedTransaction.account, +amountRemoval);
                 await this.balanceService.updateAddLatestBalance(newAccount, +amount);
