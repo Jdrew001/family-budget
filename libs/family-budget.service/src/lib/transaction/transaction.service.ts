@@ -119,43 +119,45 @@ export class TransactionService {
     }
 
     async getGroupedTransactions(dto: TransactionGroupRequest) {
-        if (dto.page == 0) {
+        if (dto.page === 0) {
             dto.page = 1;
         }
+    
         const transactions = await this.getTransactionsByAccountIdPaging(dto);
-        const groups: Array<GroupTransaction> = [];
-
+        const groupsMap = new Map<string, GroupTransaction>();
+    
         for (const transaction of transactions) {
             const groupName = this.getGroupName(transaction.createdAt as Date);
-            //const user = await this.userService.findById(transaction.createdBy as string);
-            let group = groups.find((group) => group.groupName === groupName);
-        
-            // group doesn't exist, add it
+    
+            // Get or create the group
+            let group = groupsMap.get(groupName);
+    
             if (!group) {
-              groups.push(new GroupTransaction(groupName, []));
+                group = new GroupTransaction(groupName, []);
+                groupsMap.set(groupName, group);
             }
-        
-            group = groups.find((group) => group.groupName === groupName);
+    
             const date = (transaction.createdAt as Date).toDateString();
             const transactionId = transaction.id as string;
-            group?.transactions.push({
-              id: transactionId,
-              description: transaction.description,
-              date: DateUtils.getShortDate(date),
-              showRed: transaction.category.type === 1,
-              amount: transaction.category.type === 1 ? transaction.amount * -1: transaction.amount,
-              budget: transaction.budget as Budget,
-              category: transaction.category,
-              categoryName: transaction.category.name,
-              transactionType: transaction.category.type == 0 ? 0 : 1,
-              addedBy: ``,
-              icon: transaction.category.icon as string
+    
+            group.transactions.push({
+                id: transactionId,
+                description: transaction.description,
+                date: DateUtils.getShortDate(date),
+                showRed: transaction.category.type === 1,
+                amount: transaction.category.type === 1 ? transaction.amount * -1 : transaction.amount,
+                budget: transaction.budget as Budget,
+                category: transaction.category,
+                categoryName: transaction.category.name,
+                transactionType: transaction.category.type === 0 ? 0 : 1,
+                addedBy: ``,
+                icon: transaction.category.icon as string,
             });
         }
-
-        let sortedGroups = this.sortByGroupName(groups);
-        let finalSortedGroups = this.sortByDate(sortedGroups);
-      
+    
+        const sortedGroups = this.sortByGroupName(Array.from(groupsMap.values()));
+        const finalSortedGroups = this.sortByDate(sortedGroups);
+    
         return finalSortedGroups;
     }
 
