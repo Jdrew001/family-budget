@@ -1,4 +1,4 @@
-import { Account, Budget, Category, CreateTransactionDto, GroupTransaction, Transaction, TransactionGroupRequest } from '@family-budget/family-budget.model';
+import { Account, Budget, Category, CreateTransactionDto, GroupTransaction, Transaction, TransactionDto, TransactionGroupRequest, TransactionQueryDto } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Between, Repository } from 'typeorm';
 import { AccountService } from '../account/account.service';
@@ -118,23 +118,51 @@ export class TransactionService {
         return await query.getMany();
     }
 
+    private async getTransactionsByAccountIdPagingQuery(dto: TransactionGroupRequest) {
+        const result = this.transactionRepository.query(`
+            SELECT * FROM FETCH_GROUP_TRANSACTION($1, $2, $3, $4, $5);
+        `, [dto.accountId, null, null, dto.size, dto.page]);
+
+        return result as Promise<Array<TransactionQueryDto>>;
+    }
+
+    async getGroupedTransaction(transaction: Transaction): Promise<TransactionDto> {
+        const groupName = this.getGroupName(transaction.createdAt as Date);
+        const date = (transaction.createdAt as Date).toDateString();
+        const transactionId = transaction.id as string;
+        return {
+            id: transactionId,
+            description: transaction.description,
+            date: DateUtils.getShortDate(date),
+            showRed: transaction.category.type === 1,
+            amount: transaction.category.type === 1 ? transaction.amount * -1 : transaction.amount,
+            budget: transaction.budget as Budget,
+            category: transaction.category,
+            categoryName: transaction.category.name,
+            transactionType: transaction.category.type === 0 ? 0 : 1,
+            addedBy: ``,
+            icon: transaction.category.icon as string,
+            groupName: groupName
+        };
+    }
+
     async getGroupedTransactions(dto: TransactionGroupRequest) {
         if (dto.page === 0) {
             dto.page = 1;
         }
     
-        const transactions = await this.getTransactionsByAccountIdPaging(dto);
+        const transactions = await this.getTransactionsByAccountIdPagingQuery(dto);
+        //const transactions = await this.getTransactionsByAccountIdPaging(dto);
         const groupsMap = new Map<string, GroupTransaction>();
     
         for (const transaction of transactions) {
-            const groupName = this.getGroupName(transaction.createdAt as Date);
     
             // Get or create the group
-            let group = groupsMap.get(groupName);
+            let group = groupsMap.get(transaction.transactionGroup);
     
             if (!group) {
-                group = new GroupTransaction(groupName, []);
-                groupsMap.set(groupName, group);
+                group = new GroupTransaction(transaction.transactionGroup, []);
+                groupsMap.set(transaction.transactionGroup, group);
             }
     
             const date = (transaction.createdAt as Date).toDateString();
@@ -144,21 +172,21 @@ export class TransactionService {
                 id: transactionId,
                 description: transaction.description,
                 date: DateUtils.getShortDate(date),
-                showRed: transaction.category.type === 1,
-                amount: transaction.category.type === 1 ? transaction.amount * -1 : transaction.amount,
-                budget: transaction.budget as Budget,
-                category: transaction.category,
-                categoryName: transaction.category.name,
-                transactionType: transaction.category.type === 0 ? 0 : 1,
+                showRed: transaction.categoryType === 1,
+                amount: transaction.categoryType === 1 ? transaction.amount * -1 : transaction.amount,
+                budgetId: transaction.budgetId,
+                budgetStartDate: transaction.budgetStartDate,
+                budgetEndDate: transaction.budgetEndDate,
+                budgetActiveInd: transaction.budgetActiveInd,
+                categoryId: transaction.categoryId,
+                categoryType: transaction.categoryType,
+                categoryName: transaction.categoryName,
                 addedBy: ``,
-                icon: transaction.category.icon as string,
+                icon: transaction.categoryIcon,
             });
         }
     
-        const sortedGroups = this.sortByGroupName(Array.from(groupsMap.values()));
-        const finalSortedGroups = this.sortByDate(sortedGroups);
-    
-        return finalSortedGroups;
+        return [...groupsMap.values()];
     }
 
     private sortByDate(groups: Array<GroupTransaction>) {
