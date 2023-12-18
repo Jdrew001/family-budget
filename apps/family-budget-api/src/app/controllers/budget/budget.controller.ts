@@ -85,8 +85,8 @@ export class BudgetController {
                 name: budgetCategory.category.name,
                 budgetAmount: budgetCategory.amount,
                 type: budgetCategory.category.type,
-                spentAmount: categorySpentAmount?.amount,
-                remainingAmount: budgetCategory.amount - categorySpentAmount?.amount,
+                spentAmount: categorySpentAmount?.amount || 0,
+                remainingAmount: budgetCategory.amount - (categorySpentAmount?.amount || 0),
                 showRed: budgetCategory.amount - categorySpentAmount?.amount < 0,
                 circleGuage: {
                     minValue: 0,
