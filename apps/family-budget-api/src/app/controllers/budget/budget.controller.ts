@@ -91,7 +91,7 @@ export class BudgetController {
                 circleGuage: {
                     minValue: 0,
                     maxValue: 100,
-                    currentValue: currentValue > 100 ? 100 : currentValue,
+                    currentValue: !currentValue ? 0: currentValue > 100 ? 100 : currentValue,
                     showRed: currentValue > 100,
                     icon: budgetCategory?.category?.icon
                 }
