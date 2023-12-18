@@ -66,8 +66,8 @@ export class SummaryController {
                 const multiplyBy = transaction.category.type == CategoryType.Expense ? -1 : 1;
                 const amount = (transaction.amount * multiplyBy).toString();
                 const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(transaction?.budget?.id, transaction?.category?.id);
-                const categorySpentAmount = await this.budgetService.getSpentAmountForCategory(transaction.category, transaction?.budget?.id);
-                const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
+                const categorySpentAmount = (await this.budgetService.getSpendAmountForCategoryQuery(transaction.category, transaction?.budget?.id))[0];
+                const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount?.amount / categoryBudgetAmount) * 100 : 0;
                 const user = await this.userService.findById(transaction.createdBy);
                 return {
                     id: transaction.id,

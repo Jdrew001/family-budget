@@ -39,3 +39,4 @@ export * from './lib/dto/family/family-status.model';
 export * from './lib/dto/shared/alert-box.model';
 export * from './lib/dto/user/user-onboarding.model';
 export * from './lib/dto/transaction/manage-transaction.model';
+export * from './lib/dto/budget/budget-category.model';

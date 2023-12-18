@@ -1,4 +1,4 @@
-import { Account, Budget, BudgetPeriod, Category, CreateAccountDto, Family, Frequency } from '@family-budget/family-budget.model';
+import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, Category, CreateAccountDto, Family, Frequency } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import moment from 'moment';
@@ -146,17 +146,13 @@ export class BudgetService {
         return categoryBudget?.amount || 0;
     }
 
-    async getSpentAmountForCategory(category: Category, budgetId: string) {
-        if (!category || !budgetId) return 0;
-        const budget = await this.getBudgetById(budgetId);
-        const transactions = budget?.account?.transactions?.filter(transaction => 
-            {
-                return transaction.category.id === category.id && transaction.budget?.id === budgetId;
-            }) || [];
-        const spent = transactions.reduce((total, transaction) => {
-            return total + transaction.amount;
-        }, 0)
-        return spent
+    async getSpendAmountForCategoryQuery(category: Category, budgetId: string) {
+        if (!category || !budgetId) return null;
+        const result = this.budgetRepository.query(`
+            SELECT * FROM CALCULATE_CATEGORY_BUDGET($1, $2);
+        `, [category.id, budgetId]);
+
+        return result as Promise<Array<BudgetCategoryAmount>>;
     }
 
     private handleFrequency(budgetPeriod: Frequency, newBudget: Budget, prevBudget: Budget) {
