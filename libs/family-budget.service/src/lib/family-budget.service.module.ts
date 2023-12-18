@@ -33,6 +33,7 @@ import { CategoryService } from './category/category.service';
 import { ReferenceService } from './reference/reference.service';
 import { FrequencyReferenceService } from './frequency-reference/frequency-reference.service';
 import { TextingService } from './texting/texting.service';
+import { WebSocketService } from './web-socket/web-socket.service';
 
 @Module({
   controllers: [],
@@ -52,6 +53,7 @@ import { TextingService } from './texting/texting.service';
     ReferenceService,
     FrequencyReferenceService,
     TextingService,
+    WebSocketService,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -90,6 +92,7 @@ import { TextingService } from './texting/texting.service';
     BalanceService,
     ReferenceService,
     FrequencyReferenceService,
+    WebSocketService
   ],
 })
 export class FamilyBudgetServiceModule {}

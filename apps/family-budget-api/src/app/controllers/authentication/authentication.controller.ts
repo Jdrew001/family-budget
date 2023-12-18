@@ -4,17 +4,26 @@ import { Request, Response } from 'express';
 import { AuthenticationService } from 'libs/family-budget.service/src/lib/authentication/authentication.service';
 import { RefreshTokenGuard } from '../../guards/refresh-token.guard';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
+import { WebSocketService } from 'libs/family-budget.service/src/lib/web-socket/web-socket.service';
+import { EVENT_DEFINITION } from '@family-budget/family-budget.service';
 
 @Controller('authentication')
 export class AuthenticationController {
 
     constructor(
-        private authenticationService: AuthenticationService
+        private authenticationService: AuthenticationService,
+        private readonly webSocketService: WebSocketService,
     ) {}
 
     @Get('health')
     healthCheck() {
         return 'App is running!!!!';
+    }
+
+    @Get('socketTest')
+    socketTest() {
+        this.webSocketService.sendEventToClients(EVENT_DEFINITION.TRANSACTION.CREATED, {test: 'test'});
+        return 'socket test';
     }
 
     @Post('signup')
