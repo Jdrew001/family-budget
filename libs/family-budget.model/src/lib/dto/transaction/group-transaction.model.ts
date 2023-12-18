@@ -1,5 +1,5 @@
 import { Budget } from "../../entities/budget.model";
-import { Category } from "../../entities/category.model";
+import { Category, CategoryType } from "../../entities/category.model";
 import { Transaction } from "../../entities/transaction.model";
 
 export class GroupTransaction {
@@ -12,18 +12,42 @@ export class GroupTransaction {
     }
 }
 
+export interface TransactionQueryDto {
+    id: string;
+    description: string;
+    amount: number;
+    createdAt: any,
+    createdBt: string,
+    categoryId: string,
+    categoryType: CategoryType,
+    categoryName: string,
+    categoryIcon: string,
+    budgetId: string,
+    budgetStartDate: string,
+    budgetEndDate: string,
+    budgetActiveInd: boolean,
+    transactionGroup: string
+}
+
 export interface TransactionDto {
     id: string;
     description: string;
     date: string;
     showRed: boolean;
     amount: number;
-    budget: Budget,
-    category: Category;
-    categoryName: string;
-    transactionType: number;
-    addedBy: string;
+    categoryId?: string;
+    categoryType?: CategoryType;
+    categoryName?: string;
     icon: string;
+    budget?: Budget;
+    category?: Category;
+    transactionType?: number;
+    budgetId?: string;
+    budgetStartDate?: string;
+    budgetEndDate?: string;
+    budgetActiveInd?: boolean;
+    addedBy?: string;
+    groupName?: string;
 }
 
 export interface TransactionGroupRequest {

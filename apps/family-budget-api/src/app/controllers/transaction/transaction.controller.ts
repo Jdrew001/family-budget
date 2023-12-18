@@ -3,7 +3,7 @@ import { Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/commo
 import { Request, Response } from 'express';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
-import { CreateTransactionDto, TransactionAction, Transaction, CategoryType, TransactionGroupRequest, ManageTransactionDto, GenericResponseModel } from '@family-budget/family-budget.model';
+import { CreateTransactionDto, TransactionAction, Transaction, CategoryType, TransactionGroupRequest, ManageTransactionDto, GenericResponseModel, GroupTransaction, TransactionDto } from '@family-budget/family-budget.model';
 import { BalanceService } from 'libs/family-budget.service/src/lib/balance/balance.service';
 import * as _ from 'lodash';
 
@@ -76,7 +76,6 @@ export class TransactionController {
         const newCategory = await this.categoryService.findCategoryById(dto.category);
         const userId = req.user['sub'];
         let transaction;
-        const clonedTransaction = _.clone(transaction);
         let result = null;
         dto.amount = dto.amount.replace(/[$,]/g, "");
 
@@ -94,9 +93,11 @@ export class TransactionController {
                 newAccount,
                 newCategory,
                 userId) as Transaction;
+            
         }
 
         if (result) {
+            const clonedTransaction = _.clone(transaction);
             const newTranAmount = parseFloat(dto.amount);
             let amount = newCategory.type == CategoryType.Income ? newTranAmount : newTranAmount * -1;
             const isActionEdit = action == TransactionAction.Edit;
@@ -107,8 +108,7 @@ export class TransactionController {
             if (isActionEdit && clonedTransaction?.account?.id != newAccount.id) {
                 const amountRemoval = clonedTransaction.category.type == CategoryType.Income ? clonedTransaction.amount * -1 : clonedTransaction.amount;
                 await this.balanceService.updateAddLatestBalance(clonedTransaction.account, +amountRemoval);
-                await this.balanceService.updateAddLatestBalance(newAccount, +amount);
-
+                this.balanceService.updateAddLatestBalance(newAccount, +amount);
                 return res.status(200).json({ success: true, data: result });
             }
 
@@ -146,25 +146,7 @@ export class TransactionController {
         const transactionsWithCircleGuage = await Promise.all(
             transactions.map(async (group) => {
                 const transactionsWithCircleGuage = await Promise.all(
-                    group.transactions.map(async (transaction) => {
-                        const [categoryBudgetAmount, categorySpentAmount] = await Promise.all([
-                            this.budgetService.getCategoryBudgetAmount(transaction?.budget?.id, transaction?.category?.id),
-                            this.budgetService.getSpentAmountForCategory(transaction?.category, transaction?.budget?.id),
-                        ]);
-
-                        const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
-
-                        return {
-                            ...transaction,
-                            circleGuage: {
-                                minValue: 0,
-                                maxValue: 100,
-                                currentValue: currentValue > 100 ? 100 : currentValue,
-                                showRed: currentValue > 100,
-                                icon: transaction?.category?.icon,
-                            },
-                        };
-                    })
+                    group.transactions.map(async (transaction) => this.prepareTransactionGroupDTO(transaction))
                 );
 
                 return {
@@ -174,5 +156,31 @@ export class TransactionController {
             })
         );
         return { page: dto.page, pageSize: dto.size, transactions: transactionsWithCircleGuage };
+    }
+
+    private async prepareTransactionGroupDTO(transaction: TransactionDto) {
+        const category = {
+            id: transaction?.categoryId,
+            name: transaction?.categoryName,
+            icon: transaction?.icon,
+            type: transaction?.categoryType,
+        }
+        const [categoryBudgetAmount, categorySpentAmount] = await Promise.all([
+            this.budgetService.getCategoryBudgetAmount(transaction?.budgetId, transaction?.categoryId),
+            this.budgetService.getSpentAmountForCategory(category, transaction?.budgetId),
+        ]);
+
+        const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
+
+        return {
+            ...transaction,
+            circleGuage: {
+                minValue: 0,
+                maxValue: 100,
+                currentValue: currentValue > 100 ? 100 : currentValue,
+                showRed: currentValue > 100,
+                icon: transaction?.icon,
+            },
+        };
     }
 }
