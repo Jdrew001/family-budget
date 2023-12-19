@@ -3,7 +3,7 @@ import { Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/commo
 import { Request, Response } from 'express';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
-import { CreateTransactionDto, TransactionAction, Transaction, CategoryType, TransactionGroupRequest, ManageTransactionDto, GenericResponseModel, GroupTransaction, TransactionDto } from '@family-budget/family-budget.model';
+import { CreateTransactionDto, TransactionAction, Transaction, CategoryType, TransactionGroupRequest, ManageTransactionDto, GenericResponseModel, GroupTransaction, TransactionDto, BudgetCategoryAmount } from '@family-budget/family-budget.model';
 import { BalanceService } from 'libs/family-budget.service/src/lib/balance/balance.service';
 import * as _ from 'lodash';
 
@@ -167,10 +167,9 @@ export class TransactionController {
         }
         const [categoryBudgetAmount, categorySpentAmount] = await Promise.all([
             this.budgetService.getCategoryBudgetAmount(transaction?.budgetId, transaction?.categoryId),
-            this.budgetService.getSpentAmountForCategory(category, transaction?.budgetId),
+            this.budgetService.getSpendAmountForCategoryQuery(category, transaction?.budgetId) as Promise<Array<BudgetCategoryAmount>>
         ]);
-
-        const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
+        const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount[0]?.amount / categoryBudgetAmount) * 100 : 0;
 
         return {
             ...transaction,

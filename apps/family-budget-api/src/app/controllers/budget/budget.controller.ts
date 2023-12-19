@@ -78,21 +78,20 @@ export class BudgetController {
         const budget = await this.budgetService.getBudgetById(budgetId);
         const result = await Promise.all(budget.budgetCategories.map(async budgetCategory => {
             const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(budget.id, budgetCategory.category.id);
-            const categorySpentAmount = await this.budgetService.getSpentAmountForCategory(budgetCategory.category, budget.id);
-            const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount / categoryBudgetAmount) * 100 : 0;
-            const spent = await this.budgetService.getSpentAmountForCategory(budgetCategory.category, budget.id)
+            const categorySpentAmount = (await this.budgetService.getSpendAmountForCategoryQuery(budgetCategory.category, budget.id))[0];
+            const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount?.amount / categoryBudgetAmount) * 100 : 0;
             return {
                 id: budgetCategory.id,
                 name: budgetCategory.category.name,
                 budgetAmount: budgetCategory.amount,
                 type: budgetCategory.category.type,
-                spentAmount: spent,
-                remainingAmount: budgetCategory.amount - spent,
-                showRed: budgetCategory.amount - spent < 0,
+                spentAmount: categorySpentAmount?.amount || 0,
+                remainingAmount: budgetCategory.amount - (categorySpentAmount?.amount || 0),
+                showRed: budgetCategory.amount - categorySpentAmount?.amount < 0,
                 circleGuage: {
                     minValue: 0,
                     maxValue: 100,
-                    currentValue: currentValue > 100 ? 100 : currentValue,
+                    currentValue: !currentValue ? 0: currentValue > 100 ? 100 : currentValue,
                     showRed: currentValue > 100,
                     icon: budgetCategory?.category?.icon
                 }
