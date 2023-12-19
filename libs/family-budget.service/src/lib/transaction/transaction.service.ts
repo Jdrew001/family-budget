@@ -4,7 +4,6 @@ import { Between, Repository } from 'typeorm';
 import { AccountService } from '../account/account.service';
 import { BalanceService } from '../balance/balance.service';
 import moment from 'moment';
-import { group } from 'console';
 import { DateUtils } from '../util/date-util';
 import { UserService } from '../user/user.service';
 
@@ -187,40 +186,6 @@ export class TransactionService {
         }
     
         return [...groupsMap.values()];
-    }
-
-    private sortByDate(groups: Array<GroupTransaction>) {
-        groups.forEach((group) => {
-            group.transactions.sort((a, b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                return dateB.getTime() - dateA.getTime();
-            });
-        });
-
-        return groups;
-    }
-
-    private sortByGroupName(groups: Array<GroupTransaction>) {
-
-        // starting with zero
-        const groupOrder: Record<string, number> = {
-            'Today': 0,
-            'Yesterday': 1,
-            'This Week': 2,
-            'Last Week': 3,
-            'This Month': 4,
-            'Last Month': 5,
-            'Older': 6,
-        };
-
-        groups.sort((a, b) => {
-            const aIndex = groupOrder[a.groupName];
-            const bIndex = groupOrder[b.groupName];
-            return aIndex - bIndex;
-        });
-
-        return groups
     }
 
     private getGroupName(transactionDate: Date) {

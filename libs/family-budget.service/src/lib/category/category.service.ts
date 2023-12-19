@@ -70,6 +70,17 @@ export class CategoryService {
         return await this.budgetCategoryRepository.find({ where: { budget: budget } }) as BudgetCategory[];
     }
 
+    async updateCategoryForBudget(budgetId: string, categoryDto: CreateCategoryBudgetDto) {
+        const budgetCategory = await this.budgetCategoryRepository.findOne({ where: { id: categoryDto.id, budget: {id: budgetId} } }) as BudgetCategory;
+
+        if (budgetCategory) {
+            budgetCategory.amount = categoryDto.amount as number;
+            return await this.budgetCategoryRepository.save(budgetCategory);
+        }
+
+        return null;
+    }
+
     async getCategoriesForBudget(budget: Budget): Promise<BudgetCategory[]> {
         return await this.budgetCategoryRepository.find({ where: { budget: budget }, relations: ['category'] }) as BudgetCategory[];
     };

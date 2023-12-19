@@ -43,6 +43,21 @@ export class CategoryController {
         return await this.categoryService.createCategoryForBudget(budget, formattedData.category);
     }
 
+    @Post('updateCategoryForBudget')
+    async updateCategoryForBudget(@Req() req: Request) {
+        const data = req.body as {budgetCategoryId: string, category: CreateCategoryBudgetDto};
+        const formattedAmount = (data.category.amount as string).replace(/[$,]/g, "");
+        const formattedData = {
+            budgetCategoryId: data.budgetCategoryId,
+            category: {
+                id: data.category.id,
+                amount: parseFloat(formattedAmount)
+            }
+        };
+        
+        return await this.categoryService.updateCategoryForBudget(data.budgetCategoryId, formattedData.category);
+    }
+
     @Post('createCategory')
     async createCategory(@Req() req: Request) {
         const userId = req.user['sub'];
