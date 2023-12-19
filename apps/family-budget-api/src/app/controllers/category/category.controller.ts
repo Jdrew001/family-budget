@@ -58,6 +58,11 @@ export class CategoryController {
         return await this.categoryService.updateCategoryForBudget(data.budgetCategoryId, formattedData.category);
     }
 
+    @Get('deleteCategoryForBudget/:budgetCategoryId')
+    async deleteCategoryForBudget(@Param('budgetCategoryId') budgetCategoryId: string) {
+        return await this.categoryService.deleteCategoryForBudget(budgetCategoryId);
+    }
+
     @Post('createCategory')
     async createCategory(@Req() req: Request) {
         const userId = req.user['sub'];

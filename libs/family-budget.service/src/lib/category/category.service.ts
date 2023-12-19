@@ -81,6 +81,12 @@ export class CategoryService {
         return null;
     }
 
+    async deleteCategoryForBudget(budgetCategoryId: string) {
+        const budgetCategory = await this.budgetCategoryRepository.findOne({ where: { id: budgetCategoryId } }) as BudgetCategory;
+        await this.budgetCategoryRepository.remove(budgetCategory);
+        return await this.budgetCategoryRepository.find({ where: { budget: budgetCategory.budget } }) as BudgetCategory[];
+    }
+
     async getCategoriesForBudget(budget: Budget): Promise<BudgetCategory[]> {
         return await this.budgetCategoryRepository.find({ where: { budget: budget }, relations: ['category'] }) as BudgetCategory[];
     };
