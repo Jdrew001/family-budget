@@ -81,7 +81,7 @@ export class UserService {
         const newUserInvite = new UserInvite();
         newUserInvite.email = userInviteDto.email;
         newUserInvite.family = user.family;
-        newUserInvite.updateBy = user;
+        newUserInvite.updatedBy = user.id;
         return new GenericResponseModel(true, '', 200, await this.userInviteRepo.save(newUserInvite));
     }
 
