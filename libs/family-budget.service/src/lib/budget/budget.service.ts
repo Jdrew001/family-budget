@@ -1,5 +1,5 @@
 import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, Category, CreateAccountDto, Family, Frequency } from '@family-budget/family-budget.model';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import moment from 'moment';
 import { DateUtils } from '../util/date-util';
@@ -46,6 +46,7 @@ export class BudgetService {
             const endDate = DateUtils.getYYYYMMDD(budget.endDate.toDateString());
             const mStartDate = moment(startDate);
             const mEndDate = moment(endDate);
+            Logger.log(`Current Date: ${currentDate} Start Date: ${startDate} End Date: ${endDate}`);
             return mCurrentDate.isSameOrAfter(mStartDate) && mCurrentDate.isSameOrBefore(mEndDate);
         }) as Budget[];
         if (account.budgetPeriod && budgets.length == 0) {
