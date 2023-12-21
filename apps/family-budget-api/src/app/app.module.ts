@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Scope } from '@nestjs/common';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -18,6 +18,8 @@ import { CategoryController } from './controllers/category/category.controller';
 import { BudgetController } from './controllers/budget/budget.controller';
 import { ReferenceController } from './controllers/reference/reference.controller'; 
 import { FamilyController } from './controllers/family/family.controller';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { UserInterceptor } from './core/interceptors/user.interceptor';
 
 @Module({
   imports: [
@@ -41,6 +43,15 @@ import { FamilyController } from './controllers/family/family.controller';
     ReferenceController,
     FamilyController,
   ],
-  providers: [AppService, AccessTokenGuard, RefreshTokenGuard],
+  providers: [
+    AppService, 
+    AccessTokenGuard, 
+    RefreshTokenGuard,
+    {
+      provide: APP_INTERCEPTOR,
+      scope: Scope.REQUEST,
+      useClass: UserInterceptor,
+    }
+  ],
 })
 export class AppModule {}

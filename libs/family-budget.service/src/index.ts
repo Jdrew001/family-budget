@@ -9,3 +9,4 @@ export * from './lib/category/category.service';
 export * from './lib/family/family.service';
 export * from './lib/user/user.service';
 export * from './lib/reference/reference.service';
+export * from './lib/core/core.service';

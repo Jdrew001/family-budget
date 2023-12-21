@@ -43,6 +43,9 @@ export class User {
     activeInd?: boolean;
 
     @Column({nullable: true})
+    timezone?: string;
+
+    @Column({nullable: true})
     refreshToken: string;
 
     @ManyToOne(() => Subscription, (subscription) => subscription.users)

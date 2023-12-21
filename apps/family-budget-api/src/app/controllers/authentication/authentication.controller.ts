@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { AuthenticationService } from 'libs/family-budget.service/src/lib/authentication/authentication.service';
 import { RefreshTokenGuard } from '../../guards/refresh-token.guard';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
+import * as moment from 'moment-timezone';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -15,6 +16,12 @@ export class AuthenticationController {
     @Get('health')
     healthCheck() {
         return 'App is running!!!!';
+    }
+
+    @Get('timezone')
+    getTimeZone() {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        return moment.tz(new Date(), tz).format('YYYY-MM-DD HH:mm:ss');;
     }
 
     @Post('signup')

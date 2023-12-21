@@ -1,9 +1,11 @@
 import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, Category, CreateAccountDto, Family, Frequency } from '@family-budget/family-budget.model';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import moment from 'moment';
+import * as moment from 'moment-timezone';
 import { DateUtils } from '../util/date-util';
 import * as _ from 'lodash';
+import { UserService } from '../user/user.service';
+import { CoreService } from '../core/core.service';
 
 @Injectable()
 export class BudgetService {
@@ -11,6 +13,7 @@ export class BudgetService {
     constructor(
         @Inject('BudgetRepository') private readonly budgetRepository: Repository<Budget>,
         @Inject('BudgetPeriodRepository') private readonly budgetPeriodRepository: Repository<BudgetPeriod>,
+        private readonly coreService: CoreService
     ) { }
 
     async fetchBudgetsFromAccounts(accounts: Array<Account>) {
@@ -39,15 +42,15 @@ export class BudgetService {
     }
 
     async getCurrentBudget(account: Account) {
-        const currentDate = DateUtils.getYYYYMMDD((new Date()).toDateString());
-        const mCurrentDate = moment(currentDate);
+        const user = await this.coreService.currentUser;
+        const currentDate = moment.tz(new Date(), user.timezone as string);
         const budgets = account?.budgets?.filter(budget => {
             const startDate = DateUtils.getYYYYMMDD(budget.startDate.toDateString());
             const endDate = DateUtils.getYYYYMMDD(budget.endDate.toDateString());
-            const mStartDate = moment(startDate);
-            const mEndDate = moment(endDate);
-            Logger.log(`Current Date: ${currentDate} Start Date: ${startDate} End Date: ${endDate}`);
-            return mCurrentDate.isSameOrAfter(mStartDate) && mCurrentDate.isSameOrBefore(mEndDate);
+            const mStartDate = moment.tz(startDate, user.timezone as string).startOf('day');
+            const mEndDate = moment.tz(endDate, user.timezone as string).endOf('day');
+            Logger.log(`Current Date: ${currentDate.format('YYYY-MM-DD HH:mm:ss')} Start Date: ${mStartDate.format('YYYY-MM-DD HH:mm:ss')} End Date: ${mEndDate.format('YYYY-MM-DD HH:mm:ss')}`);
+            return currentDate.isSameOrAfter(mStartDate) && currentDate.isSameOrBefore(mEndDate);
         }) as Budget[];
         if (account.budgetPeriod && budgets.length == 0) {
             return await this.createNewBudget(account);
@@ -115,7 +118,7 @@ export class BudgetService {
 
         //get the pay period for the account
         const budgetPeriod = account.budgetPeriod;
-        const newBudget = this.handleFrequency(budgetPeriod.frequency, new Budget(), (budget as Budget));
+        const newBudget = await this.handleFrequency(budgetPeriod.frequency, new Budget(), (budget as Budget));
         newBudget.account = account;
         newBudget.budgetCategories = [];
         return await this.budgetRepository.save(newBudget);
@@ -156,10 +159,11 @@ export class BudgetService {
         return result as Promise<Array<BudgetCategoryAmount>>;
     }
 
-    private handleFrequency(budgetPeriod: Frequency, newBudget: Budget, prevBudget: Budget) {
+    private async handleFrequency(budgetPeriod: Frequency, newBudget: Budget, prevBudget: Budget) {
+        const user = await this.coreService.currentUser;
         
         // using moment, using the frequency add the appropriate amount of time to the prevBudget endDate and start date
-        const endDate = moment.utc(prevBudget.endDate);
+        const endDate = moment.tz(prevBudget.endDate, user.timezone as string).endOf('day');
 
         switch (budgetPeriod) {
             case Frequency.Weekly:

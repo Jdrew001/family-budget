@@ -23,11 +23,12 @@
     "@nestjs/passport": "^10.0.2",
     "@nestjs/platform-express": "^10.0.2",
     "@nestjs/typeorm": "^10.0.0",
-    "argon2": "^0.31.1",
-    "lodash": "^4.17.21",
     "@types/lodash": "^4.14.199",
+    "@types/moment-timezone": "^0.5.30",
+    "argon2": "^0.31.1",
     "axios": "^1.0.0",
     "express": "^4.18.2",
+    "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "ngx-plaid-link": "^14.0.0",
     "passport-jwt": "^4.0.1",
@@ -36,9 +37,9 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "tslib": "^2.3.0",
+    "twilio": "^4.11.2",
     "typeorm": "^0.3.17",
-    "zone.js": "~0.13.0",
-    "twilio": "^4.11.2"
+    "zone.js": "~0.13.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~16.2.0",
