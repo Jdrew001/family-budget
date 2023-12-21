@@ -46,7 +46,7 @@ export class BudgetService {
             const endDate = DateUtils.getYYYYMMDD(budget.endDate.toDateString());
             const mStartDate = moment(startDate);
             const mEndDate = moment(endDate);
-            return mCurrentDate.isSameOrAfter(mStartDate) && mCurrentDate.isBefore(mEndDate);
+            return mCurrentDate.isSameOrAfter(mStartDate) && mCurrentDate.isSameOrBefore(mEndDate);
         }) as Budget[];
         if (account.budgetPeriod && budgets.length == 0) {
             return await this.createNewBudget(account);
@@ -157,7 +157,7 @@ export class BudgetService {
 
     private handleFrequency(budgetPeriod: Frequency, newBudget: Budget, prevBudget: Budget) {
         
-        // using moment, using the frequency, add the appropriate amount of time to the prevBudget endDate and start date
+        // using moment, using the frequency add the appropriate amount of time to the prevBudget endDate and start date
         const endDate = moment.utc(prevBudget.endDate);
 
         switch (budgetPeriod) {
