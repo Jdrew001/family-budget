@@ -19,7 +19,7 @@ export class AccountController {
 
     @Get('accountBalances')
     async getAccountBalances(@Req() req: Request): Promise<SummaryAccountBalance[]> {
-        const accountBalances = await this.accountService.getAccountBalancesForUser(this.currentUser.id);
+        const accountBalances = await this.accountService.getAccountBalancesForUser();
         return accountBalances.map((account, index: number) => {
             return {
                 id: account.accountId,
@@ -33,7 +33,7 @@ export class AccountController {
 
     @Get('getUserAccounts')
     async getAccounts(@Req() req: Request) {
-        const accounts = await this.accountService.getAccountsUserUser(this.currentUser.id);
+        const accounts = await this.accountService.getAccountsUserUser();
         return accounts.map((account, index: number) => {
             return {
                 id: account.id,
@@ -50,7 +50,7 @@ export class AccountController {
         const nAccounts = req.body as CreateAccountDto[];
         const accounts = [];
         nAccounts.forEach(async item => {
-            accounts.push(await this.accountService.createAccountForUser(this.currentUser.id, item));
+            accounts.push(await this.accountService.createAccountForUser(item));
         });
         return accounts;
     }

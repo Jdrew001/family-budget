@@ -1,10 +1,9 @@
-import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, Category, CreateAccountDto, Family, Frequency } from '@family-budget/family-budget.model';
+import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, Category, Frequency } from '@family-budget/family-budget.model';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import * as moment from 'moment-timezone';
 import { DateUtils } from '../util/date-util';
 import * as _ from 'lodash';
-import { UserService } from '../user/user.service';
 import { CoreService } from '../core/core.service';
 
 @Injectable()

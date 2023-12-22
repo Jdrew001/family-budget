@@ -5,22 +5,24 @@ import { ConfigService } from '@nestjs/config';
 import { CreateUserDto, LoginUserDto, User } from '@family-budget/family-budget.model';
 import * as argon2 from 'argon2';
 import { FamilyService } from '../family/family.service';
+import { CoreService } from '../core/core.service';
 
 @Injectable()
 export class AuthenticationService {
+
+  get currentUser() { return this.coreService.currentUser; }
     
     constructor(
         private userService: UserService,
         private jwtService: JwtService,
         private configService: ConfigService,
-        private familyService: FamilyService
+        private coreService: CoreService
     ) {}
 
     async signUp(createUserDto: CreateUserDto) {
       createUserDto.email = createUserDto.email.toLowerCase().trim();
       createUserDto.password = createUserDto.password.trim();
         const userExists = await this.userService.findByEmail(createUserDto.email);
-        let isUserInvited = false;
         if (userExists) {
             throw new BadRequestException('User already exists');
         }
@@ -46,19 +48,18 @@ export class AuthenticationService {
         return {tokens: tokens, user: user};
     }
 
-    async refreshTokens(userId: string, refreshToken: string) {
-      const user = await this.userService.findById(userId);
-      if (!user || !user.refreshToken) throw new ForbiddenException('Access Denied');
+    async refreshTokens(refreshToken: string) {
+      if (!this.currentUser || !this.currentUser.refreshToken) throw new ForbiddenException('Access Denied');
 
-      const refreshTokenMatches = await argon2.verify(user.refreshToken, refreshToken);
+      const refreshTokenMatches = await argon2.verify(this.currentUser.refreshToken, refreshToken);
       if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
-      const tokens = await this.getTokens(user.id || '', user.email);
-      await this.updateRefreshToken(user.id || '', tokens.refreshToken);
+      const tokens = await this.getTokens(this.currentUser.id || '', this.currentUser.email);
+      await this.updateRefreshToken(this.currentUser.id || '', tokens.refreshToken);
       return tokens;
     }
 
-    async logout(userId: string) {
-        return this.userService.update(userId, {refreshToken: ''});
+    async logout() {
+        return this.userService.update(this.currentUser.id as string, {refreshToken: ''});
     }
 
     hashData(data: string) {

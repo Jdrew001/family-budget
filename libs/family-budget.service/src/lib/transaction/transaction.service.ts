@@ -1,20 +1,16 @@
 import { Account, Budget, Category, CreateTransactionDto, GroupTransaction, Transaction, TransactionDto, TransactionGroupRequest, TransactionQueryDto } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
-import { Between, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AccountService } from '../account/account.service';
-import { BalanceService } from '../balance/balance.service';
 import moment from 'moment';
 import { DateUtils } from '../util/date-util';
-import { UserService } from '../user/user.service';
 
 @Injectable()
 export class TransactionService {
 
     constructor(
         @Inject('TransactionRepository') private readonly transactionRepository: Repository<Transaction>,
-        private readonly balanceService: BalanceService,
-        private readonly accountService: AccountService,
-        private readonly userService: UserService
+        private readonly accountService: AccountService
     ) {}
 
     async getTransactionById(transactionId: string) {

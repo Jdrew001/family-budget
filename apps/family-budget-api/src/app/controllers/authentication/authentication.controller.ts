@@ -51,12 +51,12 @@ export class AuthenticationController {
     @Get('refreshToken')
     refreshTokens(@Req() req: Request) {
         const refreshToken = req.user['refreshToken'];
-        return this.authenticationService.refreshTokens(this.currentUser?.id, refreshToken);
+        return this.authenticationService.refreshTokens(refreshToken);
     }
 
     @UseGuards(AccessTokenGuard)
     @Get('logout')
     logout(@Req() req: Request) {
-        return this.authenticationService.logout(this.currentUser?.id);
+        return this.authenticationService.logout();
     }
 }

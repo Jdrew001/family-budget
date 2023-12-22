@@ -1,7 +1,6 @@
 import { Family, User } from '@family-budget/family-budget.model';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { UserService } from '../user/user.service';
 
 @Injectable()
 export class FamilyService {

@@ -40,7 +40,7 @@ export class TransactionController {
 
     @Get('getTransactionRefData')
     async getTransactionRefData(@Req() req: Request) {
-        const accounts = (await this.accountService.getAccountsUserUser(this.currentUser.id)).map((account, index: number) => {
+        const accounts = (await this.accountService.getAccountsUserUser()).map((account, index: number) => {
             return {
                 id: account.id,
                 name: account.name,

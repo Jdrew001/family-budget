@@ -90,7 +90,7 @@ export class UserController {
         const accounts: CreateAccountDto[] = onboardDto.accounts;
         
         accounts.forEach(async account => {
-            await this.accountService.createAccountForUser(this.currentUser.id, account);
+            await this.accountService.createAccountForUser(account);
         });
 
         // save categories

@@ -6,26 +6,28 @@ import { DateUtils } from '../util/date-util';
 import { UserService } from '../user/user.service';
 import { BudgetService } from '../budget/budget.service';
 import { ConversionUtils } from '../util/conversions.utils';
+import { CoreService } from '../core/core.service';
 
 @Injectable()
 export class AccountService {
+
+    get currentUser() { return this.coreService.currentUser; }
 
     constructor(
         @Inject('AccountRepository') private readonly accountRepository: Repository<Account>,
         @Inject('AccountTypeRepository') private readonly accountTypeRepository: Repository<AccountType>,
         private readonly userService: UserService,
         private readonly budgetService: BudgetService,
-        private readonly balanceService: BalanceService
+        private readonly coreService: CoreService
     ) { }
 
-    async createAccountForUser(userId: string, nAccount: CreateAccountDto, newBudget?: NewAccountBudget) {
-        const user = await this.userService.findById(userId) as User;
+    async createAccountForUser(nAccount: CreateAccountDto) {
         const accountType = await this.getAccountTypeById(nAccount.accountType);
         const account = new Account();
         account.name = nAccount.name;
         account.description = nAccount.description;
         account.accountType = accountType as AccountType;
-        account.family = user.family as Family;
+        account.family = this.currentUser.family as Family;
         account.activeInd = true;
 
         if (nAccount?.frequency !== null) {
@@ -54,7 +56,7 @@ export class AccountService {
         return await this.accountRepository.save(account);
     }
 
-    async getAccountById(accountId: string, count?: number) {
+    async getAccountById(accountId: string) {
         return await this.accountRepository.findOne({ where: { id: accountId }, 
             relations: [
                 'balance',
@@ -72,10 +74,9 @@ export class AccountService {
         return await this.accountRepository.delete({ id: accountId });
     }
 
-    async getAccountsUserUser(userId: string) {
+    async getAccountsUserUser() {
         // using the userId, get the family id and get all accounts for that family;
-        const user = await this.userService.findById(userId) as User;
-        const accounts = await this.accountRepository.find({ where: { family: user.family, activeInd: true },
+        const accounts = await this.accountRepository.find({ where: { family: this.currentUser.family, activeInd: true },
         relations: [
             'transactions',
             'transactions.category',
@@ -86,8 +87,8 @@ export class AccountService {
         return accounts;
     }
 
-    async getAccountBalancesForUser(userId: string): Promise<AccountBalance[]> {
-        const accounts = await this.getAccountsUserUser(userId) as Account[];
+    async getAccountBalancesForUser(): Promise<AccountBalance[]> {
+        const accounts = await this.getAccountsUserUser() as Account[];
 
         //get the latest by date balance for each account
         const balances: Array<AccountBalance> = accounts.map(account => {

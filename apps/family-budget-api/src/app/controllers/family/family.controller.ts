@@ -20,13 +20,10 @@ export class FamilyController {
     async getFamilyMembers(@Req() req) {
         if (!this.currentUser.id) throw new ForbiddenException('User not found');
 
-        const user = await this.userService.findById(this.currentUser.id);
-        if (!user) throw new BadRequestException('User not found');
-
-        const invitedUsersForFamily = await this.userService.findAllInvitesForFamily(user.family.id);
+        const invitedUsersForFamily = await this.userService.findAllInvitesForFamily(this.currentUser.family.id);
         // i want to ensure that the owner is always at the top of the list
-        const familyOwner = user.family.owner;
-        const familyMembers = user.family.users.map(user => {
+        const familyOwner = this.currentUser.family.owner;
+        const familyMembers = this.currentUser.family.users.map(user => {
             return {
                 id: user.id,
                 label: `${user.firstname} ${user.lastname}`,
@@ -58,11 +55,9 @@ export class FamilyController {
     @Get('confirmFamilySwitch/:familyId')
     async confirmFamilySwitch(@Req() req) {
         if (!this.currentUser.id) throw new ForbiddenException('User not found');
-        const user = await this.userService.findById(this.currentUser.id);
-        const userFamily = user.family;
-        if (!user) throw new BadRequestException('User not found');
+        const userFamily = this.currentUser.family;
         
-        const invitation = await this.userService.findInvitationForEmail(user.email);
+        const invitation = await this.userService.findInvitationForEmail(this.currentUser.email);
 
         //get param
         const familyId = req.params.familyId;
@@ -83,7 +78,7 @@ export class FamilyController {
             await this.familyService.markFamilyInactive(userFamily);
 
             // update user with new family
-            const newFamily = await this.userService.updateUserFamily(user, family);
+            const newFamily = await this.userService.updateUserFamily(this.currentUser, family);
             return new GenericResponseModel(true, 'Family Switched', 200, { familyId: newFamily.id });
         }
 
@@ -91,7 +86,7 @@ export class FamilyController {
         if (userFamily && userFamily.owner !== this.currentUser.id) {
 
             // update user with new family
-            const newFamily = await this.userService.updateUserFamily(user, family);
+            const newFamily = await this.userService.updateUserFamily(this.currentUser, family);
             return new GenericResponseModel(true, 'Family Switched', 200, { familyId: newFamily.id });
         }
 
@@ -102,24 +97,14 @@ export class FamilyController {
     async checkFamilyStatus(@Req() req): Promise<GenericResponseModel<FamilyStatusDto>> {
         if (!this.currentUser.id) throw new ForbiddenException('User not found');
 
-        const user = await this.userService.findById(this.currentUser.id);
-        if (!user) throw new BadRequestException('User not found');
-
-        const invitation = await this.userService.findInvitationForEmail(user.email);
-        const userInFamily = !!user.family;
-
-        // if (!invitation && !userInFamily) {
-        //     // create new family for user
-        //     const family = await this.familyService.createFamily(userId);
-        //     await this.userService.updateUserFamily(user, family);
-        //     return new GenericResponseModel(true, 'Family Created for new User', 200, { familyId: family.id, dialogConfig: null  });
-        // }
+        const invitation = await this.userService.findInvitationForEmail(this.currentUser.email);
+        const userInFamily = !!this.currentUser.family;
 
         // if they have been invited and they have not been in a family, add them to the family they are invited to
         if (invitation && !userInFamily) {
             // add them to the family they are invited to
-            const family = await this.familyService.addFamilyMember(invitation.family.id, user);
-            await this.userService.updateUserFamily(user, family);
+            const family = await this.familyService.addFamilyMember(invitation.family.id, this.currentUser);
+            await this.userService.updateUserFamily(this.currentUser, family);
             await this.userService.markInactive(invitation.id);
             return new GenericResponseModel(true, 'User added to family', 200, { familyId: family.id, dialogConfig: null });
         }
@@ -128,7 +113,7 @@ export class FamilyController {
         if (invitation && userInFamily) { 
             const alertBoxDto = new AlertBoxDto();
             alertBoxDto.title = 'Pending Invite';
-            alertBoxDto.message = `You have been invited to join another family. Would you like to join ${user?.firstname} ${user?.lastname}'s Family?`;
+            alertBoxDto.message = `You have been invited to join another family. Would you like to join ${this.currentUser?.firstname} ${this.currentUser?.lastname}'s Family?`;
             alertBoxDto.cancelText = 'No';
             alertBoxDto.confirmText = 'Yes';
             alertBoxDto.dialogType = AlertDialogType.CONFIRM;
@@ -139,7 +124,7 @@ export class FamilyController {
             return new GenericResponseModel(true, ``, 200, { familyId: invitation.family.id, dialogConfig: alertBoxDto });
         }
     
-        return new GenericResponseModel(true, 'No Changes Needed', 200, { familyId: user.family.id, dialogConfig: null });
+        return new GenericResponseModel(true, 'No Changes Needed', 200, { familyId: this.currentUser.family.id, dialogConfig: null });
     }
 
     @Get('leaveFamily')
@@ -174,12 +159,10 @@ export class FamilyController {
     @Get('createNewFamily')
     async createNewFamily(@Req() req): Promise<GenericResponseModel<{familyId: string}>> {
         if (!this.currentUser.id) throw new ForbiddenException('User not found');
-        const user = await this.userService.findById(this.currentUser.id);
-        if (!user) throw new BadRequestException('User not found');
-        let result = await this.familyService.createFamily(user.id);
+        let result = await this.familyService.createFamily(this.currentUser.id);
 
         // update the user with the new family
-        const family = await this.userService.updateUserFamily(user, result);
+        const family = await this.userService.updateUserFamily(this.currentUser, result);
         return new GenericResponseModel(true, '', 200, { familyId: family.id });
     }
 
