@@ -78,6 +78,7 @@ export class TransactionController {
         const newCategory = await this.categoryService.findCategoryById(dto.category);
         const userId = req.user['sub'];
         let transaction;
+        let clonedTransaction;
         let result = null;
         dto.amount = dto.amount.replace(/[$,]/g, "");
 
@@ -89,6 +90,7 @@ export class TransactionController {
                 userId) as Transaction;
         } else {
             transaction = await this.transactionService.getTransactionById(dto.id);
+            clonedTransaction = _.clone(transaction);
             result = await this.transactionService.updateTransaction(
                 transaction,
                 dto, 
@@ -99,7 +101,6 @@ export class TransactionController {
         }
 
         if (result) {
-            const clonedTransaction = _.clone(transaction);
             const newTranAmount = parseFloat(dto.amount);
             let amount = newCategory.type == CategoryType.Income ? newTranAmount : newTranAmount * -1;
             const isActionEdit = action == TransactionAction.Edit;
