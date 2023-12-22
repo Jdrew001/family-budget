@@ -168,19 +168,19 @@ export class BudgetService {
         switch (budgetPeriod) {
             case Frequency.Weekly:
                 newBudget.startDate = _.clone(sEndDate).add(1, 'days').startOf('day').toDate();
-                newBudget.endDate = _.clone(mEndDate).add(1, 'weeks').endOf('day').toDate();
+                newBudget.endDate = _.clone(mEndDate).add(1, 'weeks').toDate();
                 break;
             case Frequency.BiWeekly:
                 newBudget.startDate = _.clone(sEndDate).add(1, 'days').startOf('day').toDate();
-                newBudget.endDate = _.clone(mEndDate).add(2, 'weeks').endOf('day').toDate();
+                newBudget.endDate = _.clone(mEndDate).add(2, 'weeks').toDate();
                 break;
             case Frequency.Monthly:
                 newBudget.startDate = _.clone(sEndDate).add(1, 'days').startOf('day').toDate();
-                newBudget.endDate = _.clone(mEndDate).add(1, 'month').endOf('day').toDate();
+                newBudget.endDate = _.clone(mEndDate).add(1, 'month').toDate();
                 break;
             case Frequency.Quarterly:
                 newBudget.startDate = _.clone(sEndDate).add(1, 'days').startOf('day').toDate();
-                newBudget.endDate = _.clone(mEndDate).add(3, 'month').endOf('day').toDate();
+                newBudget.endDate = _.clone(mEndDate).add(3, 'month').toDate();
                 break;
             default:
                 break;
