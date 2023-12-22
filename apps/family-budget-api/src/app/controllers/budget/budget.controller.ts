@@ -1,24 +1,25 @@
 import { LeftSpendingManage } from '@family-budget/family-budget.model';
-import { BudgetService, CategoryService, DateUtils, TransactionService, UserService } from '@family-budget/family-budget.service';
+import { BudgetService, CategoryService, CoreService, DateUtils, UserService } from '@family-budget/family-budget.service';
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
-import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 
 @UseGuards(AccessTokenGuard)
 @Controller('budget')
 export class BudgetController {
 
+    get currentUser() { return this.coreService.currentUser; }
+
     constructor(
         private readonly budgetService: BudgetService,
         private readonly categoryservice: CategoryService,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly coreService: CoreService
     ) { }
 
     @Get('getAllBudgets')
     async getAllBudgets(@Req() req: Request) {
-        const userId = req.user['sub'];
-        const family = await this.userService.findFamilyForUser(userId);
+        const family = await this.userService.findFamilyForUser(this.currentUser.id);
         const accounts = family.accounts.filter(account => account.activeInd);
         const budgets = await this.budgetService.fetchBudgetsFromAccounts(accounts);
         const leftSpendingAmounts: Array<LeftSpendingManage> = [];

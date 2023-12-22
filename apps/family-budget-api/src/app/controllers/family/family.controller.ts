@@ -1,24 +1,26 @@
 import { AlertBoxDto, AlertDialogType, AlertType, FamilyStatusDto, GenericResponseModel, User, UserInviteDto } from '@family-budget/family-budget.model';
 import { BadRequestException, Controller, ForbiddenException, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
-import { FamilyService, UserService } from '@family-budget/family-budget.service';
+import { CoreService, FamilyService, UserService } from '@family-budget/family-budget.service';
 import { AlertKeyConstants } from '../../constants/alert-key.constant';
 
 @UseGuards(AccessTokenGuard)
 @Controller('family')
 export class FamilyController {
 
+    get currentUser() { return this.coreService.currentUser; }
+
     constructor(
         private readonly userService: UserService,
-        private readonly familyService: FamilyService
+        private readonly familyService: FamilyService,
+        private readonly coreService: CoreService
     ) {}
 
     @Get('getFamilyMembers')
     async getFamilyMembers(@Req() req) {
-        const userId = req.user['sub'];
-        if (!userId) throw new ForbiddenException('User not found');
+        if (!this.currentUser.id) throw new ForbiddenException('User not found');
 
-        const user = await this.userService.findById(userId);
+        const user = await this.userService.findById(this.currentUser.id);
         if (!user) throw new BadRequestException('User not found');
 
         const invitedUsersForFamily = await this.userService.findAllInvitesForFamily(user.family.id);
@@ -55,9 +57,8 @@ export class FamilyController {
 
     @Get('confirmFamilySwitch/:familyId')
     async confirmFamilySwitch(@Req() req) {
-        const userId = req.user['sub'];
-        if (!userId) throw new ForbiddenException('User not found');
-        const user = await this.userService.findById(userId);
+        if (!this.currentUser.id) throw new ForbiddenException('User not found');
+        const user = await this.userService.findById(this.currentUser.id);
         const userFamily = user.family;
         if (!user) throw new BadRequestException('User not found');
         
@@ -77,7 +78,7 @@ export class FamilyController {
         }
 
         // check if user is already in the family and is owner
-        if (userFamily && userFamily.owner === userId) {
+        if (userFamily && userFamily.owner === this.currentUser.id) {
             // mark family inactive
             await this.familyService.markFamilyInactive(userFamily);
 
@@ -87,7 +88,7 @@ export class FamilyController {
         }
 
         // check if user is already in the family and is not owner
-        if (userFamily && userFamily.owner !== userId) {
+        if (userFamily && userFamily.owner !== this.currentUser.id) {
 
             // update user with new family
             const newFamily = await this.userService.updateUserFamily(user, family);
@@ -99,10 +100,9 @@ export class FamilyController {
 
     @Get('checkFamilyStatus')
     async checkFamilyStatus(@Req() req): Promise<GenericResponseModel<FamilyStatusDto>> {
-        const userId = req.user['sub'];
-        if (!userId) throw new ForbiddenException('User not found');
+        if (!this.currentUser.id) throw new ForbiddenException('User not found');
 
-        const user = await this.userService.findById(userId);
+        const user = await this.userService.findById(this.currentUser.id);
         if (!user) throw new BadRequestException('User not found');
 
         const invitation = await this.userService.findInvitationForEmail(user.email);
@@ -144,13 +144,12 @@ export class FamilyController {
 
     @Get('leaveFamily')
     async leaveFamily(@Req() req) {
-        const userId = req.user['sub'];
-        if (!userId) throw new ForbiddenException('User not found');
-        const user = await this.userService.findById(userId);
+        if (!this.currentUser.id) throw new ForbiddenException('User not found');
+        const user = await this.userService.findById(this.currentUser.id);
         if (!user) throw new BadRequestException('User not found');
 
         // check if user is owner of family
-        if (user.family.owner === userId) {
+        if (user.family.owner === this.currentUser.id) {
             throw new BadRequestException('Owner cannot leave family');
         }
 
@@ -158,7 +157,7 @@ export class FamilyController {
         const ownedFamily = await this.familyService.isUserOwnerOfAnyFamily(user.id);
         if (!ownedFamily) {
             //TODO: return that the user needs to onboard
-            const family = await this.familyService.createFamily(userId);
+            const family = await this.familyService.createFamily(this.currentUser.id);
             await this.userService.updateUserFamily(user, family);
             return new GenericResponseModel(true, 'Family Created for new User', 200, { familyId: family.id });
         }
@@ -174,9 +173,8 @@ export class FamilyController {
     // --> they have activated their account after being removed from previous family
     @Get('createNewFamily')
     async createNewFamily(@Req() req): Promise<GenericResponseModel<{familyId: string}>> {
-        const userId = req.user['sub'];
-        if (!userId) throw new ForbiddenException('User not found');
-        const user = await this.userService.findById(userId);
+        if (!this.currentUser.id) throw new ForbiddenException('User not found');
+        const user = await this.userService.findById(this.currentUser.id);
         if (!user) throw new BadRequestException('User not found');
         let result = await this.familyService.createFamily(user.id);
 
@@ -187,11 +185,10 @@ export class FamilyController {
 
     @Post('manageInviteUser')
     async manageInviteUser(@Req() req): Promise<GenericResponseModel<any>> {
-        const userId = req.user['sub'];
-        if (!userId) throw new ForbiddenException('User not found');
+        if (!this.currentUser.id) throw new ForbiddenException('User not found');
 
         const userInviteDto = req.body as UserInviteDto;
-        userInviteDto.userId = userId;
+        userInviteDto.userId = this.currentUser.id;
 
         if (!userInviteDto.action) throw new BadRequestException('Invalid action');
 
@@ -204,11 +201,10 @@ export class FamilyController {
 
     @Post('removeFamilyMember')
     async removeFamilyMember(@Req() req): Promise<GenericResponseModel<any>> {
-        const userId = req.user['sub'];
-        if (!userId) throw new ForbiddenException('User not found');
+        if (!this.currentUser.id) throw new ForbiddenException('User not found');
 
         const userInviteDto = req.body as UserInviteDto;
-        userInviteDto.userId = userId;
+        userInviteDto.userId = this.currentUser.id;
         return await this.userService.removeFamilyMember(userInviteDto);
     }
 }

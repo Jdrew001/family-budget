@@ -19,7 +19,7 @@ export class UserInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     if (!request.user) return next.handle();
     const userId = request.user['sub'];// Assuming 'sub' is the user ID property in the token
-    const user = await this.coreService.fetchUserInfo(userId);
+    await this.coreService.fetchUserInfo(userId);
     return next.handle();
   }
 }

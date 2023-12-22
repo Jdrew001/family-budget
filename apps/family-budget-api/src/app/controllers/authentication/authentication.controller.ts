@@ -5,12 +5,16 @@ import { AuthenticationService } from 'libs/family-budget.service/src/lib/authen
 import { RefreshTokenGuard } from '../../guards/refresh-token.guard';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
 import * as moment from 'moment-timezone';
+import { CoreService } from '@family-budget/family-budget.service';
 
 @Controller('authentication')
 export class AuthenticationController {
 
+    get currentUser() { return this.coreService.currentUser; }
+
     constructor(
-        private authenticationService: AuthenticationService
+        private authenticationService: AuthenticationService,
+        private coreService: CoreService
     ) {}
 
     @Get('health')
@@ -36,7 +40,6 @@ export class AuthenticationController {
 
     @Post('signin')
     async signIn(@Body() loginDto: LoginUserDto, @Res() res: Response) {
-        Logger.log(`Sign in attempt for ${loginDto}`)
         const data = await this.authenticationService.signIn(loginDto);
         return res.status(200).json({
             accessToken: data.tokens.accessToken,
@@ -47,15 +50,13 @@ export class AuthenticationController {
     @UseGuards(RefreshTokenGuard)
     @Get('refreshToken')
     refreshTokens(@Req() req: Request) {
-        const userId = req.user['sub'];
         const refreshToken = req.user['refreshToken'];
-        return this.authenticationService.refreshTokens(userId, refreshToken);
+        return this.authenticationService.refreshTokens(this.currentUser?.id, refreshToken);
     }
 
     @UseGuards(AccessTokenGuard)
     @Get('logout')
     logout(@Req() req: Request) {
-        const userId = req.user['sub'];
-        return this.authenticationService.logout(userId);
+        return this.authenticationService.logout(this.currentUser?.id);
     }
 }

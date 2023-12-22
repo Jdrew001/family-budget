@@ -3,34 +3,35 @@ import { UserService } from 'libs/family-budget.service/src/lib/user/user.servic
 import { AccessTokenGuard } from '../../guards/access-token.guard';
 import { CreateAccountDto, CreateCategoryDto, GenericResponse, GenericResponseModel, OnboardingDto, User, UserInfoDto, UserInviteDto } from '@family-budget/family-budget.model';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
-import { CategoryService, FamilyService } from '@family-budget/family-budget.service';
+import { CategoryService, CoreService, FamilyService } from '@family-budget/family-budget.service';
 import { OnboardingConstant } from '../../constants/onboarding-steps.constant';
 
 @UseGuards(AccessTokenGuard)
 @Controller('user')
 export class UserController {
 
+    get currentUser() { return this.coreService.currentUser; }
+
     constructor(
         private readonly userService: UserService,
         private readonly accountService: AccountService,
         private readonly familyService: FamilyService,
-        private readonly categoryService: CategoryService
+        private readonly categoryService: CategoryService,
+        private readonly coreService: CoreService
     ) {}
 
     @Get('getUserEmail')
     async getUserEmail(@Req() req): Promise<GenericResponseModel<string>> {
-        const userId = req.user['sub'];
-        if (!userId) throw new ForbiddenException('User not found');
-        const user = await this.userService.findById(userId);
+        if (!this.currentUser.id) throw new ForbiddenException('User not found');
+        const user = await this.userService.findById(this.currentUser.id);
         if (!user) throw new BadRequestException('User not found');
         return new GenericResponseModel(true, '', 200, user.email);
     }
 
     @Get('getUserInformation')
     async getUserInformation(@Req() req): Promise<UserInfoDto> {
-        const userId = req.user['sub'];
-        if (!userId) throw new ForbiddenException('User not found');
-        const user = await this.userService.findById(userId);
+        if (!this.currentUser.id) throw new ForbiddenException('User not found');
+        const user = await this.userService.findById(this.currentUser.id);
         if (!user) throw new BadRequestException('User not found');
         return {
             id: user.id,
@@ -53,8 +54,7 @@ export class UserController {
 
     @Get('checkOnboardStatus')
     async getUserOnboarded(@Req() req) {
-        const userId = req.user['sub'];
-        const user = await this.userService.findById(userId);
+        const user = await this.userService.findById(this.currentUser.id);
         if (!user) throw new BadRequestException('User not found');
 
         return new GenericResponseModel(true, '', 200, 
@@ -65,8 +65,7 @@ export class UserController {
 
     @Post('handleOnboarding')
     async handleOnboarding(@Req() req) {
-        const userId = req.user['sub'];
-        const user = await this.userService.findById(userId);
+        const user = await this.userService.findById(this.currentUser.id);
         if (!user) throw new BadRequestException('User not found');
 
         const onboardDto = req.body as OnboardingDto;
@@ -84,20 +83,20 @@ export class UserController {
         }
 
         // create new family for user
-        const family = await this.familyService.createFamily(userId);
+        const family = await this.familyService.createFamily(this.currentUser.id);
         await this.userService.updateUserFamily(user, family);
 
         // save accounts
         const accounts: CreateAccountDto[] = onboardDto.accounts;
         
         accounts.forEach(async account => {
-            await this.accountService.createAccountForUser(userId, account);
+            await this.accountService.createAccountForUser(this.currentUser.id, account);
         });
 
         // save categories
         const categories: CreateCategoryDto[] = onboardDto.categories;
         categories.forEach(async category => {
-            await this.categoryService.createCategory(userId, category);
+            await this.categoryService.createCategory(this.currentUser.id, category);
         });
 
         // save family invites

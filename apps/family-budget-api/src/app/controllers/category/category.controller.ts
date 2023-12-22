@@ -1,4 +1,4 @@
-import { BudgetService, CategoryService } from '@family-budget/family-budget.service';
+import { BudgetService, CategoryService, CoreService } from '@family-budget/family-budget.service';
 import { Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
@@ -7,23 +7,24 @@ import { CreateCategoryBudgetDto, CreateCategoryDto } from '@family-budget/famil
 @UseGuards(AccessTokenGuard)
 @Controller('category')
 export class CategoryController {
+
+    get currentUser() { return this.coreService.currentUser; }
     
     constructor(
         private readonly categoryService: CategoryService,
-        private readonly budgetService: BudgetService
+        private readonly budgetService: BudgetService,
+        private readonly coreService: CoreService
     ) {}
 
     @Get('categoriesForUser')
     async fetchCategoriesForUser(@Req() req: Request) {
-        const userId = req.user['sub'];
-        return await this.categoryService.fetchCategoriesForUser(userId);
+        return await this.categoryService.fetchCategoriesForUser(this.currentUser.id);
     }
 
     @Post('createCategories')
     async createCategories(@Req() req: Request) {
-        const userId = req.user['sub'];
         const categories = req.body as Array<CreateCategoryDto>;
-        return await this.categoryService.createCategories(userId, categories);
+        return await this.categoryService.createCategories(this.currentUser.id, categories);
     }
 
     @Post('createCategoryForBudget')
@@ -65,8 +66,7 @@ export class CategoryController {
 
     @Post('createCategory')
     async createCategory(@Req() req: Request) {
-        const userId = req.user['sub'];
         const category = req.body as CreateCategoryDto;
-        return await this.categoryService.createCategory(userId, category);
+        return await this.categoryService.createCategory(this.currentUser.id, category);
     }
 }

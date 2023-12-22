@@ -1,4 +1,4 @@
-import { BudgetService, CategoryService, DateUtils, TransactionService } from '@family-budget/family-budget.service';
+import { BudgetService, CategoryService, CoreService, DateUtils, TransactionService } from '@family-budget/family-budget.service';
 import { Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
@@ -11,12 +11,15 @@ import * as _ from 'lodash';
 @Controller('transaction')
 export class TransactionController {
 
+    get currentUser() { return this.coreService.currentUser; }
+
     constructor(
         private readonly categoryService: CategoryService,
         private readonly accountService: AccountService,
         private readonly transactionService: TransactionService,
         private readonly balanceService: BalanceService,
-        private readonly budgetService: BudgetService
+        private readonly budgetService: BudgetService,
+        private readonly coreService: CoreService
     ) {}
 
     @Get('getTransaction/:id')
@@ -37,8 +40,7 @@ export class TransactionController {
 
     @Get('getTransactionRefData')
     async getTransactionRefData(@Req() req: Request) {
-        const userId = req.user['sub'];
-        const accounts = (await this.accountService.getAccountsUserUser(userId)).map((account, index: number) => {
+        const accounts = (await this.accountService.getAccountsUserUser(this.currentUser.id)).map((account, index: number) => {
             return {
                 id: account.id,
                 name: account.name,
@@ -46,7 +48,7 @@ export class TransactionController {
                 type: account.accountType,
             }
         });
-        const categories = await this.categoryService.fetchCategoriesForUser(userId);
+        const categories = await this.categoryService.fetchCategoriesForUser(this.currentUser.id);
 
         return {
             accounts: accounts,
@@ -133,9 +135,8 @@ export class TransactionController {
 
     @Post('getGroupedTransactions')
     async getGroupedTransactions(@Req() req: Request) {
-        const userId = req.user['sub'];
         const dto = req.body as TransactionGroupRequest;
-        dto.userId = userId;
+        dto.userId = this.currentUser.id;
 
         const transactions = await this.transactionService.getGroupedTransactions(dto);
 

@@ -4,19 +4,22 @@ import { AccessTokenGuard } from '../../guards/access-token.guard';
 import { Request } from 'express';
 import { CreateAccountDto, SummaryAccountBalance } from '@family-budget/family-budget.model';
 import { ConversionUtils } from 'libs/family-budget.service/src/lib/util/conversions.utils';
+import { CoreService } from '@family-budget/family-budget.service';
 
 @UseGuards(AccessTokenGuard)
 @Controller('account')
 export class AccountController {
 
+    get currentUser() { return this.coreService.currentUser; }
+
     constructor(
-        private readonly accountService: AccountService
+        private readonly accountService: AccountService,
+        private readonly coreService: CoreService
     ) {}
 
     @Get('accountBalances')
     async getAccountBalances(@Req() req: Request): Promise<SummaryAccountBalance[]> {
-        const user = req.user['sub'];
-        const accountBalances = await this.accountService.getAccountBalancesForUser(user);
+        const accountBalances = await this.accountService.getAccountBalancesForUser(this.currentUser.id);
         return accountBalances.map((account, index: number) => {
             return {
                 id: account.accountId,
@@ -30,8 +33,7 @@ export class AccountController {
 
     @Get('getUserAccounts')
     async getAccounts(@Req() req: Request) {
-        const user = req.user['sub'];
-        const accounts = await this.accountService.getAccountsUserUser(user);
+        const accounts = await this.accountService.getAccountsUserUser(this.currentUser.id);
         return accounts.map((account, index: number) => {
             return {
                 id: account.id,
@@ -45,11 +47,10 @@ export class AccountController {
 
     @Post('createAccounts')
     async createAccount(@Req() req: Request) {
-        const user = req.user['sub'];
         const nAccounts = req.body as CreateAccountDto[];
         const accounts = [];
         nAccounts.forEach(async item => {
-            accounts.push(await this.accountService.createAccountForUser(user, item));
+            accounts.push(await this.accountService.createAccountForUser(this.currentUser.id, item));
         });
         return accounts;
     }
