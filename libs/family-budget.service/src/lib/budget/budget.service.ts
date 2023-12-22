@@ -162,8 +162,8 @@ export class BudgetService {
         const user = await this.coreService.currentUser;
         
         // using moment, using the frequency add the appropriate amount of time to the prevBudget endDate and start date
-        const startDate = moment.tz(prevBudget.startDate, user.timezone as string).startOf('day');
-        const endDate = moment.tz(prevBudget.endDate, user.timezone as string).endOf('day');
+        const startDate = moment.utc(prevBudget.startDate, user.timezone as string).startOf('day');
+        const endDate = moment.utc(prevBudget.endDate, user.timezone as string).endOf('day');
 
         switch (budgetPeriod) {
             case Frequency.Weekly:
