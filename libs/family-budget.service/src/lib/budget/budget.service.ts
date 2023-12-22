@@ -186,6 +186,8 @@ export class BudgetService {
                 break;
         }
 
+        Logger.log(`Start Date: ${newBudget.startDate} End Date: ${newBudget.endDate}`);
+
         return newBudget;
     }
 }
