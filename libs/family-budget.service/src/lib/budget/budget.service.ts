@@ -162,24 +162,25 @@ export class BudgetService {
         const user = await this.coreService.currentUser;
         
         // using moment, using the frequency add the appropriate amount of time to the prevBudget endDate and start date
-        const endDate = moment.tz(prevBudget.endDate, user.timezone as string).endOf('day');
+        const sEndDate = moment.tz(_.clone(prevBudget.endDate), user.timezone as string).endOf('day');
+        const mEndDate = moment.tz(_.clone(prevBudget.endDate), user.timezone as string).endOf('day');
 
         switch (budgetPeriod) {
             case Frequency.Weekly:
-                newBudget.startDate = _.clone(endDate).add(1, 'days').toDate();
-                newBudget.endDate = _.clone(endDate).add(1, 'weeks').toDate();
+                newBudget.startDate = _.clone(sEndDate).add(1, 'days').startOf('day').toDate();
+                newBudget.endDate = _.clone(mEndDate).add(1, 'weeks').endOf('day').toDate();
                 break;
             case Frequency.BiWeekly:
-                newBudget.startDate = _.clone(endDate).add(1, 'days').toDate();
-                newBudget.endDate = _.clone(endDate).add(2, 'weeks').toDate();
+                newBudget.startDate = _.clone(sEndDate).add(1, 'days').startOf('day').toDate();
+                newBudget.endDate = _.clone(mEndDate).add(2, 'weeks').endOf('day').toDate();
                 break;
             case Frequency.Monthly:
-                newBudget.startDate = _.clone(endDate).add(1, 'days').toDate();
-                newBudget.endDate = _.clone(endDate).add(1, 'month').toDate();
+                newBudget.startDate = _.clone(sEndDate).add(1, 'days').startOf('day').toDate();
+                newBudget.endDate = _.clone(mEndDate).add(1, 'month').endOf('day').toDate();
                 break;
             case Frequency.Quarterly:
-                newBudget.startDate = _.clone(endDate).add(1, 'days').toDate();
-                newBudget.endDate = _.clone(endDate).add(3, 'month').toDate();
+                newBudget.startDate = _.clone(sEndDate).add(1, 'days').startOf('day').toDate();
+                newBudget.endDate = _.clone(mEndDate).add(3, 'month').endOf('day').toDate();
                 break;
             default:
                 break;
