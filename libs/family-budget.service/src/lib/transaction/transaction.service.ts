@@ -30,7 +30,7 @@ export class TransactionService {
         const transactionToCreate: Transaction = {
             description: transaction.description,
             account: account,
-            budget: this.getLatestActiveBudget(account),
+            budget: this.getBudgetByDate(account, new Date(transaction.date)),
             amount: +transaction.amount,
             createdAt: new Date(transaction.date),
             createdBy: userId,
