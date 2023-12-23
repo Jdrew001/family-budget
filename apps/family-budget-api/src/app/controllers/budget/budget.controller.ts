@@ -26,14 +26,17 @@ export class BudgetController {
 
         await Promise.all(budgets.map(async data => {
             const endDate = new Date(data.budget.endDate);
-            const daysLeft = DateUtils.daysLeftCalculation(endDate);
+            const daysLeft = DateUtils.daysLeftCalculation(endDate, this.currentUser.family?.timezone as string);
             const leftSpendingAmount = await this.budgetService.getWhatsLeftToSpend(data.account, data.budget)
             const percentageSpent = leftSpendingAmount.totalBudget > 0 ? leftSpendingAmount.totalSpent / leftSpendingAmount.totalBudget: 0;
             leftSpendingAmounts.push({
                 accountId: data.account.id,
                 accountName: data.account.name,
                 id: data.budget.id,
-                displayDate: DateUtils.getShortDateString(data.budget.startDate.toDateString(), data.budget.endDate.toDateString()),
+                displayDate: DateUtils.getShortDateString(
+                    data.budget.startDate, 
+                    data.budget.endDate,
+                    this.currentUser.family.timezone as string),
                 leftSpendingAmount: leftSpendingAmount.whatsLeft.toString(),
                 leftSpendingDays: daysLeft,
                 percentageSpent: percentageSpent,
@@ -51,7 +54,7 @@ export class BudgetController {
         const budget = await this.budgetService.getBudgetById(budgetId);
         const totalExpenses = (await this.budgetService.getTotalIncomeExpenseForBudget(budget.account, budget)).totalExpense;
         const endDate = new Date(budget.endDate);
-        const daysLeft = DateUtils.daysLeftCalculation(endDate);
+        const daysLeft = DateUtils.daysLeftCalculation(endDate, this.currentUser.family?.timezone as string);
         const leftSpendingAmount = await this.budgetService.getWhatsLeftToSpend(budget.account, budget)
         const expenseBudgetAmount = budget.budgetCategories.filter(o => o.category.type == 1).reduce((total, category) => {
             return total + category.amount;
@@ -60,7 +63,10 @@ export class BudgetController {
 
         const response: LeftSpendingManage = {
             id: budgetId,
-            displayDate: DateUtils.getShortDateString(budget.startDate.toDateString(), budget.endDate.toDateString()),
+            displayDate: DateUtils.getShortDateString(
+                budget.startDate, 
+                budget.endDate,
+                this.currentUser.family.timezone as string),
             leftSpendingAmount: leftSpendingAmount.whatsLeft.toString(),
             leftSpendingDays: daysLeft,
             percentageSpent: percentageSpent,

@@ -4,13 +4,17 @@ import { Repository } from 'typeorm';
 import { AccountService } from '../account/account.service';
 import moment from 'moment';
 import { DateUtils } from '../util/date-util';
+import { CoreService } from '../core/core.service';
 
 @Injectable()
 export class TransactionService {
 
+    get currentUser() { return this.coreService.currentUser; }
+
     constructor(
         @Inject('TransactionRepository') private readonly transactionRepository: Repository<Transaction>,
-        private readonly accountService: AccountService
+        private readonly accountService: AccountService,
+        private readonly coreService: CoreService
     ) {}
 
     async getTransactionById(transactionId: string) {
@@ -27,12 +31,13 @@ export class TransactionService {
         account: Account,
         category: Category,
         userId: string) {
+        const date = moment.utc(transaction.date).toDate();
         const transactionToCreate: Transaction = {
             description: transaction.description,
             account: account,
-            budget: this.getBudgetByDate(account, new Date(transaction.date)),
+            budget: this.getBudgetByDate(account, date),
             amount: +transaction.amount,
-            createdAt: new Date(transaction.date),
+            createdAt: date,
             createdBy: userId,
             category: category
         }
@@ -47,17 +52,18 @@ export class TransactionService {
         account: Account,
         category: Category,
         userId: string) {
-        originalTransaction.amount = parseFloat(transaction.amount);
-        originalTransaction.description = transaction.description;
-        originalTransaction.account = account;
-        originalTransaction.category = category;
-        const budget = this.getBudgetByDate(account, new Date(transaction.date));
-        originalTransaction.budget = (budget ? budget: null) as any;
-        originalTransaction.createdAt = new Date(transaction.date);
-        originalTransaction.updatedAt = new Date();
+            const date = moment.utc(transaction.date).toDate();
+            originalTransaction.amount = parseFloat(transaction.amount);
+            originalTransaction.description = transaction.description;
+            originalTransaction.account = account;
+            originalTransaction.category = category;
+            const budget = this.getBudgetByDate(account, date);
+            originalTransaction.budget = (budget ? budget: null) as any;
+            originalTransaction.createdAt = date;
+            originalTransaction.updatedAt = date;
 
-        // update the balance
-        return await this.transactionRepository.save(originalTransaction);
+            // update the balance
+            return await this.transactionRepository.save(originalTransaction);
     }
 
     async deleteTransaction(transactionId: string) {
@@ -123,12 +129,12 @@ export class TransactionService {
 
     async getGroupedTransaction(transaction: Transaction): Promise<TransactionDto> {
         const groupName = this.getGroupName(transaction.createdAt as Date);
-        const date = (transaction.createdAt as Date).toDateString();
+        const date = (transaction.createdAt as Date);
         const transactionId = transaction.id as string;
         return {
             id: transactionId,
             description: transaction.description,
-            date: DateUtils.getShortDate(date),
+            date: DateUtils.getShortDate(date, this.currentUser.family?.timezone as string),
             showRed: transaction.category.type === 1,
             amount: transaction.category.type === 1 ? transaction.amount * -1 : transaction.amount,
             budget: transaction.budget as Budget,
@@ -160,13 +166,13 @@ export class TransactionService {
                 groupsMap.set(transaction.transactionGroup, group);
             }
     
-            const date = (transaction.createdAt as Date).toDateString();
+            const date = (transaction.createdAt as Date);
             const transactionId = transaction.id as string;
     
             group.transactions.push({
                 id: transactionId,
                 description: transaction.description,
-                date: DateUtils.getShortDate(date),
+                date: DateUtils.getShortDate(date, this.currentUser.family?.timezone as string),
                 showRed: transaction.categoryType === 1,
                 amount: transaction.categoryType === 1 ? transaction.amount * -1 : transaction.amount,
                 budgetId: transaction.budgetId,

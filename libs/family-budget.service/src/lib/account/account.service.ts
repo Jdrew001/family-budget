@@ -7,6 +7,7 @@ import { UserService } from '../user/user.service';
 import { BudgetService } from '../budget/budget.service';
 import { ConversionUtils } from '../util/conversions.utils';
 import { CoreService } from '../core/core.service';
+import moment from 'moment-timezone';
 
 @Injectable()
 export class AccountService {
@@ -16,7 +17,6 @@ export class AccountService {
     constructor(
         @Inject('AccountRepository') private readonly accountRepository: Repository<Account>,
         @Inject('AccountTypeRepository') private readonly accountTypeRepository: Repository<AccountType>,
-        private readonly userService: UserService,
         private readonly budgetService: BudgetService,
         private readonly coreService: CoreService
     ) { }
@@ -36,14 +36,17 @@ export class AccountService {
 
         const balance = new Balance();
         balance.amount = ConversionUtils.convertFormatUSDToNumber(nAccount.beginningBalance);
-        balance.dateTime = new Date();
+        balance.dateTime = moment.utc(new Date()).toDate();
 
         account.balance = balance;
 
         if (nAccount.createBudget) {
             const budget = new Budget();
-            budget.startDate = new Date(nAccount.startDate);
-            budget.endDate = DateUtils.calculateEndDate(new Date(nAccount.startDate), nAccount.frequency);
+            budget.startDate = moment.utc(new Date(nAccount.startDate)).toDate();
+            budget.endDate = DateUtils.calculateEndDate(
+                new Date(nAccount.startDate), 
+                nAccount.frequency,
+                this.currentUser.family?.timezone as string).toDate();
             budget.budgetCategories = [];
             account.budgets = [budget];
         }
@@ -76,7 +79,7 @@ export class AccountService {
 
     async getAccountsUserUser() {
         // using the userId, get the family id and get all accounts for that family;
-        const accounts = await this.accountRepository.find({ where: { family: this.currentUser.family, activeInd: true },
+        const accounts = await this.accountRepository.find({ where: { family: {id: this.currentUser.family?.id}, activeInd: true },
         relations: [
             'transactions',
             'transactions.category',

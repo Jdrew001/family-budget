@@ -9,8 +9,8 @@ export class FamilyService {
         @Inject('FamilyRepository') private readonly familyRepository: Repository<Family>,
     ) {}
 
-    async createFamily(id?: string) {
-        return await this.familyRepository.create({ owner: id });
+    async createFamily(id?: string, timeZone?: string) {
+        return await this.familyRepository.create({ owner: id, timezone: timeZone });
     }
 
     async addFamilyMember(familyId: string, user: User) {

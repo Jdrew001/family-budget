@@ -142,7 +142,7 @@ export class FamilyController {
         const ownedFamily = await this.familyService.isUserOwnerOfAnyFamily(user.id);
         if (!ownedFamily) {
             //TODO: return that the user needs to onboard
-            const family = await this.familyService.createFamily(this.currentUser.id);
+            const family = await this.familyService.createFamily(this.currentUser.id, user.timezone);
             await this.userService.updateUserFamily(user, family);
             return new GenericResponseModel(true, 'Family Created for new User', 200, { familyId: family.id });
         }
@@ -152,18 +152,6 @@ export class FamilyController {
         // mark family active
         const nFamily = await this.familyService.markFamilyActive(ownedFamily);
         return new GenericResponseModel(true, 'User removed from family and added to new', 200, { familyId: nFamily.id });
-    }
-
-    // this should get called when the user wants to create a new family after they have been in a family before 
-    // --> they have activated their account after being removed from previous family
-    @Get('createNewFamily')
-    async createNewFamily(@Req() req): Promise<GenericResponseModel<{familyId: string}>> {
-        if (!this.currentUser.id) throw new ForbiddenException('User not found');
-        let result = await this.familyService.createFamily(this.currentUser.id);
-
-        // update the user with the new family
-        const family = await this.userService.updateUserFamily(this.currentUser, result);
-        return new GenericResponseModel(true, '', 200, { familyId: family.id });
     }
 
     @Post('manageInviteUser')

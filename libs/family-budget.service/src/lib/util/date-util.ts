@@ -1,12 +1,13 @@
 import { Frequency } from "@family-budget/family-budget.model";
+import * as moment from 'moment-timezone';
 
 export class DateUtils {
     // if payperiod is weekly, then the end date is 7 days - 1 from the start date
     // if payperiod is biweekly, then the end date is 14 days - 1 from the start date
     // if payperiod is monthly, then the end date is 30 days - 1 from the start date
 
-    public static daysLeftCalculation(endDate: Date) {
-        const presentTime = new Date().getTime();
+    public static daysLeftCalculation(endDate: Date, timezone: string) {
+        const presentTime = moment.tz(new Date(), timezone).toDate().getTime();
         const endTime = endDate.getTime();
 
         const timeDiff = endTime - presentTime;
@@ -17,41 +18,42 @@ export class DateUtils {
 
 
     // code the first comment
-    public static calculateEndDate(startDate: Date, payPeriod: Frequency) {
-        let endDate = new Date(startDate);
+    public static calculateEndDate(startDate: Date, payPeriod: Frequency, timezone: string) {
+        let date;
+
         switch (payPeriod) {
             case Frequency.Weekly:
-                endDate.setDate(startDate.getDate() + 6);
+                date = moment.utc(startDate, timezone as string).add(1, 'weeks').subtract(1, 'day').endOf('day');
                 break;
             case Frequency.BiWeekly:
-                endDate.setDate(startDate.getDate() + 13);
+                date = moment.utc(startDate, timezone as string).add(2, 'weeks').subtract(1, 'day').endOf('day');
                 break;
             case Frequency.Monthly:
-                endDate.setDate(startDate.getDate() + 29);
+                date = moment.utc(startDate, timezone as string).add(1, 'month').subtract(1, 'day').endOf('day');
                 break;
             case Frequency.Quarterly:
-                endDate.setDate(startDate.getDate() + 89);
+                date = moment.utc(startDate, timezone as string).add(3, 'month').subtract(1, 'day').endOf('day');
                 break;
             case Frequency.Yearly:
-                endDate.setDate(startDate.getDate() + 364);
+                date = moment.utc(startDate, timezone as string).add(1, 'year').subtract(1, 'day').endOf('day');
                 break;
             default:
-                endDate.setDate(startDate.getDate() + 6);
+                date = moment.utc(startDate, timezone as string).add(1, 'weeks').subtract(1, 'day').endOf('day');
                 break;
         }
-        return endDate;
+        return date;
     }
 
-    public static getShortDateString(startDateParam: string, endDateParam: string) {
-        const startDate = new Date(startDateParam);
-        const endDate = new Date(endDateParam);
-        const displayDate = `${startDate.toLocaleString('default', { month: 'short' })} ${startDate.getDate()} - ${endDate.toLocaleString('default', { month: 'short' })} ${endDate.getDate()}`;
+    public static getShortDateString(startDateParam: Date, endDateParam: Date, userTimezone: string) {
+        const startDate = moment.tz(startDateParam, userTimezone);
+        const endDate = moment.tz(endDateParam, userTimezone);
+        const displayDate = `${startDate.format('MMM D')} - ${endDate.format('MMM D')}`;
         return displayDate;
     }
 
-    public static getShortDate(dateParam: string) {
-        const startDate = new Date(dateParam);
-        const displayDate = `${startDate.toLocaleString('default', { month: 'short' })} ${startDate.getDate()}, ${startDate.getFullYear()}`;
+    public static getShortDate(dateParam: Date, timezone: string) {
+        const date = moment.tz(dateParam, timezone);
+        const displayDate = `${date.format('MMM D, YYYY')}`;
         return displayDate;
     }
 

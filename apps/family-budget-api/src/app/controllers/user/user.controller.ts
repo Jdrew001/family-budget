@@ -65,7 +65,7 @@ export class UserController {
 
     @Post('handleOnboarding')
     async handleOnboarding(@Req() req) {
-        const user = await this.userService.findById(this.currentUser.id);
+        const user = this.currentUser;
         if (!user) throw new BadRequestException('User not found');
 
         const onboardDto = req.body as OnboardingDto;
@@ -83,7 +83,7 @@ export class UserController {
         }
 
         // create new family for user
-        const family = await this.familyService.createFamily(this.currentUser.id);
+        const family = await this.familyService.createFamily(this.currentUser.id, onboardDto.profile.timezone);
         await this.userService.updateUserFamily(user, family);
 
         // save accounts

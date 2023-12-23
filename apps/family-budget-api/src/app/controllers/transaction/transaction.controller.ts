@@ -32,7 +32,7 @@ export class TransactionController {
             description: transaction.description,
             category: transaction.category.id,
             amount: transaction.amount.toString(),
-            date: DateUtils.getShortDate(transaction.createdAt.toDateString())
+            date: DateUtils.getShortDate(transaction.createdAt, this.currentUser.family?.timezone as string),
         }
 
         return dto;

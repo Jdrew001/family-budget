@@ -1,5 +1,5 @@
 import { CategoryType, CurrentBudgetSummary, SummaryAccountBalance, SummaryTransactions } from '@family-budget/family-budget.model';
-import { BudgetService, DateUtils, TransactionService, UserService } from '@family-budget/family-budget.service';
+import { BudgetService, CoreService, DateUtils, TransactionService, UserService } from '@family-budget/family-budget.service';
 import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
@@ -9,11 +9,14 @@ import moment from 'moment';
 @Controller('summary')
 export class SummaryController {
 
+    get currentUser() { return this.coreService.currentUser; }
+
     constructor(
         private readonly budgetService: BudgetService,
         private readonly accountService: AccountService,
         private readonly transactionService: TransactionService,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly coreService: CoreService
     ) { }
 
     @Get('currentBudget/:accountId')
@@ -27,9 +30,12 @@ export class SummaryController {
         const whatsLeftToSpend = await this.budgetService.getWhatsLeftToSpend(account, budget);
         const totalIncomeExpense = await this.budgetService.getTotalIncomeExpenseForBudget(account, budget);
         
-        const displayDate = DateUtils.getShortDateString(budget.startDate.toDateString(), budget.endDate.toDateString());
+        const displayDate = DateUtils.getShortDateString(
+            budget.startDate, 
+            budget.endDate,
+            this.currentUser.family.timezone as string);
         const endDate = new Date(budget.endDate);
-        const daysLeft = DateUtils.daysLeftCalculation(endDate);
+        const daysLeft = DateUtils.daysLeftCalculation(endDate, this.currentUser.family.timezone as string);
 
         const currentValue = whatsLeftToSpend.totalSpent / whatsLeftToSpend.totalBudget * 100;
         
@@ -71,7 +77,9 @@ export class SummaryController {
                 const user = await this.userService.findById(transaction.createdBy);
                 return {
                     id: transaction.id,
-                    date: DateUtils.getShortDate(transaction.createdAt.toDateString()),
+                    date: DateUtils.getShortDate(
+                        transaction.createdAt,
+                        this.currentUser.family.timezone as string),
                     amount: amount,
                     description: transaction.description,
                     categoryName: transaction.category.name,

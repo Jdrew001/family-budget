@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { FamilyService } from '../family/family.service';
 import { ErrorConstants } from '../constants/error.constants';
+import moment from 'moment-timezone';
 
 @Injectable()
 export class UserService {
@@ -18,7 +19,7 @@ export class UserService {
         user.email = createUserDto.email;
         user.firstname = createUserDto.firstname;
         user.lastname = createUserDto.lastname;
-        user.lastLogin = new Date();
+        user.lastLogin = moment.utc(new Date()).toDate();
         user.confirmed = false;
         user.password = createUserDto.password;
         user.locked = false;
@@ -124,16 +125,6 @@ export class UserService {
         return new GenericResponseModel(true, '', 200, result);
     }
 
-    async checkFamilyStatus(user: User) {
-        if (!user.family) {
-            const family = await this.familyService.createFamily();
-            user.family = family;
-            user.activeInd = true;
-            await this.userRepository.save(user);
-        }
-    }
-
-
     /**
      * Onboards a user by updating their profile information and setting the onboarded flag.
      * If the onboardDto.partial flag is true, the user is considered partially onboarded and
@@ -148,6 +139,7 @@ export class UserService {
         user.firstname = onboardDto.profile.firstname;
         user.lastname = onboardDto.profile.lastname;
         user.phoneNumber = onboardDto.profile.phone;
+        user.timezone = onboardDto.profile.timezone;
 
         await this.userRepository.save(user);
         return true;

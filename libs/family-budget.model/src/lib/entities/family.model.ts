@@ -13,6 +13,9 @@ export class Family {
     @Column({default: true})
     activeInd: boolean;
 
+    @Column({nullable: true})
+    timezone: string;
+
     @OneToMany(() => User, (user) => user.family)
     users: Array<User>;
 

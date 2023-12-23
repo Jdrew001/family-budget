@@ -46,8 +46,8 @@ export class BudgetService {
         const budgets = account?.budgets?.filter(budget => {
             const startDate = DateUtils.getYYYYMMDD(budget.startDate.toDateString());
             const endDate = DateUtils.getYYYYMMDD(budget.endDate.toDateString());
-            const mStartDate = moment.tz(startDate, user.timezone as string).startOf('day');
-            const mEndDate = moment.tz(endDate, user.timezone as string).endOf('day');
+            const mStartDate = moment.tz(startDate, user.family?.timezone as string).startOf('day');
+            const mEndDate = moment.tz(endDate, user.family?.timezone as string).endOf('day');
             Logger.log(`Current Date: ${currentDate.format('YYYY-MM-DD HH:mm:ss')} Start Date: ${mStartDate.format('YYYY-MM-DD HH:mm:ss')} End Date: ${mEndDate.format('YYYY-MM-DD HH:mm:ss')}`);
             return currentDate.isSameOrAfter(mStartDate) && currentDate.isSameOrBefore(mEndDate);
         }) as Budget[];

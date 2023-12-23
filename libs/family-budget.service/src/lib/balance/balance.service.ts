@@ -1,6 +1,7 @@
 import { Account, Balance } from '@family-budget/family-budget.model';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
+import moment from 'moment-timezone';
 
 @Injectable()
 export class BalanceService {
@@ -23,7 +24,7 @@ export class BalanceService {
         const balance = new Balance();
         balance.account = account;
         balance.amount = amount;
-        balance.dateTime = new Date();
+        balance.dateTime = moment.utc(new Date()).toDate();
         return await this.balanceRepository.save(balance);
     }
  

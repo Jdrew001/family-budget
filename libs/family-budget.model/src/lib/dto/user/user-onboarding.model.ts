@@ -12,6 +12,7 @@ export interface ProfileDto {
     firstname: string;
     lastname: string;
     phone: string;
+    timezone: string;
 }
 
 export interface AccountDto {
