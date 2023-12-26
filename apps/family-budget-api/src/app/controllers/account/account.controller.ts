@@ -2,9 +2,9 @@ import { Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
 import { Request } from 'express';
-import { CreateAccountDto, SummaryAccountBalance } from '@family-budget/family-budget.model';
+import { Account, AccountFields, CreateAccountDto, DisabledField, GenericResponseModel, SummaryAccountBalance } from '@family-budget/family-budget.model';
 import { ConversionUtils } from 'libs/family-budget.service/src/lib/util/conversions.utils';
-import { CoreService } from '@family-budget/family-budget.service';
+import { BudgetService, CoreService } from '@family-budget/family-budget.service';
 
 @UseGuards(AccessTokenGuard)
 @Controller('account')
@@ -14,6 +14,7 @@ export class AccountController {
 
     constructor(
         private readonly accountService: AccountService,
+        private readonly budgetService: BudgetService,
         private readonly coreService: CoreService
     ) {}
 
@@ -55,6 +56,36 @@ export class AccountController {
         return accounts;
     }
 
+    @Post('updateAccount')
+    async updateAccount(@Req() req: Request) {
+        const accountDto = req.body as CreateAccountDto;
+        const accountEntity = await this.accountService.getAccountById(accountDto.id);
+        const latestBudget = await this.budgetService.getCurrentBudget(accountEntity);
+
+        accountEntity.name = accountDto.name;
+        accountEntity.description = accountDto.description;
+        accountEntity.icon = accountDto.icon;
+        accountEntity.balance.amount = ConversionUtils.convertFormatUSDToNumber(accountDto.beginningBalance);
+
+        const accountType = await this.accountService.getAccountTypeById(accountDto.accountType);
+        accountEntity.accountType = accountType;
+
+        // this is when the user is updating the budget start date&frequency
+        if (latestBudget && accountEntity.accountType.name == 'Checking') {
+            accountEntity.budgetPeriod = await this.budgetService.getBudgetPeriodByFrequency(accountDto.frequency);
+            this.budgetService.updateStartAndEndDate(latestBudget, accountDto);
+            this.budgetService.activateBudget(latestBudget);
+        }
+
+        // if the account type has changed to something other than checking, remove the budget period
+        if (accountEntity.accountType.name != 'Checking') {
+            accountEntity.budgetPeriod = null;
+            this.budgetService.markInactiveBudget(latestBudget);
+        }
+        
+        return await this.accountService.updateAccount(accountEntity);
+    }
+
     @Get('getAccountById/:accountId')
     async getAccountById(@Req() request: Request) {
         const accountId = request.params.accountId;
@@ -69,11 +100,11 @@ export class AccountController {
                 icon: data.icon,
                 accountType: data.accountType?.id,
                 createBudget: data.budgets?.length > 0,
-                frequency: data.budgetPeriod.frequency,
+                frequency: data.budgetPeriod?.frequency ?? null,
                 beginningBalance: ConversionUtils.convertFormatNumberToUSD(data.balance.amount),
-                startDate: currentBudget?.startDate
+                startDate: currentBudget?.startDate ?? null
             },
-            shouldDisable: data.budgets?.length > 0
+            disabledFields: this.getDisabledFields(data)
         }
     }
 
@@ -81,5 +112,23 @@ export class AccountController {
     async markAccountInactive(@Req() request: Request) {
         const accountId = request.params.accountId;
         return await this.accountService.markAccountInactive(accountId);
+    }
+
+    private getDisabledFields(account: Account) {
+        const fieldsToDisable: DisabledField[] = [];
+        
+        if (account.transactions?.length > 0) {
+            fieldsToDisable.push({name: AccountFields.beginningBalance, message: 'Cannot update balance if transactions exist'});
+            fieldsToDisable.push({name: AccountFields.accountType, message: 'Cannot update account type if transactions exist'});
+        }
+
+        if (account.accountType.name != 'Checking') {
+            fieldsToDisable.push({name: AccountFields.createBudget, message: ''});
+            fieldsToDisable.push({name: AccountFields.frequency, message: ''});
+            fieldsToDisable.push({name: AccountFields.startDate, message: ''});
+        }
+
+        return fieldsToDisable;
+
     }
 }

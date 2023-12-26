@@ -1,4 +1,4 @@
-import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, Category, Frequency } from '@family-budget/family-budget.model';
+import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, Category, CreateAccountDto, Frequency } from '@family-budget/family-budget.model';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import * as moment from 'moment-timezone';
@@ -8,6 +8,8 @@ import { CoreService } from '../core/core.service';
 
 @Injectable()
 export class BudgetService {
+
+    get currentUser() { return this.coreService.currentUser; }
 
     constructor(
         @Inject('BudgetRepository') private readonly budgetRepository: Repository<Budget>,
@@ -147,6 +149,23 @@ export class BudgetService {
         const budget = await this.getBudgetById(budgetId);
         const categoryBudget = budget?.budgetCategories?.find(category => category.category.id === categoryId);
         return categoryBudget?.amount || 0;
+    }
+
+    async updateStartAndEndDate(budget: Budget, account: CreateAccountDto) {
+        const startDate = moment.utc(new Date(account.startDate)).startOf('day').toDate();
+        const endDate = DateUtils.calculateEndDate(
+            new Date(account.startDate), 
+            account.frequency,
+            this.currentUser.family?.timezone as string).toDate();
+        budget.startDate = startDate;
+        budget.endDate = endDate;
+
+        return await this.budgetRepository.save(budget);
+    }
+    
+    async activateBudget(budget: Budget) {
+        budget.activeInd = true;
+        return await this.budgetRepository.save(budget);
     }
 
     async getSpendAmountForCategoryQuery(category: Category, budgetId: string) {

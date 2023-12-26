@@ -16,6 +16,7 @@ export interface ProfileDto {
 }
 
 export interface AccountDto {
+    id?: string;
     name: string;
     description: string;
     beginningBalance: string;

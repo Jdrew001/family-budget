@@ -1,6 +1,7 @@
 import { Frequency } from "@family-budget/family-budget.model";
 
 export interface CreateAccountDto {
+    id?: string;
     name: string;
     description: string;
     beginningBalance: string;
