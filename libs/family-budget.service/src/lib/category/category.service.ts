@@ -25,24 +25,37 @@ export class CategoryService {
         const user = await this.userService.findById(userId);
         const categories = await this.fetchCategoriesForUser(userId);
 
-        const duplicateCategory = categories.find(c => c.name.toLowerCase() === category.categoryName.toLowerCase());
-        if (duplicateCategory) {
+        const duplicateCategory = categories.find(c => {c.name.toLowerCase() === category.categoryName.toLowerCase()});
+        if (duplicateCategory && duplicateCategory?.id !== category.id) {
             return new GenericResponseModel(false, 'Category already exists');
         }
 
         const duplicateIcon = categories.find(c => c.icon === category.icon);
-        if (duplicateIcon) {
-            return new GenericResponseModel(false, `Icon already exists for ${duplicateIcon.name} category`);
+        if (duplicateIcon && duplicateIcon.id !== category.id) {
+            return new GenericResponseModel(false, `Icon already exists for ${duplicateIcon?.name} category`);
         }
 
-        await this.categoryRepository.save({
-            name: category.categoryName,
-            type: category.categoryType,
-            icon: category.icon,
-            family: user.family
-        });
-        const nCategories = await this.fetchCategoriesForUser(userId);
-        return new GenericResponseModel(true, 'Category created successfully', 200, nCategories);
+
+        if (category.id) {
+            await this.categoryRepository.update(category.id, {
+                name: category.categoryName,
+                type: category.categoryType,
+                icon: category.icon,
+                family: user.family
+            });
+            const nCategories = await this.fetchCategoriesForUser(userId);
+            return new GenericResponseModel(true, 'Category updated successfully', 200, nCategories);
+        } else {
+            const newCategory = this.categoryRepository.create({
+                name: category.categoryName,
+                type: category.categoryType,
+                icon: category.icon,
+                family: user.family
+            });
+            await this.categoryRepository.save(newCategory);
+            const nCategories = await this.fetchCategoriesForUser(userId);
+            return new GenericResponseModel(true, 'Category created successfully', 200, nCategories);
+        }
     }
 
     async createCategories(userId: string, categories: Array<CreateCategoryDto>) {
