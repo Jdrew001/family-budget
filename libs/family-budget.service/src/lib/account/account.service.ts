@@ -29,6 +29,7 @@ export class AccountService {
         account.accountType = accountType as AccountType;
         account.family = this.currentUser.family as Family;
         account.activeInd = true;
+        account.icon = nAccount.icon;
 
         if (nAccount?.frequency !== null) {
             account.budgetPeriod = await this.budgetService.getBudgetPeriodByFrequency(nAccount.frequency) as BudgetPeriod;

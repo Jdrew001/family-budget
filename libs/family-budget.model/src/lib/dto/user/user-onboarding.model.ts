@@ -23,6 +23,7 @@ export interface AccountDto {
     createBudget: boolean;
     frequency: Frequency;
     startDate: string;
+    icon: string;
 }
 
 export interface CategoryDto {

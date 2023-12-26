@@ -8,4 +8,5 @@ export interface CreateAccountDto {
     createBudget: boolean;
     frequency: Frequency;
     startDate: string;
+    icon: string;
 }
