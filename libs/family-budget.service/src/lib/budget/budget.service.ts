@@ -152,7 +152,7 @@ export class BudgetService {
     }
 
     async updateStartAndEndDate(budget: Budget, account: CreateAccountDto) {
-        const startDate = moment.utc(new Date(account.startDate)).startOf('day').toDate();
+        const startDate = moment.tz(new Date(account.startDate), this.currentUser.family?.timezone as string).startOf('day').toDate();
         const endDate = DateUtils.calculateEndDate(
             new Date(account.startDate), 
             account.frequency,
