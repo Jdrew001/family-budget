@@ -56,6 +56,19 @@ export class AccountService {
         return savedAccount;
     }
 
+    async getAccountTotal(accountId: string) {
+        if (!accountId) {
+            throw new BadRequestException('Account Id is required');
+        }
+
+        const result = await this.accountRepository.query(
+            `SELECT * FROM CALCULATE_INCOME_EXPENSE($1);`,
+            [accountId]
+        ) ?? [];
+
+        return result[0];
+    }
+
     async updateAccount(account: Account) {
         return await this.accountRepository.save(account);
     }

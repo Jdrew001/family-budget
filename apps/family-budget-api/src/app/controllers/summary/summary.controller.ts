@@ -1,4 +1,4 @@
-import { CategoryType, CurrentBudgetSummary, SummaryAccountBalance, SummaryTransactions } from '@family-budget/family-budget.model';
+import { CategoryType, CurrentBudgetSummary, SummaryAccountBalance, SummaryTransactions, SummaryWrapperDto } from '@family-budget/family-budget.model';
 import { BudgetService, CoreService, DateUtils, TransactionService, UserService } from '@family-budget/family-budget.service';
 import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
@@ -20,12 +20,27 @@ export class SummaryController {
     ) { }
 
     @Get('currentBudget/:accountId')
-    async getCurrentBudgetSummary(@Param('accountId') accountId: string): Promise<CurrentBudgetSummary> {
+    async getCurrentBudgetSummary(@Param('accountId') accountId: string): Promise<SummaryWrapperDto> {
         const account = await this.accountService.getAccountById(accountId);
         const budget = await this.budgetService.getCurrentBudget(account);
 
         // TODO: Improve this logic
-        if (budget === null) return null;
+        if (budget === null) {
+            const accountTotal = await this.accountService.getAccountTotal(accountId);
+            return {
+                currentBudgetSummary: {
+                    income: {
+                        amount: accountTotal?.income.toString(),
+                        icon: 'profit'
+                    },
+                    expense: {
+                        amount: accountTotal?.expense.toString(),
+                        icon: 'expense'
+                    }
+                },
+                accountType: account.accountType.name
+            } as SummaryWrapperDto;
+        } 
 
         const whatsLeftToSpend = await this.budgetService.getWhatsLeftToSpend(account, budget);
         const totalIncomeExpense = await this.budgetService.getTotalIncomeExpenseForBudget(account, budget);
@@ -38,8 +53,7 @@ export class SummaryController {
         const daysLeft = DateUtils.daysLeftCalculation(endDate, this.currentUser.family.timezone as string);
 
         const currentValue = whatsLeftToSpend.totalSpent / whatsLeftToSpend.totalBudget * 100;
-        
-        return {
+        const summaryData = {
             id: budget.id,
             displayDate: displayDate,
             leftSpendingAmount: whatsLeftToSpend.whatsLeft.toString(),
@@ -60,7 +74,11 @@ export class SummaryController {
                 amount: totalIncomeExpense.totalExpense.toString(),
                 icon: 'expense'
             }
-        }
+        } as CurrentBudgetSummary;
+        return {
+            currentBudgetSummary: summaryData,
+            accountType: account.accountType.name
+        } as SummaryWrapperDto;
     }
 
     @Get('transactions/:accountId')

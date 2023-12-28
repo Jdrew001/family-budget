@@ -169,7 +169,7 @@ export class BudgetService {
     }
 
     async getSpendAmountForCategoryQuery(category: Category, budgetId: string) {
-        if (!category || !budgetId) return null;
+        if (!category || !budgetId) return [];
         const result = this.budgetRepository.query(`
             SELECT * FROM CALCULATE_CATEGORY_BUDGET($1, $2);
         `, [category.id, budgetId]);

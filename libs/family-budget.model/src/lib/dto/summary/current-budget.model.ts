@@ -1,3 +1,15 @@
+
+export interface SummaryWrapperDto {
+    currentBudgetSummary: CurrentBudgetSummary;
+    accountType: AccountTypeEnum;
+}
+
+export enum AccountTypeEnum {
+    Checking = 'Checking',
+    Savings = 'Savings',
+    Debt = 'Debt'
+}
+
 export interface CurrentBudgetSummary {
     id: string;
     displayDate: string;
