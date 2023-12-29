@@ -38,7 +38,7 @@ export class BalanceService {
     async updateAddLatestBalance(account: Account, amount: number) {
         const balance = await this.getLatestBalance(account) as Balance;
         if (!balance) throw new BadRequestException('No balance found for account');
-        if (balance.amount === undefined) throw new BadRequestException('No balance found for account');
+        if (balance.amount === undefined) throw new BadRequestException('No balance available for account');
         balance.amount += amount;
         return await this.balanceRepository.save(balance);
     }

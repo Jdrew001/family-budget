@@ -42,3 +42,4 @@ export * from './lib/dto/user/user-onboarding.model';
 export * from './lib/dto/transaction/manage-transaction.model';
 export * from './lib/dto/budget/budget-category.model';
 export * from './lib/dto/account/account-fields.model';
+export * from './lib/response/generic-exception';

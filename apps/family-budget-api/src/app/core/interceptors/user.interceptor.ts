@@ -6,7 +6,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { CoreService } from 'libs/family-budget.service/src/lib/core/core.service';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class UserInterceptor implements NestInterceptor {

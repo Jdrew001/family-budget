@@ -2,10 +2,11 @@ import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/com
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { CreateUserDto, LoginUserDto, User } from '@family-budget/family-budget.model';
+import { CreateUserDto, GenericException, LoginUserDto, User } from '@family-budget/family-budget.model';
 import * as argon2 from 'argon2';
 import { FamilyService } from '../family/family.service';
 import { CoreService } from '../core/core.service';
+import { ErrorConstants } from '../constants/error.constants';
 
 @Injectable()
 export class AuthenticationService {
@@ -24,7 +25,7 @@ export class AuthenticationService {
       createUserDto.password = createUserDto.password.trim();
         const userExists = await this.userService.findByEmail(createUserDto.email);
         if (userExists) {
-            throw new BadRequestException('User already exists');
+            throw new GenericException('User already exists');
         }
 
         const hashedPassword = await this.hashData(createUserDto.password);
@@ -40,19 +41,19 @@ export class AuthenticationService {
 
     async signIn(loginDto: LoginUserDto) {
         const user = await this.userService.findByEmail(loginDto.email);
-        if (!user) throw new BadRequestException('Invalid credentials');
+        if (!user) throw new GenericException(ErrorConstants.INVALID_CREDENTIALS);
         const passwordMatches = await argon2.verify(user.password, loginDto.password);
-        if (!passwordMatches) throw new BadRequestException('Invalid credentials');
+        if (!passwordMatches) throw new GenericException(ErrorConstants.INVALID_CREDENTIALS);
         const tokens = await this.getTokens(user.id || '', user.email);
         await this.updateRefreshToken(user.id || '', tokens.refreshToken);
         return {tokens: tokens, user: user};
     }
 
     async refreshTokens(refreshToken: string) {
-      if (!this.currentUser || !this.currentUser.refreshToken) throw new ForbiddenException('Access Denied');
+      if (!this.currentUser || !this.currentUser.refreshToken) throw new GenericException(ErrorConstants.YOU_HAVE_BEEN_LOGGED_OUT);
 
       const refreshTokenMatches = await argon2.verify(this.currentUser.refreshToken, refreshToken);
-      if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+      if (!refreshTokenMatches) throw new GenericException(ErrorConstants.YOU_HAVE_BEEN_LOGGED_OUT, 403);
       const tokens = await this.getTokens(this.currentUser.id || '', this.currentUser.email);
       await this.updateRefreshToken(this.currentUser.id || '', tokens.refreshToken);
       return tokens;
