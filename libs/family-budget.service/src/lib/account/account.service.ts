@@ -1,9 +1,7 @@
 import { Account, AccountBalance, AccountType, Balance, Budget, BudgetPeriod, CreateAccountDto, Family, NewAccountBudget, User } from '@family-budget/family-budget.model';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { BalanceService } from '../balance/balance.service';
 import { DateUtils } from '../util/date-util';
-import { UserService } from '../user/user.service';
 import { BudgetService } from '../budget/budget.service';
 import { ConversionUtils } from '../util/conversions.utils';
 import { CoreService } from '../core/core.service';
@@ -146,7 +144,7 @@ export class AccountService {
     async markAccountInactive(accountId: string) {
         const account = await this.getAccountById(accountId) as Account;
         if (!account) {
-            throw new BadRequestException('Account not found');
+            throw new BadRequestException('The account you are trying to mark inactive does not exist.');
         }
         account.activeInd = false;
         return await this.accountRepository.save(account);

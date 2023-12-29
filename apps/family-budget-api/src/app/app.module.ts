@@ -20,6 +20,7 @@ import { ReferenceController } from './controllers/reference/reference.controlle
 import { FamilyController } from './controllers/family/family.controller';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { UserInterceptor } from './core/interceptors/user.interceptor';
+import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 
 @Module({
   imports: [
@@ -51,6 +52,11 @@ import { UserInterceptor } from './core/interceptors/user.interceptor';
       provide: APP_INTERCEPTOR,
       scope: Scope.REQUEST,
       useClass: UserInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      scope: Scope.REQUEST,
+      useClass: ErrorInterceptor
     }
   ],
 })

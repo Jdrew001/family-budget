@@ -1,5 +1,5 @@
-import { CreateUserDto, LoginUserDto } from '@family-budget/family-budget.model';
-import { Body, Controller, Get, Logger, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { CreateUserDto, GenericException, LoginUserDto } from '@family-budget/family-budget.model';
+import { BadRequestException, Body, Controller, Get, Logger, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthenticationService } from 'libs/family-budget.service/src/lib/authentication/authentication.service';
 import { RefreshTokenGuard } from '../../guards/refresh-token.guard';
@@ -20,12 +20,6 @@ export class AuthenticationController {
     @Get('health')
     healthCheck() {
         return 'App is running!!!!';
-    }
-
-    @Get('timezone')
-    getTimeZone() {
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        return moment.tz(new Date(), tz).format('YYYY-MM-DD HH:mm:ss');;
     }
 
     @Post('signup')
