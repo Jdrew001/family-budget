@@ -12,4 +12,7 @@ export class FrequencyRef {
 
     @Column({type: 'int', nullable: true})
     type: Frequency;
+
+    @Column({ default: true, name: 'active_ind' })
+    activeInd: boolean;
 }

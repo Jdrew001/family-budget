@@ -10,7 +10,7 @@ export class FrequencyReferenceService {
     ) {}
 
     async getFrequencyRefData(): Promise<FrequencyRef[]> {
-        return await this.frequencyRefRepository.find();
+        return await this.frequencyRefRepository.find({ where: { activeInd: true }});
     }
 
 }
