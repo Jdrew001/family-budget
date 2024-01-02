@@ -104,7 +104,10 @@ export class BudgetController {
                 }
             }
         }));
-        return result;
+        // sort by type income at the top and name aplhabetically
+        return result.sort((a, b) => {
+            return a.type - b.type || a.name.localeCompare(b.name);
+        });
     }
 
     @Get('categoriesForBudgetUnselected/:budgetId')
