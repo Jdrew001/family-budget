@@ -134,7 +134,7 @@ export class AccountService {
     }
 
     async getAccountTypes() {
-        return await this.accountTypeRepository.find({ order: { sortOrder: 'ASC' } });
+        return await this.accountTypeRepository.find({ where: {activeInd: true}, order: { sortOrder: 'ASC' } });
     }
 
     async getAccountTypeById(id: string) {
