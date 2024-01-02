@@ -11,4 +11,7 @@ export class AccountType {
 
     @Column({ default: 0 })
     sortOrder: number;
+
+    @Column({ default: true, name: 'active_ind' })
+    activeInd: boolean;
 }

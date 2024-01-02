@@ -52,7 +52,9 @@ export class TransactionController {
 
         return {
             accounts: accounts,
-            categories: categories,
+            categories: categories.sort((a, b) => {
+                return a.type - b.type || a.name.localeCompare(b.name);
+            }),
         }
     }
 
@@ -160,6 +162,13 @@ export class TransactionController {
         return { page: dto.page, pageSize: dto.size, transactions: transactionsWithCircleGuage };
     }
 
+    //TODO:
+    /**
+     * 
+     * Write a query that gets the following data
+     * category name|budget amount|spent amount|percentage spent
+     * 
+     */
     private async prepareTransactionGroupDTO(transaction: TransactionDto) {
         const category = {
             id: transaction?.categoryId,

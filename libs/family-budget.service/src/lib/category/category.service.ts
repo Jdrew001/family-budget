@@ -14,7 +14,7 @@ export class CategoryService {
 
     async fetchCategoriesForUser(userId: string): Promise<Category[]> {
         const family = await this.userService.findFamilyForUser(userId) as Family;
-        return (family.categories as Category[]).sort((a, b) => a.type - b.type) as Category[];
+        return (family.categories as Category[]).sort((a, b) => {return a.type - b.type || a.name.localeCompare(b.name)}) as Category[];
     }
 
     async findCategoryById(categoryId: string): Promise<Category> {
