@@ -52,7 +52,9 @@ export class TransactionController {
 
         return {
             accounts: accounts,
-            categories: categories,
+            categories: categories.sort((a, b) => {
+                return a.type - b.type || a.name.localeCompare(b.name);
+            }),
         }
     }
 
