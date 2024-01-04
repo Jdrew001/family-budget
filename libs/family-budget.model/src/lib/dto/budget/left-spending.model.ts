@@ -10,6 +10,7 @@ export interface LeftSpendingManage {
     totalBudget: string;
     totalSpentIcon?: string;
     totalBudgetIcon?: string;
+    accountOrder?: number;
 }
 
 export interface BudgetCategoryManage {

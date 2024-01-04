@@ -188,7 +188,7 @@ export class TransactionController {
                 minValue: 0,
                 maxValue: 100,
                 currentValue: currentValue > 100 ? 100 : currentValue,
-                showRed: currentValue > 100,
+                showRed: transaction.categoryType == CategoryType.Expense ? currentValue > 100: false,
                 icon: transaction?.icon,
             },
         };

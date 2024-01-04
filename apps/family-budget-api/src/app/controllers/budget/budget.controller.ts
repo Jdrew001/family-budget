@@ -1,8 +1,9 @@
-import { LeftSpendingManage } from '@family-budget/family-budget.model';
+import { CategoryType, LeftSpendingManage } from '@family-budget/family-budget.model';
 import { BudgetService, CategoryService, CoreService, DateUtils, UserService } from '@family-budget/family-budget.service';
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { AccessTokenGuard } from '../../guards/access-token.guard';
+import { AccountService } from 'libs/family-budget.service/src/lib/account/account.service';
 
 @UseGuards(AccessTokenGuard)
 @Controller('budget')
@@ -14,7 +15,8 @@ export class BudgetController {
         private readonly budgetService: BudgetService,
         private readonly categoryservice: CategoryService,
         private readonly userService: UserService,
-        private readonly coreService: CoreService
+        private readonly coreService: CoreService,
+        private readonly accountService: AccountService
     ) { }
 
     @Get('getAllBudgets')
@@ -22,6 +24,7 @@ export class BudgetController {
         const family = await this.userService.findFamilyForUser(this.currentUser.id);
         const accounts = family.accounts.filter(account => account.activeInd);
         const budgets = await this.budgetService.fetchBudgetsFromAccounts(accounts);
+        const orderOfAccounts = await this.accountService.getUserAccountsOrder();
         const leftSpendingAmounts: Array<LeftSpendingManage> = [];
 
         await Promise.all(budgets.map(async data => {
@@ -45,7 +48,8 @@ export class BudgetController {
             })
         }));
 
-        return leftSpendingAmounts;
+        return leftSpendingAmounts.sort((a, b) => 
+            orderOfAccounts.indexOf(a.accountId) - orderOfAccounts.indexOf(b.accountId));
     }
 
     @Get('getSummaryBudget/:budgetId')
@@ -79,6 +83,7 @@ export class BudgetController {
         return response;
     }
 
+    // TODO: Refactor to improve performance!!
     @Get('getTransactionsForBudget/:budgetId')
     async getTransactionForBudget(@Req() req: Request) {
         const budgetId = req.params.budgetId;
@@ -99,7 +104,7 @@ export class BudgetController {
                     minValue: 0,
                     maxValue: 100,
                     currentValue: !currentValue ? 0: currentValue > 100 ? 100 : currentValue,
-                    showRed: currentValue > 100,
+                    showRed: budgetCategory.category.type == CategoryType.Expense ? currentValue > 100: false,
                     icon: budgetCategory?.category?.icon
                 }
             }

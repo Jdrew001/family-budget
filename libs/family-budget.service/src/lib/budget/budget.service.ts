@@ -26,7 +26,7 @@ export class BudgetService {
             relations: [
                 'budgetCategories', 
                 'budgetCategories.category', 
-                'account', 'account.transactions', 
+                'account', 'account.transactions',
                 'account.transactions.budget', 
                 'account.transactions.category']
           });

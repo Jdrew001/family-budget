@@ -109,7 +109,7 @@ export class SummaryController {
                         minValue: 0,
                         maxValue: 100,
                         currentValue: currentValue > 100 ? 100 : currentValue,
-                        showRed: currentValue > 100,
+                        showRed: transaction.category.type == CategoryType.Expense ? currentValue > 100: false,
                         icon: transaction.category.icon
                     }
                 } as SummaryTransactions;
