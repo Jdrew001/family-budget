@@ -52,14 +52,16 @@ export class TransactionService {
         account: Account,
         category: Category,
         userId: string) {
-            const date = moment.utc(transaction.date).toDate();
+            const formattedDate = !moment(transaction.date, 'MMM DD, YYYY').isValid() ? transaction.date : moment(transaction.date).format('MMM DD, YYYY');
+            const date = moment.utc(formattedDate).toDate();
+            const isSameDate = moment(originalTransaction.createdAt).isSame(date, 'day');
             originalTransaction.amount = parseFloat(transaction.amount);
             originalTransaction.description = transaction.description;
             originalTransaction.account = account;
             originalTransaction.category = category;
             const budget = this.getBudgetByDate(account, date);
             originalTransaction.budget = (budget ? budget: null) as any;
-            originalTransaction.createdAt = date;
+            originalTransaction.createdAt = isSameDate ? originalTransaction.createdAt : date;
             originalTransaction.updatedAt = date;
 
             // update the balance

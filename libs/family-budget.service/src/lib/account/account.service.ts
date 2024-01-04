@@ -80,6 +80,7 @@ export class AccountService {
                 'transactions.category',
                 'transactions.budget',
                 'budgetPeriod',
+                'family',
                 'budgets', 
                 'budgets.budgetCategories',
                 'budgets.budgetCategories.category'] });
