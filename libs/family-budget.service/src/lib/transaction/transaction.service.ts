@@ -31,7 +31,7 @@ export class TransactionService {
         account: Account,
         category: Category,
         userId: string) {
-        const date = moment.utc(transaction.date).toDate();
+        const date = moment(transaction.date).toDate();
         const transactionToCreate: Transaction = {
             description: transaction.description,
             account: account,
@@ -52,8 +52,7 @@ export class TransactionService {
         account: Account,
         category: Category,
         userId: string) {
-            const formattedDate = !moment(transaction.date, 'MMM DD, YYYY').isValid() ? transaction.date : moment(transaction.date).format('MMM DD, YYYY');
-            const date = moment.utc(formattedDate).toDate();
+            const date = moment(transaction.date).toDate();
             const isSameDate = moment(originalTransaction.createdAt).isSame(date, 'day');
             originalTransaction.amount = parseFloat(transaction.amount);
             originalTransaction.description = transaction.description;
