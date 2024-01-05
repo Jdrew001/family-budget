@@ -44,16 +44,15 @@ export class BudgetService {
 
     async getCurrentBudget(account: Account) {
         const user = await this.coreService.currentUser;
-        const currentDate = moment.tz(new Date(), user.timezone as string);
+        const currentDate = moment.tz(new Date(), user.timezone as string).startOf('day'); // Use startOf('day') to set the time to midnight
         const budgets = account?.budgets?.filter(budget => {
-            const startDate = DateUtils.getYYYYMMDD(budget.startDate.toDateString());
-            const endDate = DateUtils.getYYYYMMDD(budget.endDate.toDateString());
-            const mStartDate = moment.tz(startDate, user.family?.timezone as string).startOf('day');
-            const mEndDate = moment.tz(endDate, user.family?.timezone as string).endOf('day');
-            Logger.log(`Current Date: ${currentDate.format('YYYY-MM-DD HH:mm:ss')} Start Date: ${mStartDate.format('YYYY-MM-DD HH:mm:ss')} End Date: ${mEndDate.format('YYYY-MM-DD HH:mm:ss')}`);
-            return currentDate.isSameOrAfter(mStartDate) && currentDate.isSameOrBefore(mEndDate);
+            const startDate = moment.tz(budget.startDate, user.family?.timezone as string).startOf('day');
+            const endDate = moment.tz(budget.endDate, user.family?.timezone as string).endOf('day');
+            Logger.log(`same or before: ${currentDate.isSameOrBefore(endDate)}`);
+            Logger.log(`same or after: ${currentDate.isSameOrAfter(startDate)}`);
+            return currentDate.isSameOrAfter(startDate) && currentDate.isSameOrBefore(endDate);
         }) as Budget[];
-        if (account.budgetPeriod && budgets.length == 0) {
+        if (account.budgetPeriod && budgets.length === 0) {
             return await this.createNewBudget(account);
         }
         return budgets[0] || null;
