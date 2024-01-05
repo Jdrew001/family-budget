@@ -4,5 +4,5 @@ export interface ManageTransactionDto {
     description: string;
     category: string;
     amount: string;
-    date: string
+    date: Date
 }

@@ -32,7 +32,7 @@ export class TransactionController {
             description: transaction.description,
             category: transaction.category.id,
             amount: transaction.amount.toString(),
-            date: DateUtils.getShortDate(transaction.createdAt, this.currentUser.family?.timezone as string),
+            date: DateUtils.getDateTimezone(transaction.createdAt, this.currentUser.family?.timezone as string),
         }
 
         return dto;
@@ -188,7 +188,7 @@ export class TransactionController {
                 minValue: 0,
                 maxValue: 100,
                 currentValue: currentValue > 100 ? 100 : currentValue,
-                showRed: currentValue > 100,
+                showRed: transaction.categoryType == CategoryType.Expense ? currentValue > 100: false,
                 icon: transaction?.icon,
             },
         };

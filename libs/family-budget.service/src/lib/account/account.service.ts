@@ -80,6 +80,7 @@ export class AccountService {
                 'transactions.category',
                 'transactions.budget',
                 'budgetPeriod',
+                'family',
                 'budgets', 
                 'budgets.budgetCategories',
                 'budgets.budgetCategories.category'] });
@@ -100,6 +101,19 @@ export class AccountService {
         ] });
 
         return accounts;
+    }
+
+    async getUserAccountsOrder() {
+        const accounts = (await this.getAccountsUserUser() as Account[]).sort((a, b) => {
+            if (a.accountType.sortOrder < b.accountType.sortOrder) {
+                return -1;
+            } else if (a.accountType.sortOrder > b.accountType.sortOrder) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+        return accounts.map(account => account.id) as string[];
     }
 
     async getAccountBalancesForUser(): Promise<AccountBalance[]> {

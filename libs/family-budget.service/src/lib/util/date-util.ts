@@ -57,6 +57,10 @@ export class DateUtils {
         return displayDate;
     }
 
+    public static getDateTimezone(dateParam: Date, timezone: string) {
+        return moment.tz(dateParam, timezone).toDate();
+    }
+
     public static getYYYYMMDD(date: string) {
         // format YYYY-MM-DD - include leading zeros
         const startDate = new Date(date);
