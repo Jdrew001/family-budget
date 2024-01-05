@@ -6,7 +6,7 @@ export class GenericException extends HttpException {
         super(
           {
             status: HttpStatus.BAD_REQUEST,
-            msg
+            message: msg
           },
           HttpStatus.BAD_REQUEST,
         );
