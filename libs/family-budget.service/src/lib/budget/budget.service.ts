@@ -48,8 +48,6 @@ export class BudgetService {
         const budgets = account?.budgets?.filter(budget => {
             const startDate = moment.tz(budget.startDate, user.family?.timezone as string).startOf('day');
             const endDate = moment.tz(budget.endDate, user.family?.timezone as string).endOf('day');
-            Logger.log(`same or before: ${currentDate.isSameOrBefore(endDate)}`);
-            Logger.log(`same or after: ${currentDate.isSameOrAfter(startDate)}`);
             return currentDate.isSameOrAfter(startDate) && currentDate.isSameOrBefore(endDate);
         }) as Budget[];
         if (account.budgetPeriod && budgets.length === 0) {
