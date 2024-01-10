@@ -84,14 +84,15 @@ export class SummaryController {
     @Get('transactions/:accountId')
     async getAccountTransactions(@Param('accountId') accountId: string): Promise<SummaryTransactions[]> {
         const transactions = await this.transactionService.getRecentTransactionsForAccount(accountId, 5);
+        const budgetIds = transactions.map(o => o.budget?.id).filter(o => o != null);
+        const budgetCategoryReports = await this.budgetService.getBudgetReports(budgetIds);
 
         return await Promise.all(
             transactions.map(async transaction => {
                 const multiplyBy = transaction.category.type == CategoryType.Expense ? -1 : 1;
                 const amount = (transaction.amount * multiplyBy).toString();
-                const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(transaction?.budget?.id, transaction?.category?.id);
-                const categorySpentAmount = (await this.budgetService.getSpendAmountForCategoryQuery(transaction.category, transaction?.budget?.id))[0];
-                const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount?.amount / categoryBudgetAmount) * 100 : 0;
+                const categoryReport = budgetCategoryReports[transaction.budget?.id]?.find(o => o.categoryId == transaction.category.id) ?? null;
+                const currentValue = categoryReport && categoryReport?.amountBudgeted > 0 ? (categoryReport?.amountSpent / categoryReport?.amountBudgeted) * 100 : 0; 
                 const user = await this.userService.findById(transaction.createdBy);
                 return {
                     id: transaction.id,

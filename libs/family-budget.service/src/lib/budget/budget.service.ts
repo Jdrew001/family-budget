@@ -1,4 +1,4 @@
-import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, Category, CreateAccountDto, Frequency } from '@family-budget/family-budget.model';
+import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, BudgetReportModel, Category, CreateAccountDto, Frequency } from '@family-budget/family-budget.model';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import * as moment from 'moment-timezone';
@@ -173,6 +173,33 @@ export class BudgetService {
 
         return result as Promise<Array<BudgetCategoryAmount>>;
     }
+
+    async getBudgetReports(budgetIds: Array<string>): Promise<{ [x: string]: BudgetReportModel[] }> {
+        if (!budgetIds || budgetIds.length === 0) return {};
+        
+        const nonDuplicates = [...new Set(budgetIds)];
+        const reports: { [x: string]: BudgetReportModel[] } = {};
+      
+        const promises = nonDuplicates.map(async (id) => {
+          const result = (await this.budgetRepository.query(`
+            SELECT * FROM generate_budget_report($1);
+          `, [id])).map((item: any) => {
+            return new BudgetReportModel(
+                item['categoryId'],
+                item['amountBudgeted'],
+                item['amountSpent'],
+                item['categoryName'],
+                item['difference']
+                );
+            });
+      
+          reports[id] = result;
+        });
+      
+        await Promise.all(promises);
+      
+        return reports;
+      }
 
     private async handleFrequency(budgetPeriod: Frequency, newBudget: Budget, prevBudget: Budget) {
         const user = await this.coreService.currentUser;
