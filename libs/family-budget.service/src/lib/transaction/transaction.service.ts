@@ -238,7 +238,7 @@ export class TransactionService {
     }
 
     private async prepareTransactionGroupDTO(transaction: TransactionDto, budgetCategoryReports: any) {
-        const categoryReport = budgetCategoryReports[transaction.budgetId as string]?.find((o: { categoryId: string | undefined; })  => o.categoryId == transaction.category?.id) ?? null;
+        const categoryReport = budgetCategoryReports[transaction.budgetId as string]?.find((o: { categoryId: string | undefined; })  => o.categoryId == transaction.categoryId) ?? null;
         const currentValue = categoryReport && categoryReport?.amountBudgeted > 0 ? (categoryReport?.amountSpent / categoryReport?.amountBudgeted) * 100 : 0; 
         return {
             ...transaction,
