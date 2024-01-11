@@ -1,10 +1,11 @@
-import { Account, Budget, Category, CreateTransactionDto, GroupTransaction, Transaction, TransactionDto, TransactionGroupRequest, TransactionQueryDto } from '@family-budget/family-budget.model';
+import { Account, Budget, Category, CategoryType, CreateTransactionDto, GroupTransaction, Transaction, TransactionDto, TransactionGroupRequest, TransactionQueryDto } from '@family-budget/family-budget.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { AccountService } from '../account/account.service';
 import moment from 'moment';
 import { DateUtils } from '../util/date-util';
 import { CoreService } from '../core/core.service';
+import { BudgetService } from '../budget/budget.service';
 
 @Injectable()
 export class TransactionService {
@@ -14,7 +15,8 @@ export class TransactionService {
     constructor(
         @Inject('TransactionRepository') private readonly transactionRepository: Repository<Transaction>,
         private readonly accountService: AccountService,
-        private readonly coreService: CoreService
+        private readonly coreService: CoreService,
+        private readonly budgetService: BudgetService
     ) {}
 
     async getTransactionById(transactionId: string) {
@@ -154,6 +156,9 @@ export class TransactionService {
         }
     
         const transactions = await this.getTransactionsByAccountIdPagingQuery(dto);
+        const budgetIds = transactions.map(o => o.budgetId).filter(o => o != null);
+        const budgetCategoryReports = await this.budgetService.getBudgetReports(budgetIds);
+
         //const transactions = await this.getTransactionsByAccountIdPaging(dto);
         const groupsMap = new Map<string, GroupTransaction>();
     
@@ -169,8 +174,7 @@ export class TransactionService {
     
             const date = (transaction.createdAt as Date);
             const transactionId = transaction.id as string;
-    
-            group.transactions.push({
+            const tempTransaction = {
                 id: transactionId,
                 description: transaction.description,
                 date: DateUtils.getShortDate(date, this.currentUser.family?.timezone as string),
@@ -185,7 +189,12 @@ export class TransactionService {
                 categoryName: transaction.categoryName,
                 addedBy: ``,
                 icon: transaction.categoryIcon,
-            });
+            }
+            
+
+            const transactionDto = await this.prepareTransactionGroupDTO(tempTransaction, budgetCategoryReports);
+    
+            group.transactions.push(transactionDto);
         }
     
         return [...groupsMap.values()];
@@ -226,5 +235,20 @@ export class TransactionService {
         }
 
         return groupName;
+    }
+
+    private async prepareTransactionGroupDTO(transaction: TransactionDto, budgetCategoryReports: any) {
+        const categoryReport = budgetCategoryReports[transaction.budgetId as string]?.find((o: { categoryId: string | undefined; })  => o.categoryId == transaction.category?.id) ?? null;
+        const currentValue = categoryReport && categoryReport?.amountBudgeted > 0 ? (categoryReport?.amountSpent / categoryReport?.amountBudgeted) * 100 : 0; 
+        return {
+            ...transaction,
+            circleGuage: {
+                minValue: 0,
+                maxValue: 100,
+                currentValue: currentValue > 100 ? 100 : currentValue,
+                showRed: transaction.categoryType == CategoryType.Expense ? currentValue > 100: false,
+                icon: transaction?.icon,
+            },
+        };
     }
 }
