@@ -88,18 +88,18 @@ export class BudgetController {
     async getTransactionForBudget(@Req() req: Request) {
         const budgetId = req.params.budgetId;
         const budget = await this.budgetService.getBudgetById(budgetId);
+        const budgetCategoryReports = await this.budgetService.getBudgetReports([budgetId]);
         const result = await Promise.all(budget.budgetCategories.map(async budgetCategory => {
-            const categoryBudgetAmount = await this.budgetService.getCategoryBudgetAmount(budget.id, budgetCategory.category.id);
-            const categorySpentAmount = (await this.budgetService.getSpendAmountForCategoryQuery(budgetCategory.category, budget.id))[0];
-            const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount?.amount / categoryBudgetAmount) * 100 : 0;
+            const categoryReport = budgetCategoryReports[budgetId]?.find(o => o.categoryId == budgetCategory?.category?.id) ?? null;
+            const currentValue = categoryReport && categoryReport?.amountBudgeted > 0 ? (categoryReport?.amountSpent / categoryReport?.amountBudgeted) * 100 : 0; 
             return {
                 id: budgetCategory.id,
                 name: budgetCategory.category.name,
                 budgetAmount: budgetCategory.amount,
                 type: budgetCategory.category.type,
-                spentAmount: categorySpentAmount?.amount || 0,
-                remainingAmount: budgetCategory.amount - (categorySpentAmount?.amount || 0),
-                showRed: budgetCategory.amount - categorySpentAmount?.amount < 0,
+                spentAmount: categoryReport?.amountSpent || 0 ,
+                remainingAmount: categoryReport?.difference,
+                showRed: categoryReport?.difference < 0,
                 circleGuage: {
                     minValue: 0,
                     maxValue: 100,
