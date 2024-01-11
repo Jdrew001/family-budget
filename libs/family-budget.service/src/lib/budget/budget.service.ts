@@ -1,4 +1,4 @@
-import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, BudgetReportModel, BudgetSummaryDto, Category, CreateAccountDto, Frequency } from '@family-budget/family-budget.model';
+import { Account, Budget, BudgetCategoryAmount, BudgetIncomeExpenseDto, BudgetPeriod, BudgetReportModel, BudgetSummaryDto, Category, CreateAccountDto, Frequency } from '@family-budget/family-budget.model';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import * as moment from 'moment-timezone';
@@ -72,20 +72,15 @@ export class BudgetService {
             budget = await this.getCurrentBudget(userAccount as Account);
         }
 
-        // add update all income transactions from account
-        let totalIncome = 0;
-        let incomeTransactions = userAccount?.transactions?.filter(item => item.category.type === 0 && item.budget?.id === budget?.id);
-        incomeTransactions?.forEach(transaction => {
-            totalIncome += transaction.amount;
-        });
+        const result = await this.budgetRepository.query(`
+            SELECT * FROM calculate_income_expense_summary($1);
+        `, [budget?.id]);
 
-        let totalExpense = 0;
-        let expenseTransactions = userAccount?.transactions?.filter(item => item.category.type === 1 && item.budget?.id === budget?.id);
-        expenseTransactions?.forEach(transaction => {
-            totalExpense += transaction.amount;
-        });
 
-        return {totalIncome, totalExpense};
+        return new BudgetIncomeExpenseDto(
+            result[0]['totalIncome'],
+            result[0]['totalExpense']
+        );
     }
 
     async createNewBudget(account: Account) {

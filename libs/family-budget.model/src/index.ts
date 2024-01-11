@@ -45,3 +45,4 @@ export * from './lib/dto/account/account-fields.model';
 export * from './lib/response/generic-exception';
 export * from './lib/dto/budget/budget-report.model';
 export * from './lib/dto/budget/budget-summary.model';
+export * from './lib/dto/budget/budget-income-expense.model';
