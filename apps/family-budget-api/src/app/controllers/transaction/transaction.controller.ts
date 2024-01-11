@@ -146,51 +146,7 @@ export class TransactionController {
         if (transactions.length === 0) {
             return { page: dto.page - 1, pageSize: dto.size, transactions: [] };
         }
-
-        const transactionsWithCircleGuage = await Promise.all(
-            transactions.map(async (group) => {
-                const transactionsWithCircleGuage = await Promise.all(
-                    group.transactions.map(async (transaction) => this.prepareTransactionGroupDTO(transaction))
-                );
-
-                return {
-                    ...group,
-                    transactions: transactionsWithCircleGuage,
-                };
-            })
-        );
-        return { page: dto.page, pageSize: dto.size, transactions: transactionsWithCircleGuage };
+        return { page: dto.page, pageSize: dto.size, transactions: transactions };
     }
-
-    //TODO:
-    /**
-     * 
-     * Write a query that gets the following data
-     * category name|budget amount|spent amount|percentage spent
-     * 
-     */
-    private async prepareTransactionGroupDTO(transaction: TransactionDto) {
-        const category = {
-            id: transaction?.categoryId,
-            name: transaction?.categoryName,
-            icon: transaction?.icon,
-            type: transaction?.categoryType,
-        }
-        const [categoryBudgetAmount, categorySpentAmount] = await Promise.all([
-            this.budgetService.getCategoryBudgetAmount(transaction?.budgetId, transaction?.categoryId),
-            this.budgetService.getSpendAmountForCategoryQuery(category, transaction?.budgetId) as Promise<Array<BudgetCategoryAmount>>
-        ]);
-        const currentValue = categoryBudgetAmount > 0 ? (categorySpentAmount[0]?.amount / categoryBudgetAmount) * 100 : 0;
-
-        return {
-            ...transaction,
-            circleGuage: {
-                minValue: 0,
-                maxValue: 100,
-                currentValue: currentValue > 100 ? 100 : currentValue,
-                showRed: transaction.categoryType == CategoryType.Expense ? currentValue > 100: false,
-                icon: transaction?.icon,
-            },
-        };
-    }
+    
 }
