@@ -1,4 +1,4 @@
-import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, BudgetReportModel, Category, CreateAccountDto, Frequency } from '@family-budget/family-budget.model';
+import { Account, Budget, BudgetCategoryAmount, BudgetPeriod, BudgetReportModel, BudgetSummaryDto, Category, CreateAccountDto, Frequency } from '@family-budget/family-budget.model';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import * as moment from 'moment-timezone';
@@ -61,25 +61,9 @@ export class BudgetService {
         if (budget === undefined) {
             budget = await this.getCurrentBudget(userAccount as Account);
         }
-
-        //Add up all the expense budget categories
-        let totalBudget = 0;
-        let categories = budget.budgetCategories.filter(item => item.category.type === 1);
-        categories.forEach(category => {
-            totalBudget += category.amount;
-        });
-
-        // add update all the expense type transactions
-        let totalSpent = 0;
-        let transactions = userAccount?.transactions?.filter(item => item.category.type === 1 && item.budget?.id === budget?.id);
-        transactions?.forEach(transaction => {
-            // Only consider the transaction if it's in a budgeted category
-            if (categories.find(budgetCategory => budgetCategory.category.id === transaction.category.id)) {
-                totalSpent += transaction.amount;
-            }
-        });
+        const budgetSummary = await this.getBudgetSummary(budget?.id as string);
         
-        return {whatsLeft: totalBudget - totalSpent, totalBudget, totalSpent};
+        return budgetSummary;
     }
 
     async getTotalIncomeExpenseForBudget(account: Account, budget?: Budget) {
@@ -172,6 +156,19 @@ export class BudgetService {
         `, [category.id, budgetId]);
 
         return result as Promise<Array<BudgetCategoryAmount>>;
+    }
+
+    async getBudgetSummary(budgetId: string): Promise<BudgetSummaryDto> {
+        if (!budgetId) return new BudgetSummaryDto(0, 0, 0);
+        const result = await this.budgetRepository.query(`
+            SELECT * FROM CALCULATE_BUDGET_SUMMARY($1);
+        `, [budgetId]);
+
+        return new BudgetSummaryDto(
+            result[0]['remainingBudget'],
+            result[0]['totalBudget'],
+            result[0]['totalSpent']
+        );
     }
 
     async getBudgetReports(budgetIds: Array<string>): Promise<{ [x: string]: BudgetReportModel[] }> {
